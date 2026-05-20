@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# synapse-framework
-=======
 # Synapse Framework Phase 0-1 设计包
 
 本目录用于启动 `synapse-framework` 的框架化沉淀工作，覆盖两个阶段：
