@@ -1,0 +1,149 @@
+# 测试规则
+
+## 1. 测试目标
+
+Synapse Framework 的测试不是为了覆盖率数字，而是为了保证：
+
+- 权限不越权
+- 数据不串租户
+- 登录链路安全
+- 持久化行为稳定
+- 代码生成结果可用
+- AI Agent 修改不会破坏边界
+
+## 2. 测试分层
+
+```text
+Unit Test
+  -> Domain / Service / Converter
+Slice Test
+  -> Repository / Controller
+Integration Test
+  -> Auth / Permission / Flyway / DB
+Contract Test
+  -> API response format
+Generated Code Test
+  -> Codegen output compile/test
+```
+
+## 3. 命名规范
+
+```text
+XxxTest
+XxxRepositoryTest
+XxxControllerTest
+XxxApplicationServiceTest
+XxxIntegrationTest
+```
+
+## 4. 必测场景
+
+每个功能至少覆盖：
+
+1. 正常流程
+2. 参数为空
+3. 参数非法
+4. 数据不存在
+5. 重复数据
+6. 权限不足
+7. 数据权限不足
+8. 租户隔离
+9. 并发更新冲突
+10. 审计日志写入
+
+## 5. Auth 模块必测
+
+- 登录成功
+- 用户不存在
+- 密码错误
+- 用户禁用
+- 临时锁定
+- 锁定过期后可恢复
+- refresh token 正常刷新
+- refresh token 过期
+- refresh token 被吊销
+- refresh token rotation 并发冲突
+- logout 校验 token 归属
+- logout 后 access token 黑名单生效
+
+## 6. RBAC 必测
+
+- 用户无角色不能访问受限接口
+- 用户有角色但无权限不能访问
+- 用户有权限可以访问
+- 禁用角色后权限失效
+- 修改角色菜单后权限缓存刷新
+- 动态菜单只返回有权限菜单
+
+## 7. 数据权限必测
+
+- SELF 只能看自己的数据
+- DEPT 只能看本部门数据
+- DEPT_AND_CHILDREN 能看子部门数据
+- CUSTOM_DEPT 只能看授权部门数据
+- ALL 只能授权给高权限角色
+
+## 8. Repository 必测
+
+- 新增
+- 修改
+- 逻辑删除
+- 乐观锁冲突
+- 租户过滤
+- 唯一约束冲突
+- 分页查询
+- 排序白名单
+
+## 9. Controller 必测
+
+- 参数校验错误响应
+- 未登录返回 401
+- 无权限返回 403
+- 业务错误码返回
+- traceId 返回
+- 响应结构一致
+
+## 10. Codegen 必测
+
+代码生成器输出必须验证：
+
+- 文件路径正确
+- 包名正确
+- 能编译
+- 能运行测试
+- 不生成 Controller -> Mapper 直连代码
+- 不生成 Domain 依赖 MyBatis-Plus 代码
+- 不生成无白名单排序代码
+
+## 11. 测试数据规则
+
+- 测试数据必须最小化。
+- 不依赖本地已有数据库状态。
+- 不共享可变全局状态。
+- 必要时使用 Testcontainers。
+- Flyway migration 必须在集成测试中验证。
+
+## 12. 命令要求
+
+后端至少提供：
+
+```bash
+mvn test
+mvn verify
+```
+
+前端至少提供：
+
+```bash
+pnpm lint
+pnpm test
+pnpm build
+```
+
+## 13. 禁止行为
+
+- 禁止删除失败测试。
+- 禁止为了通过测试降低断言。
+- 禁止只测 happy path。
+- 禁止 mock 掉核心权限逻辑后声称权限测试通过。
+- 禁止集成测试依赖开发者本机数据。
