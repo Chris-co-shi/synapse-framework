@@ -4,33 +4,42 @@
 
 ## 1. 项目定位
 
-Synapse Framework 是面向企业内部应用的 Java 后台管理框架和快速开发底座。
+Synapse Framework 是面向企业内部应用的 Java 通用技术基座和后台快速开发底座。
 
 核心目标：
 
-1. 提供统一认证、授权、菜单、组织、数据权限、审计日志、字典配置等后台基础能力。
-2. 提供标准化 Java 后端开发包结构、接口规范、数据库规范和测试规范。
-3. 提供可被 AI Agent 长期协作的工程约束，避免不同 Agent 生成风格冲突的代码。
-4. 支持未来扩展到多租户、工作流、消息通知、文件存储、代码生成器、业务模块脚手架。
+1. 提供 Web、Data、Cache、Security、Audit、Starter 等可复用技术基座能力。
+2. 提供统一认证、授权、菜单、组织、数据权限、审计日志、字典配置等后台验证能力。
+3. 提供标准化 Java 后端开发包结构、接口规范、数据库规范和测试规范。
+4. 提供可被 AI Agent 长期协作的工程约束，避免不同 Agent 生成风格冲突的代码。
+5. 支持未来扩展到多租户、工作流、消息通知、文件存储、代码生成器、业务模块脚手架。
 
 ## 2. 当前阶段
 
 当前处于框架 v0.1 阶段：
 
 - 优先单体模块化，不直接拆微服务。
-- 优先完成通用后台骨架，不追求完整低代码平台。
+- 优先完成通用技术基座，不追求完整后台管理系统或低代码平台。
 - 优先保证工程边界、测试闭环和可维护性。
 
 ## 3. 技术基线
 
 - Java 21
-- Spring Boot 3.x
-- Spring Security 6.x
-- MyBatis-Plus 3.5.x
-- Maven 多模块
-- PostgreSQL 优先，MySQL 兼容预留
-- Redis
+- Spring Boot 3.5.14
+- Spring Security 6.5.x
+- OAuth2 Authorization Server + Resource Server
+- JWT + JWK
+- MyBatis-Plus 3.5.9，完整使用官方能力
+- dynamic-datasource Spring Boot 3 starter，配置级多数据源切换
+- Maven 3.9.0 多模块，当前工作站使用 `/Users/sxc/Documents/tool/apache-maven-3.9.0`
+- 数据库不绑定具体厂商，通过方言适配层支持切换
+- Redis / Spring Data Redis / Lettuce
+- Redis + Lua 可重入分布式锁
+- Redis + Lua 滑动窗口限流
 - Flyway
+- H2 + Testcontainers
+- springdoc OpenAPI 2.8.x
+- Lombok + MapStruct
 - Vue 3 + TypeScript + Vite
 - Element Plus 或 Naive UI
 
@@ -48,13 +57,17 @@ Synapse Framework 是面向企业内部应用的 Java 后台管理框架和快�
 - `docs/07-test-rules.md`
 - `docs/08-ai-development-rules.md`
 
-涉及 MyBatis-Plus 必须读取：
+涉及 MyBatis-Plus 或动态数据源必须读取：
 
-- `skills/synapse-mybatis-plus-persistence/SKILL.md`
+- `skills/synapse-data/SKILL.md`
 
-涉及权限认证必须读取：
+涉及 Redis、缓存、分布式锁或限流必须读取：
 
-- `skills/synapse-security-rbac/SKILL.md`
+- `skills/synapse-cache/SKILL.md`
+
+涉及 OAuth2、JWT、资源服务器或权限认证必须读取：
+
+- `skills/synapse-security/SKILL.md`
 
 涉及前端后台页面必须读取：
 
@@ -85,16 +98,13 @@ Controller -> Application Service -> Domain/Repository Port -> Repository Adapte
 
 ### 5.2 禁止 Domain Model 依赖 MyBatis-Plus
 
-Domain Model 不允许出现：
+MyBatis-Plus 允许按官方最佳实践完整使用，包括 `IService`、`ServiceImpl` 和 ActiveRecord。
 
-- `@TableName`
-- `@TableId`
-- `@TableField`
-- `@Version`
-- `@TableLogic`
-- `BaseMapper`
-- `IService`
-- `ServiceImpl`
+边界要求：
+
+- Entity、Mapper、ServiceImpl、ActiveRecord 模型属于持久化实现，不允许直接暴露给 Controller 或前端。
+- Domain Model 如独立存在，不承载 MyBatis-Plus 注解和持久化行为。
+- 业务 API 返回对象必须是 response/result DTO，不直接返回 Entity。
 
 ### 5.3 Entity 只允许存在于 infrastructure.persistence.entity
 
@@ -132,10 +142,22 @@ MyBatis-Plus Entity 是持久化模型，不是领域模型，不允许直接暴
 9. 是否会使用 JdbcClient？
 10. 是否会使用 java.sql？
 11. 是否会使用 IService / ServiceImpl？
-12. 是否会让 Entity 继承 Model<T>？
-13. 是否会让 Domain Model 依赖 MyBatis-Plus？
+12. 是否会使用 ActiveRecord Model<T>，边界如何控制？
+13. 是否会让 MyBatis-Plus 模型直接暴露到 Controller 或前端？
 14. 是否会让 Controller 直接依赖 Mapper？
 15. 需要补充哪些测试？
+
+## 6.1 模块完成后的 Skill 交付规则
+
+每完成一个模块并通过测试后，必须为该模块沉淀 `skills/<module-name>/SKILL.md`。
+
+要求：
+
+- `SKILL.md` 是最佳实践，不是过程日志。
+- 模块测试未通过，不允许把实现沉淀为最终 Skill。
+- `SKILL.md` 必须覆盖模块职责和边界、推荐包结构、允许技术和禁止事项、标准实现模式、测试要求、常见错误、执行前必读文档、示例任务拆分方式。
+- 后续同类模块开发前，Agent 必须先读取对应 `SKILL.md`。
+- 如果实现过程中发现原 Skill 规则不适用，必须先说明原因，再更新 Skill。
 
 ## 7. 测试要求
 

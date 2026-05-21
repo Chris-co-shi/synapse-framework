@@ -33,9 +33,9 @@
 - AGENTS.md
 - Skills 初版
 
-## 阶段 2：工程骨架
+## 阶段 2：技术基座骨架
 
-目标：搭建 Maven 多模块工程。
+目标：搭建 Maven 多模块技术基座工程。
 
 模块：
 
@@ -44,9 +44,10 @@ synapse-bom
 synapse-common
 synapse-web
 synapse-data
+synapse-cache
 synapse-security
 synapse-audit
-synapse-admin-api
+synapse-starter
 ```
 
 完成标准：
@@ -54,54 +55,59 @@ synapse-admin-api
 - `mvn test` 通过
 - 统一响应可用
 - 统一异常可用
-- Flyway 可用
-- MyBatis-Plus 基础配置可用
+- 技术基线写入 BOM
+- 模块完成后有对应 `skills/<module>/SKILL.md`
 
-## 阶段 3：Auth 最小闭环
+## 阶段 3：Core Foundation
 
-目标：完成登录、刷新、登出、me。
+目标：完成 Web、Data、Cache、Security、Audit 的可复用基础能力。
 
-接口：
+交付物：
 
 ```text
-POST /api/admin/auth/login-options
-POST /api/admin/auth/login
-POST /api/admin/auth/refresh
-POST /api/admin/auth/logout
-GET  /api/admin/auth/me
+Web: MVC/WebFlux 统一响应、异常、分页、Trace、OpenAPI
+Data: MyBatis-Plus 3.5.9、动态数据源、数据库方言、Flyway
+Cache: Redis、Lua、可重入锁、滑动窗口限流
+Security: OAuth2 Authorization Server、Resource Server、JWT、JWK
+Audit: 审计事件、审计 Port、操作日志注解
 ```
 
 完成标准：
 
-- access token 可用
-- refresh token rotation 可用
-- logout 校验 token 归属
-- 登录失败锁定可用
-- 登录日志可用
-- 测试覆盖主要异常场景
+- 每个模块测试通过
+- 关键模块根目录 `mvn clean test` 通过
+- 每个模块完成后沉淀 `SKILL.md`
 
-## 阶段 4：RBAC 系统管理
+## 阶段 4：Starter 与示例应用
 
-目标：完成用户、角色、菜单、权限。
+目标：让业务项目通过 starter 接入技术基座。
 
-模块：
+交付物：
 
-- user
-- role
-- menu
-- permission
+- 自动配置
+- 条件装配
+- 默认 properties
+- 示例应用
+- 多数据源、Redis 锁、限流、OAuth2 示例
 
 完成标准：
 
-- 用户 CRUD
-- 角色 CRUD
-- 菜单 CRUD
-- 用户分配角色
-- 角色分配菜单
-- 登录后加载动态菜单
-- 接口权限校验
+- 示例应用可启动
+- starter 引入后基础能力可用
+- 示例测试通过
 
-## 阶段 5：基础系统模块
+## 阶段 5：IAM 验证模块
+
+目标：用 IAM/Auth/RBAC 验证技术基座。
+
+完成标准：
+
+- OAuth2 登录授权链路可用
+- 资源服务器权限保护可用
+- 用户、客户端、角色权限最小模型可用
+- 验证 Data/Cache/Security/Audit/Web 能支撑真实模块
+
+## 阶段 6：基础系统模块
 
 目标：完成后台管理常见基础模块。
 
@@ -121,7 +127,7 @@ GET  /api/admin/auth/me
 - 操作日志可查询
 - 登录日志可查询
 
-## 阶段 6：代码生成器 v0.1
+## 阶段 7：代码生成器 v0.1
 
 目标：通过表结构/元数据生成标准 CRUD。
 
@@ -146,7 +152,7 @@ GET  /api/admin/auth/me
 - 生成代码不破坏分层
 - 生成代码有基础测试
 
-## 阶段 7：框架验证业务模块
+## 阶段 8：框架验证业务模块
 
 目标：用一个小型业务模块验证框架通用性。
 
@@ -162,7 +168,7 @@ GET  /api/admin/auth/me
 - 人工补业务规则
 - 权限/审计/字典/分页均可复用
 
-## 阶段 8：生产化增强
+## 阶段 9：生产化增强
 
 目标：补齐工程质量。
 

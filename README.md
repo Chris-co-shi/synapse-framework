@@ -7,11 +7,11 @@
 
 ## 目标
 
-Synapse Framework 不是单一业务系统，也不是简单后台模板，而是面向企业内部应用的 Java 后台管理框架与快速开发底座。
+Synapse Framework 不是单一业务系统，也不是简单后台模板，而是面向企业内部应用的 Java 通用技术基座与后台快速开发底座。
 
 第一版建议定位为：
 
-> 单体优先、模块化设计、可演进到微服务、可被 AI Agent 规范协作的企业后台基础框架。
+> 单体优先、模块化设计、可演进到微服务、可被 AI Agent 规范协作的企业技术基座。
 
 ## 推荐目录
 
@@ -30,14 +30,17 @@ synapse-framework
 │   ├── 07-test-rules.md
 │   ├── 08-ai-development-rules.md
 │   ├── 09-implementation-roadmap.md
+│   ├── 10-technical-foundation-baseline.md
 │   └── benchmark
 ├── skills
-│   ├── synapse-architecture-review
-│   ├── synapse-java-backend
-│   ├── synapse-mybatis-plus-persistence
-│   ├── synapse-security-rbac
-│   ├── synapse-vue-admin
-│   └── synapse-test-engineering
+│   ├── synapse-common
+│   ├── synapse-web
+│   ├── synapse-data
+│   ├── synapse-cache
+│   ├── synapse-security
+│   ├── synapse-audit
+│   ├── synapse-starter
+│   └── synapse-example
 └── templates
     └── codex-task-template.md
 ```
@@ -53,13 +56,21 @@ synapse-framework
 ## 当前推荐技术基线
 
 - Java 21
-- Spring Boot 3.x
-- Spring Security 6.x
-- MyBatis-Plus 3.5.x
-- Maven 多模块
-- PostgreSQL 优先，MySQL 兼容预留
-- Redis
+- Spring Boot 3.5.14
+- Spring Security 6.5.x
+- OAuth2 Authorization Server + Resource Server
+- JWT + JWK
+- MyBatis-Plus 3.5.9
+- dynamic-datasource Spring Boot 3 starter
+- Maven 3.9.0 多模块，当前工作站使用 `/Users/sxc/Documents/tool/apache-maven-3.9.0`
+- 数据库不绑定具体厂商，通过方言适配层支持切换
+- Redis / Spring Data Redis / Lettuce
+- Redis + Lua 可重入分布式锁
+- Redis + Lua 滑动窗口限流
 - Flyway
+- H2 + Testcontainers
+- springdoc OpenAPI 2.8.x
+- Lombok + MapStruct
 - Vue 3 + TypeScript + Vite
 - Element Plus 或 Naive UI
 - JUnit 5 + Mockito + Spring Boot Test
@@ -73,6 +84,16 @@ synapse-framework
 - 不做 AI 应用平台
 - 不复制开源项目代码
 - 不把业务系统代码混入框架核心
+
+## 模块最佳实践沉淀规则
+
+每完成一个模块并通过测试后，必须沉淀：
+
+```text
+skills/<module-name>/SKILL.md
+```
+
+`SKILL.md` 只记录可复用最佳实践、边界、实现模式和测试要求，不写过程日志。
 
 ## 第一版必须做什么
 

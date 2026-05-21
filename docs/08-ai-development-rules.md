@@ -118,16 +118,27 @@ AI 负责分析、实现、测试、Review 辅助
 
 ## 9. Skills 机制
 
-每类任务必须绑定 Skill：
+每类任务必须绑定 Skill。每个模块完成并测试通过后，必须沉淀模块级 `skills/<module-name>/SKILL.md`。
 
 | 任务 | Skill |
 |---|---|
-| 架构审查 | synapse-architecture-review |
-| Java 后端 | synapse-java-backend |
-| MyBatis-Plus | synapse-mybatis-plus-persistence |
-| 权限认证 | synapse-security-rbac |
+| Common 基础能力 | skills/synapse-common/SKILL.md |
+| Web 基础能力 | skills/synapse-web/SKILL.md |
+| Data / MyBatis-Plus / 动态数据源 | skills/synapse-data/SKILL.md |
+| Cache / Redis / Lua 锁 / 限流 | skills/synapse-cache/SKILL.md |
+| Security / OAuth2 / JWT / JWK | skills/synapse-security/SKILL.md |
+| Audit 审计 | skills/synapse-audit/SKILL.md |
+| Starter 自动配置 | skills/synapse-starter/SKILL.md |
+| Example 示例应用 | skills/synapse-example/SKILL.md |
 | Vue 后台 | synapse-vue-admin |
 | 测试 | synapse-test-engineering |
+
+`SKILL.md` 要求：
+
+- 是最佳实践，不是过程日志。
+- 覆盖模块职责和边界、推荐包结构、允许技术和禁止事项、标准实现模式、测试要求、常见错误、执行前必读文档、示例任务拆分方式。
+- 后续同类任务开始前必须读取。
+- 如果实现发现 Skill 规则不适用，必须先说明原因，再修改 Skill。
 
 ## 10. 禁止 AI 自动行为
 

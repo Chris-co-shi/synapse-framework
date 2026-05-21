@@ -9,6 +9,8 @@
 - 删除默认逻辑删除。
 - 并发更新默认考虑乐观锁。
 - 多租户预留必须从第一版开始设计。
+- 数据库不绑定具体厂商，核心能力必须通过方言适配层保持可切换。
+- 应用层不负责数据库集群高可用、读写分离或故障转移，这些能力由数据库集群或基础设施承担。
 
 ## 2. 命名规范
 
@@ -51,12 +53,12 @@ version
 普通业务表默认包含：
 
 ```sql
-id BIGINT PRIMARY KEY,
-tenant_id BIGINT NULL,
+id varchar(19) PRIMARY KEY,
+tenant_id varchar(19) NULL,
 created_at TIMESTAMP NOT NULL,
-created_by BIGINT NULL,
+created_by varchar(19) NULL,
 updated_at TIMESTAMP NOT NULL,
-updated_by BIGINT NULL,
+updated_by varchar(19) NULL,
 deleted SMALLINT NOT NULL DEFAULT 0,
 version INTEGER NOT NULL DEFAULT 0
 ```
@@ -84,8 +86,9 @@ Entity 禁止：
 
 - 暴露到 Controller
 - 作为接口返回对象
-- 放业务行为
-- 继承 MyBatis-Plus `Model<T>`
+- 放与持久化无关的业务行为
+
+Entity 可以按 MyBatis-Plus 官方最佳实践继承 ActiveRecord `Model<T>`，但只能作为持久化模型使用，不允许直接成为接口入参、接口响应或跨模块领域对象。
 
 ## 5. BaseEntity 判断规则
 
@@ -118,6 +121,9 @@ Entity 禁止：
 允许：
 
 - BaseMapper
+- IService
+- ServiceImpl
+- ActiveRecord `Model<T>`
 - LambdaQueryWrapper
 - LambdaUpdateWrapper
 - 分页插件
@@ -126,13 +132,18 @@ Entity 禁止：
 - 自动填充
 - 租户插件预留
 
-默认禁止：
+禁止：
 
-- IService / ServiceImpl 作为业务 Service 基类
-- ActiveRecord `Model<T>`
 - Controller 直接调用 Mapper
+- Controller 直接调用 IService / ServiceImpl / ActiveRecord 模型
 - Wrapper 条件来自未校验前端字段
 - 拼接 SQL 片段
+
+建议：
+
+- 基础 CRUD 可以使用 IService / ServiceImpl 提高效率。
+- 跨聚合编排、事务协调、权限审计等仍放在 application service。
+- ActiveRecord 只用于简单持久化操作或内部实现，不直接穿透到 Web/API 层。
 
 ## 7. Wrapper 安全规则
 
@@ -241,7 +252,7 @@ CREATE INDEX idx_sys_operation_log_created_at ON sys_operation_log(created_at);
 
 ## 13. 数据库兼容策略
 
-v0.1 推荐 PostgreSQL 优先，MySQL 兼容预留。
+v0.1 不绑定具体数据库厂商，通过 `DatabaseDialect`、profile、adapter 和兼容 migration 约束保持可切换。
 
 注意：
 
@@ -249,3 +260,21 @@ v0.1 推荐 PostgreSQL 优先，MySQL 兼容预留。
 - 时间字段统一 UTC。
 - 不依赖某个数据库独有特性作为核心链路。
 - 需要数据库差异时放 adapter。
+
+## 14. 动态数据源规则
+
+v0.1 使用 dynamic-datasource Spring Boot 3 starter 支持配置级多数据源切换。
+
+范围：
+
+- 启动时从配置加载多个数据源。
+- 通过注解或上下文进行数据源切换。
+- 提供数据源健康信息和基础观测能力。
+
+暂不做：
+
+- 运行时动态增删数据源。
+- 应用层读写分离。
+- 应用层故障转移。
+- 分布式事务。
+- 租户自动绑定独立数据源。

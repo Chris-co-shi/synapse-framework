@@ -18,9 +18,9 @@
 - synapse-common
 - synapse-web
 - synapse-data
+- synapse-cache
 - synapse-security
 - synapse-audit
-- synapse-cache
 - synapse-tenant
 
 原则：
@@ -171,6 +171,13 @@ AuthApplicationService
 | 统一异常 | synapse-web |
 | 错误码基类 | synapse-common |
 | JWT 解析 | synapse-security |
+| OAuth2 Authorization Server | synapse-security |
+| OAuth2 Resource Server | synapse-security |
+| Redis 缓存 | synapse-cache |
+| Redis Lua 分布式锁 | synapse-cache |
+| Redis Lua 滑动窗口限流 | synapse-cache |
+| 动态数据源 | synapse-data |
+| 数据库方言适配 | synapse-data |
 | 操作日志注解 | synapse-audit |
 | BaseEntity | synapse-data |
 | 用户管理 | synapse-admin-api |

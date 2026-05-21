@@ -1,0 +1,3 @@
+com.indigo.synapse.web.autoconfigure.SynapseWebAutoConfiguration
+com.indigo.synapse.web.autoconfigure.SynapseWebMvcAutoConfiguration
+com.indigo.synapse.web.autoconfigure.SynapseWebFluxAutoConfiguration

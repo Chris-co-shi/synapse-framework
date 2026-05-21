@@ -121,9 +121,23 @@ XxxIntegrationTest
 - 不依赖本地已有数据库状态。
 - 不共享可变全局状态。
 - 必要时使用 Testcontainers。
+- Data 关键路径使用 H2 + Testcontainers 验证数据库兼容。
+- Cache 关键路径使用 Redis Testcontainers 验证 Lua 锁和限流。
+- Security 关键路径验证 OAuth2 token 签发、JWK 暴露、资源服务器验签、401/403。
 - Flyway migration 必须在集成测试中验证。
 
-## 12. 命令要求
+## 12. Skill 交付测试规则
+
+每个模块完成时，验收必须同时包含：
+
+- 模块代码完成。
+- 模块级测试通过。
+- 关键模块根目录 `mvn clean test` 通过。
+- `skills/<module-name>/SKILL.md` 已更新为最佳实践。
+
+模块测试失败时，不允许把当前实现沉淀为最终 Skill。
+
+## 13. 命令要求
 
 后端至少提供：
 
@@ -140,7 +154,7 @@ pnpm test
 pnpm build
 ```
 
-## 13. 禁止行为
+## 14. 禁止行为
 
 - 禁止删除失败测试。
 - 禁止为了通过测试降低断言。

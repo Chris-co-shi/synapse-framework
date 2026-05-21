@@ -2,9 +2,9 @@
 
 ## 1. 一句话定位
 
-Synapse Framework 是面向企业内部应用的 Java 后台管理框架和快速开发底座。
+Synapse Framework 是面向企业内部应用的 Java 通用技术基座和后台快速开发底座。
 
-它不是单一业务系统，也不是简单脚手架，而是为企业内部系统提供统一基础能力的框架。
+它不是单一业务系统，也不是简单脚手架，而是为企业内部系统提供统一 Web、Data、Cache、Security、Audit、Starter 等基础能力的技术基座。
 
 ## 2. 为什么存在
 
@@ -48,31 +48,35 @@ Synapse Framework 的目标是把这些能力沉淀成统一底座。
 
 ## 4. 第一版边界
 
-Synapse v0.1 只解决：
+Synapse v0.1 优先解决：
 
 ```text
-后台管理框架最小闭环 + AI 可控开发规范
+通用技术基座最小闭环 + AI 可控开发规范
 ```
 
 包含：
 
-- 统一认证登录
-- RBAC 权限
-- 用户、角色、菜单、权限
-- 字典、参数配置
-- 操作日志、登录日志
 - 统一异常、响应、错误码
-- 统一分页、审计字段
-- MyBatis-Plus 持久化规范
+- 统一分页、Trace、OpenAPI
+- MyBatis-Plus 完整使用规范
+- 动态数据源与数据库方言适配
+- Redis 缓存、可重入分布式锁、滑动窗口限流
+- OAuth2 Authorization Server + Resource Server
+- JWT + JWK
+- 审计事件与审计扩展点
+- Starter 自动配置
 - Flyway 数据库版本管理
-- 代码生成器最小闭环
-- Vue3 管理后台骨架
+- 示例应用验证
+- 模块完成后的 Skill 最佳实践沉淀
 - Codex/AI 协作规范
+
+IAM、Auth、RBAC、用户、角色、菜单、权限作为后续验证模块，不作为第一阶段技术基座的主线目标。
 
 ## 5. 第一版不做什么
 
 不做：
 
+- 完整后台管理系统
 - 完整低代码平台
 - 完整在线表单
 - 完整工作流平台
@@ -90,6 +94,8 @@ Synapse v0.1 只解决：
 Synapse Framework
   -> Synapse Admin
   -> Synapse IAM
+  -> Synapse Starter
+  -> Synapse Cache
   -> Synapse Codegen
   -> Synapse Tenant
   -> Synapse Workflow Adapter

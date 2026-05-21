@@ -11,7 +11,7 @@ class StarterModuleTest {
     @Test
     void shouldAggregateFrameworkModules() {
         assertEquals(
-                List.of("synapse-common", "synapse-web", "synapse-data", "synapse-security", "synapse-audit"),
+                List.of("synapse-common", "synapse-web", "synapse-data", "synapse-cache", "synapse-security", "synapse-audit"),
                 StarterModule.modules()
         );
     }

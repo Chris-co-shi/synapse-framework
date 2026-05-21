@@ -37,9 +37,9 @@ synapse-framework
 ├── synapse-common
 ├── synapse-web
 ├── synapse-data
+├── synapse-cache
 ├── synapse-security
 ├── synapse-audit
-├── synapse-cache
 ├── synapse-tenant
 ├── synapse-codegen
 ├── synapse-admin-api
@@ -107,21 +107,36 @@ Web 层通用能力。
 
 - BaseEntity
 - BaseLogEntity
-- MyBatis-Plus 配置
+- MyBatis-Plus 完整能力配置
+- dynamic-datasource 配置级多数据源切换
+- 数据库方言适配层
 - 分页插件
 - 乐观锁插件
 - 逻辑删除配置
 - 租户插件预留
 - 自动填充字段
 
-### 3.5 synapse-security
+### 3.5 synapse-cache
+
+缓存与并发控制基础能力。
+
+职责：
+
+- Redis 缓存配置
+- Redis Lua 脚本执行封装
+- 可重入分布式锁
+- 滑动窗口限流
+- 缓存 key 命名规范
+
+### 3.6 synapse-security
 
 认证与授权基础能力。
 
 职责：
 
-- JWT 认证
-- Refresh Token
+- OAuth2 Authorization Server
+- OAuth2 Resource Server
+- JWT + JWK
 - PasswordEncoder
 - LoginUser
 - SecurityContext
@@ -129,7 +144,7 @@ Web 层通用能力。
 - Token 黑名单
 - 接口权限校验
 
-### 3.6 synapse-audit
+### 3.7 synapse-audit
 
 审计日志。
 
@@ -141,7 +156,7 @@ Web 层通用能力。
 - 审计事件模型
 - 审计持久化接口
 
-### 3.7 synapse-tenant
+### 3.8 synapse-tenant
 
 租户上下文与租户隔离预留。
 
@@ -153,7 +168,7 @@ Web 层通用能力。
 - tenant_id 字段规则
 - MyBatis-Plus TenantLineHandler 适配预留
 
-### 3.8 synapse-codegen
+### 3.9 synapse-codegen
 
 代码生成器。
 
@@ -165,7 +180,7 @@ Web 层通用能力。
 - 生成 migration
 - 生成测试骨架
 
-### 3.9 synapse-admin-api
+### 3.10 synapse-admin-api
 
 后台管理 API。
 
@@ -180,7 +195,7 @@ Web 层通用能力。
 - 操作日志
 - 登录日志
 
-### 3.10 synapse-admin-ui
+### 3.11 synapse-admin-ui
 
 后台管理前端。
 
@@ -204,6 +219,7 @@ admin-api -> security/web/data/common
 security -> web/common/cache
 web -> common
  data -> common
+cache -> common
  audit -> common/web/data/security
  codegen -> common
 ```
@@ -258,6 +274,10 @@ Database
 - Trace ID
 - 异常处理
 - 参数校验
+- Redis 缓存
+- Redis Lua 分布式锁
+- Redis Lua 限流
+- 动态数据源
 - 数据权限
 - 多租户
 - 幂等
@@ -266,9 +286,9 @@ Database
 ## 8. 演进路线
 
 ```text
-v0.1 单体模块化后台框架
-v0.2 代码生成器增强 + 数据权限 + 租户预留落地
-v0.3 插件化模块机制 + 文件/消息/通知
+v0.1 通用技术基座 + Starter + 示例应用
+v0.2 IAM/Auth/RBAC 验证模块 + 数据权限 + 租户预留落地
+v0.3 代码生成器增强 + 文件/消息/通知
 v0.4 微服务版本 + Gateway + Nacos + OpenFeign
 v0.5 工作流适配 + 企业业务模块模板
 ```

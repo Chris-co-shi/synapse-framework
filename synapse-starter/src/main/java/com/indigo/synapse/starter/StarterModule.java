@@ -1,6 +1,7 @@
 package com.indigo.synapse.starter;
 
 import com.indigo.synapse.audit.AuditModule;
+import com.indigo.synapse.cache.CacheModule;
 import com.indigo.synapse.common.CommonModule;
 import com.indigo.synapse.data.DataModule;
 import com.indigo.synapse.security.SecurityModule;
@@ -20,6 +21,7 @@ public final class StarterModule {
                 CommonModule.NAME,
                 WebModule.NAME,
                 DataModule.NAME,
+                CacheModule.NAME,
                 SecurityModule.NAME,
                 AuditModule.NAME
         );

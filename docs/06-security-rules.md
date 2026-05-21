@@ -11,18 +11,27 @@
 
 ## 2. 认证模型
 
-v0.1 采用：
+v0.1 基座采用：
 
 ```text
-Access Token + Refresh Token
+OAuth2 Authorization Server + OAuth2 Resource Server + JWT + JWK
 ```
+
+要求：
+
+- 基座可以签发 JWT token。
+- 基座可以作为资源服务器保护 API。
+- JWK 必须支持密钥轮换预留。
+- 默认接口必须认证，公开端点必须显式白名单。
+- IAM/Auth/RBAC 是后续验证模块，不是 security 基座第一阶段必须完成的业务模块。
 
 Access Token：
 
-- 短有效期
-- 用于接口访问
-- JWT 格式
-- 可通过黑名单临时吊销
+- 短有效期。
+- 用于接口访问。
+- JWT 格式。
+- 资源服务器通过 JWK 验签。
+- 需要吊销能力时通过 cache 模块维护 token denylist 或授权状态。
 
 Refresh Token：
 
@@ -31,6 +40,8 @@ Refresh Token：
 - 支持 rotation
 - 支持复用检测
 - 登出时吊销
+
+Refresh Token 属于 IAM/Auth 验证模块职责，security 基座只提供 OAuth2 和 token 基础设施。
 
 ## 3. 登录流程
 
@@ -125,9 +136,11 @@ system:role:assign-menu
 只允许：
 
 ```text
-/api/admin/auth/login-options
-/api/admin/auth/login
-/api/admin/auth/refresh
+/oauth2/**
+/.well-known/**
+/api/admin/auth/login-options 仅 IAM 验证模块启用时
+/api/admin/auth/login 仅 IAM 验证模块启用时
+/api/admin/auth/refresh 仅 IAM 验证模块启用时
 /actuator/health 受环境限制
 /openapi/** 仅开发环境
 ```
