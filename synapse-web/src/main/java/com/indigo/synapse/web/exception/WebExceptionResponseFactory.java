@@ -1,8 +1,8 @@
 package com.indigo.synapse.web.exception;
 
-import com.indigo.synapse.common.error.CommonErrorCode;
-import com.indigo.synapse.common.error.ErrorCode;
-import com.indigo.synapse.common.exception.SynapseException;
+import com.indigo.synapse.core.error.CommonErrorCode;
+import com.indigo.synapse.core.error.ErrorCode;
+import com.indigo.synapse.core.exception.SynapseException;
 import com.indigo.synapse.web.response.Result;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;

@@ -1,4 +1,4 @@
-package com.indigo.synapse.common.mask;
+package com.indigo.synapse.core.mask;
 
 import java.util.Objects;
 

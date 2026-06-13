@@ -1,4 +1,4 @@
-package com.indigo.synapse.common.time;
+package com.indigo.synapse.core.time;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

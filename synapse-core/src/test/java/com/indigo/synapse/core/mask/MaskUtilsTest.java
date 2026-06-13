@@ -1,4 +1,4 @@
-package com.indigo.synapse.common.mask;
+package com.indigo.synapse.core.mask;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

@@ -1,4 +1,4 @@
-package com.indigo.synapse.common.id;
+package com.indigo.synapse.core.id;
 
 import java.util.UUID;
 

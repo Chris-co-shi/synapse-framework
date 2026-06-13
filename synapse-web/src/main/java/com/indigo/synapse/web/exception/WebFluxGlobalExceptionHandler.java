@@ -1,6 +1,6 @@
 package com.indigo.synapse.web.exception;
 
-import com.indigo.synapse.common.exception.SynapseException;
+import com.indigo.synapse.core.exception.SynapseException;
 import com.indigo.synapse.web.response.Result;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;

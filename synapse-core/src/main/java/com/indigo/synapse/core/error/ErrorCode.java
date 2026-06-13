@@ -1,4 +1,4 @@
-package com.indigo.synapse.common.error;
+package com.indigo.synapse.core.error;
 
 /**
  * 统一错误码契约。

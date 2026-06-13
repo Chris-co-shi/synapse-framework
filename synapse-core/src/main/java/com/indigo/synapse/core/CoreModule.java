@@ -1,4 +1,4 @@
-package com.indigo.synapse.common;
+package com.indigo.synapse.core;
 
 /**
  * Synapse 核心模块标识。

@@ -1,4 +1,4 @@
-package com.indigo.synapse.common.id;
+package com.indigo.synapse.core.id;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

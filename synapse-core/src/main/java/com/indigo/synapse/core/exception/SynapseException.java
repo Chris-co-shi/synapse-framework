@@ -1,6 +1,6 @@
-package com.indigo.synapse.common.exception;
+package com.indigo.synapse.core.exception;
 
-import com.indigo.synapse.common.error.ErrorCode;
+import com.indigo.synapse.core.error.ErrorCode;
 
 import java.io.Serial;
 import java.util.Objects;

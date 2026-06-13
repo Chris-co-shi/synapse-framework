@@ -1,4 +1,4 @@
-package com.indigo.synapse.common.error;
+package com.indigo.synapse.core.error;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

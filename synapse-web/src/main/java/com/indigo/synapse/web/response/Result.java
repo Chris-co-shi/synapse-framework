@@ -1,7 +1,7 @@
 package com.indigo.synapse.web.response;
 
-import com.indigo.synapse.common.error.CommonErrorCode;
-import com.indigo.synapse.common.error.ErrorCode;
+import com.indigo.synapse.core.error.CommonErrorCode;
+import com.indigo.synapse.core.error.ErrorCode;
 import com.indigo.synapse.web.trace.TraceContext;
 import com.indigo.synapse.web.trace.TraceIdGenerator;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package com.indigo.synapse.web;
 
-import com.indigo.synapse.common.CoreModule;
+import com.indigo.synapse.core.CoreModule;
 
 public final class WebModule {
 

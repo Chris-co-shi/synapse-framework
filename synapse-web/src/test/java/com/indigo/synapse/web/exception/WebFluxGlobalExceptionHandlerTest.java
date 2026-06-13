@@ -1,7 +1,7 @@
 package com.indigo.synapse.web.exception;
 
-import com.indigo.synapse.common.error.CommonErrorCode;
-import com.indigo.synapse.common.exception.SynapseException;
+import com.indigo.synapse.core.error.CommonErrorCode;
+import com.indigo.synapse.core.exception.SynapseException;
 import com.indigo.synapse.web.response.Result;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;

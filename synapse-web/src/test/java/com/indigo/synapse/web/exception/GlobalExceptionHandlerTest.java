@@ -2,8 +2,8 @@ package com.indigo.synapse.web.exception;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.indigo.synapse.common.error.CommonErrorCode;
-import com.indigo.synapse.common.exception.SynapseException;
+import com.indigo.synapse.core.error.CommonErrorCode;
+import com.indigo.synapse.core.exception.SynapseException;
 import com.indigo.synapse.web.response.Result;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;

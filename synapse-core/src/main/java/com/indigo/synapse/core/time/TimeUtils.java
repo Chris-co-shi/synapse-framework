@@ -1,4 +1,4 @@
-package com.indigo.synapse.common.time;
+package com.indigo.synapse.core.time;
 
 import java.time.Clock;
 import java.time.Instant;

@@ -1,4 +1,4 @@
-package com.indigo.synapse.common.error;
+package com.indigo.synapse.core.error;
 
 /**
  * 框架级通用错误码。

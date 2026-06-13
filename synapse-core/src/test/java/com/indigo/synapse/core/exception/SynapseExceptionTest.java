@@ -1,9 +1,9 @@
-package com.indigo.synapse.common.exception;
+package com.indigo.synapse.core.exception;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-import com.indigo.synapse.common.error.CommonErrorCode;
+import com.indigo.synapse.core.error.CommonErrorCode;
 import org.junit.jupiter.api.Test;
 
 class SynapseExceptionTest {
