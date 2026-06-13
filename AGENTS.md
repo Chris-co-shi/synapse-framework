@@ -10,8 +10,8 @@ Synapse Framework 是面向 Java 企业应用的通用技术底座。
 
 核心目标：
 
-1. 提供 Web、Data、Cache、Security、Audit、Starter、Tenant、Message、File、Task、Data Permission、Cloud 等可复用技术能力。
-2. 提供统一异常、响应、追踪、数据访问、缓存、认证资源保护、审计、幂等、限流、租户上下文、消息与文件抽象等基础设施。
+1. 提供 Core、Web、Data、Cache、Security、OAuth2、Audit、File、Message 等一阶段可复用技术能力。
+2. 提供统一异常、响应、追踪、数据访问、缓存、安全上下文、权限抽象、OAuth2 技术抽象、审计事件、幂等、限流、消息与文件抽象等基础设施。
 3. 提供标准化 Java 后端开发包结构、接口规范、数据库规范和测试规范，作为消费方项目的工程约束。
 4. 提供可被 AI Agent 长期协作的文档和 Skill 约束，避免不同 Agent 生成风格冲突的代码。
 5. 为未来业务项目、Admin 项目、IAM 项目或行业应用提供技术支撑，但这些业务实现不进入本仓库。
@@ -21,11 +21,16 @@ Synapse Framework 是面向 Java 企业应用的通用技术底座。
 当前处于框架 v0.1 阶段：
 
 - 优先完成纯技术底座模块。
+- 一阶段 Maven reactor 固定为：`synapse-bom`、`synapse-core`、`synapse-web`、`synapse-data`、`synapse-cache`、`synapse-security`、`synapse-oauth2`、`synapse-audit`、`synapse-file`、`synapse-message`。
+- `synapse-task` 当前移除，不得恢复到一阶段 reactor。
+- `synapse-tenant`、`synapse-data-permission`、`synapse-cloud` 属于二阶段预留，当前不得实现，也不得加入 reactor。
+- 当前不做 starter，业务项目按 module 引入。
 - 不实现业务模块。
 - 不提供启动应用。
 - 不提供后台管理前端。
 - 不把 IAM/Auth/RBAC、用户、角色、菜单、字典、组织等业务模型作为本仓库交付物。
 - 优先保证模块边界、测试闭环和可维护性。
+- 每次只执行一个 Task，禁止一次性大范围重构。
 
 ## 3. 技术基线
 
@@ -34,11 +39,11 @@ Synapse Framework 是面向 Java 企业应用的通用技术底座。
 | Java | 21 | 当前主线运行时基线。 |
 | Maven | 3.9.0 | 当前工作站使用 `/Users/sxc/Documents/tool/apache-maven-3.9.0`。 |
 | Spring Boot | 3.5.15 | 3.5.x 稳定线；本框架暂不切到 Spring Boot 4.x。 |
-| Spring Cloud | 2025.0.2 | 2025.0.x 对应 Spring Boot 3.5.x。 |
-| Spring Cloud Alibaba | 2025.0.0.0 | 适配 Spring Boot 3.5.x / Spring Cloud 2025.0.x。 |
+| Spring Cloud | 2025.0.2 | 二阶段 cloud 预留版本；当前不实现 `synapse-cloud`。 |
+| Spring Cloud Alibaba | 2025.0.0.0 | 二阶段 cloud 预留版本；当前不实现 `synapse-cloud`。 |
 | Spring Security | Boot 管理，6.5.x | 不单独覆盖 Boot 管理版本。 |
-| OAuth2 | Authorization Server + Resource Server | security 模块提供基础设施，不提供业务登录系统。 |
-| Token | JWT + JWK | 支持签发、验签、密钥轮换预留。 |
+| OAuth2 | Authorization Server + Resource Server | 目标归属 `synapse-oauth2`，不提供业务登录系统；当前仅有模块骨架，迁移尚未完成。 |
+| Token | JWT + JWK | 目标归属 `synapse-oauth2`；当前迁移尚未完成，后续 Task 从 `synapse-security` 拆分。 |
 | MyBatis-Plus | 3.5.16 | 使用 `mybatis-plus-spring-boot3-starter`。 |
 | dynamic-datasource | Spring Boot 3 starter | 配置级多数据源切换。 |
 | Redis Server | 7.2.7 可用 | 服务端可保留；客户端版本跟随 Spring Boot 管理。 |
@@ -46,9 +51,9 @@ Synapse Framework 是面向 Java 企业应用的通用技术底座。
 | Seata | 2.5.0 优先 / 2.6.0 可选 | 使用 SCA BOM 时优先 2.5.0；独立接入时可评估 2.6.0。 |
 | RocketMQ Server | 5.3.1 优先 | 跟随 SCA 2025.0.0.0 组件关系。 |
 | RocketMQ Spring Boot Starter | 2.3.4 | 不走 SCA starter 管理时的直接依赖选择；升级需单独验证兼容性。 |
-| OpenFeign | Spring Cloud 2025.0.2 管理 | 仅通过 cloud adapter 可选启用。 |
-| Spring Cloud LoadBalancer | Spring Cloud 2025.0.2 管理 | 仅提供负载均衡抽象和默认集成。 |
-| Resilience4j | Spring Cloud 2025.0.2 管理 | 用于熔断、限流、重试等微服务韧性能力。 |
+| OpenFeign | Spring Cloud 2025.0.2 管理 | 二阶段 cloud 预留；当前不实现。 |
+| Spring Cloud LoadBalancer | Spring Cloud 2025.0.2 管理 | 二阶段 cloud 预留；当前不实现。 |
+| Resilience4j | Spring Cloud 2025.0.2 管理 | 二阶段 cloud 预留；当前不实现。 |
 | Flyway | Boot 管理 | 只提供迁移规范和测试约束。 |
 | H2 / Testcontainers | Boot 管理 | 用于模块测试和兼容性验证。 |
 | springdoc OpenAPI | 2.8.x | 由 BOM 统一管理。 |
@@ -77,9 +82,11 @@ Synapse Framework 是面向 Java 企业应用的通用技术底座。
 
 - `skills/synapse-cache/SKILL.md`
 
-涉及 OAuth2、JWT、JWK、资源服务器或权限基础设施必须读取：
+涉及权限基础设施必须读取：
 
 - `skills/synapse-security/SKILL.md`
+
+涉及 OAuth2、JWT、JWK、Resource Server 或 Authorization Server 时，必须遵守本文件中 `synapse-oauth2` 的归属边界。当前 `synapse-oauth2` 只是模块骨架，OAuth2/JWT/JWK 代码迁移尚未完成，后续 Task 才允许从 `synapse-security` 拆分。
 
 涉及测试必须读取对应模块 Skill；若存在测试工程 Skill，也必须读取。
 
@@ -112,17 +119,23 @@ Synapse Framework 是面向 Java 企业应用的通用技术底座。
 Web response / exception / trace / validation
 Data dialect / MyBatis-Plus configuration / datasource abstraction
 Cache / lock / rate limit / idempotency
-Security resource protection / token infrastructure / permission abstraction
-Audit event / audit publisher / audit repository port
-Tenant context / tenant resolver / tenant propagation
-Message abstraction / producer-consumer SPI / RocketMQ adapter
-File storage abstraction / local-minio-oss adapter
-Task scheduling abstraction / execution record SPI
-Cloud client abstraction / service discovery / remote call / resilience / config refresh
-Starter auto-configuration / feature switch
+Security context / permission abstraction / invalid request protection / header contract
+OAuth2 / JWT / JWK / Resource Server / Authorization Server technical abstraction
+Audit event infrastructure / audit publisher / audit repository port
+File storage abstraction / storage port / lightweight default implementation
+Message infrastructure contract / producer-consumer SPI / lightweight default implementation
 ```
 
 框架模块不得沉淀具体业务语义，如用户、角色、菜单、组织、字典、订单、工单、客户、库存。
+
+当前模块边界：
+
+- `synapse-security` 只负责轻量安全上下文、权限抽象、非法请求拦截、Header 契约；后续不得继续新增 OAuth2/JWT/JWK 能力。
+- `synapse-oauth2` 是 OAuth2/JWT/JWK/Resource Server/Authorization Server 技术抽象的目标归属模块；当前仅有模块骨架，代码迁移尚未完成。
+- `synapse-audit` 是审计事件基础设施，不是审计中心。
+- `synapse-file` 是文件存储抽象，不是文件中心。
+- `synapse-message` 是消息基础设施契约，不是消息中心。
+- `synapse-tenant`、`synapse-data-permission`、`synapse-cloud` 是二阶段预留，当前不实现。
 
 ### 5.3 分层规则只约束消费方和可选 adapter
 
@@ -158,7 +171,7 @@ MyBatis-Plus Entity 是持久化模型，不是领域模型。
 2. 为什么不用已有依赖？
 3. 是否有许可证风险？
 4. 是否会影响启动速度、包体积、安全性？
-5. 是否需要封装在 starter 或 adapter 里？
+5. 是否需要封装在 adapter 里？当前不得新增 starter。
 
 ## 6. 代码修改前必须输出自查
 
@@ -183,7 +196,12 @@ MyBatis-Plus Entity 是持久化模型，不是领域模型。
 17. 是否会使用 ActiveRecord Model<T>，边界如何控制？
 18. 是否会让 MyBatis-Plus 模型直接暴露到 Controller 或前端？
 19. 是否会让 Controller 直接依赖 Mapper？
-20. 需要执行哪些验证命令？
+20. 是否触碰 `synapse-task`、`synapse-tenant`、`synapse-data-permission`、`synapse-cloud` 或将其加入 reactor？
+21. 是否新增 starter？
+22. 是否在 `synapse-security` 中继续新增 OAuth2/JWT/JWK 能力？
+23. 是否把 `synapse-audit`、`synapse-file`、`synapse-message` 做成中心化平台服务？
+24. 是否一次性处理多个 Task 或扩大任务范围？
+25. 需要执行哪些验证命令？
 
 ## 7. 模块完成后的 Skill 交付规则
 
@@ -216,7 +234,7 @@ skills/<module-name>/SKILL.md
 - 与 Spring Boot 条件装配兼容。
 - 与消费方可覆盖配置兼容。
 
-涉及安全、租户、数据权限、审计、缓存、消息、文件、任务时，必须补充对应边界测试。
+涉及安全、OAuth2、审计、缓存、消息、文件时，必须补充对应边界测试。租户、数据权限、Cloud 属于二阶段预留，当前不实现；Task 当前移除。
 
 ## 9. 输出要求
 
@@ -243,6 +261,13 @@ skills/<module-name>/SKILL.md
 - 禁止把临时实验代码提交到主模块。
 - 禁止新增启动应用、示例应用或 Admin UI。
 - 禁止使用宽泛的 `catch (Exception e)` 后只打印日志不处理。
+- 禁止当前阶段新增 starter。
+- 禁止恢复 `synapse-task` 或将其加入 reactor。
+- 禁止将 `synapse-tenant`、`synapse-data-permission`、`synapse-cloud` 加入当前 reactor。
+- 禁止在 `synapse-security` 中继续新增 OAuth2/JWT/JWK 能力。
+- 禁止把 `synapse-audit` 实现为审计中心。
+- 禁止把 `synapse-file` 实现为文件中心。
+- 禁止把 `synapse-message` 实现为消息中心。
 
 ## 11. 代码注释要求
 
