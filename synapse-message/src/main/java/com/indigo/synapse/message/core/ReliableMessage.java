@@ -5,7 +5,7 @@ import java.time.Instant;
 /**
  * 可靠消息领域模型。
  *
- * <p>该模型不依赖 MyBatis-Plus 注解，持久化字段由 adapter 转换。</p>
+ * <p>该模型不依赖具体持久化技术，存储方式由消费方 adapter 决定。</p>
  */
 public record ReliableMessage(
         String messageId,
