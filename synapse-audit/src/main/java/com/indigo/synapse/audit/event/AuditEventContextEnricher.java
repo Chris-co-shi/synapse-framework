@@ -1,0 +1,134 @@
+package com.indigo.synapse.audit.event;
+
+import com.indigo.synapse.audit.context.AuditContext;
+import com.indigo.synapse.audit.context.AuditContextSnapshot;
+import com.indigo.synapse.core.context.OperationActor;
+import com.indigo.synapse.core.context.OperationActorType;
+import com.indigo.synapse.core.context.OperationContext;
+import com.indigo.synapse.core.context.OperationContextProvider;
+import com.indigo.synapse.core.context.OperationSource;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+
+/**
+ * 为审计事件补齐当前操作上下文。
+ *
+ * <p>补齐来源优先级为显式事件字段、AuditContext、OperationContextProvider。
+ * 该组件不伪造 system/unknown 用户，也不覆盖调用方已经写入的 attributes。</p>
+ */
+public final class AuditEventContextEnricher {
+
+    private final OperationContextProvider operationContextProvider;
+
+    public AuditEventContextEnricher(OperationContextProvider operationContextProvider) {
+        if (operationContextProvider == null) {
+            throw new IllegalArgumentException("operationContextProvider must not be null");
+        }
+        this.operationContextProvider = operationContextProvider;
+    }
+
+    public AuditEvent enrich(AuditEvent event) {
+        if (event == null) {
+            throw new IllegalArgumentException("event must not be null");
+        }
+        Optional<AuditContextSnapshot> auditContext = AuditContext.current();
+        Optional<OperationContext> operationContext = operationContextProvider.current();
+
+        AuditSubject subject = resolveSubject(event, auditContext, operationContext);
+        String traceId = resolveTraceId(event, auditContext, operationContext);
+        Map<String, String> attributes = enrichAttributes(event.attributes(), operationContext);
+
+        return new AuditEvent(
+                event.action(),
+                subject,
+                event.target(),
+                event.occurredAt(),
+                event.outcome(),
+                traceId,
+                event.message(),
+                attributes
+        );
+    }
+
+    private AuditSubject resolveSubject(
+            AuditEvent event,
+            Optional<AuditContextSnapshot> auditContext,
+            Optional<OperationContext> operationContext
+    ) {
+        if (event.subject() != null) {
+            return event.subject();
+        }
+        return auditContext.map(AuditContextSnapshot::subject)
+                .or(() -> operationContext.flatMap(this::toSubject))
+                .orElse(null);
+    }
+
+    private Optional<AuditSubject> toSubject(OperationContext context) {
+        OperationActor actor = context.actor();
+        if (actor == null || actor.id() == null || actor.id().isBlank()) {
+            return Optional.empty();
+        }
+        if (actor.type() == OperationActorType.SYSTEM || actor.type() == OperationActorType.UNKNOWN) {
+            return Optional.empty();
+        }
+        return Optional.of(new AuditSubject(actor.type().name(), actor.id(), context.tenantId()));
+    }
+
+    private String resolveTraceId(
+            AuditEvent event,
+            Optional<AuditContextSnapshot> auditContext,
+            Optional<OperationContext> operationContext
+    ) {
+        if (event.traceId() != null && !event.traceId().isBlank()) {
+            return event.traceId();
+        }
+        return auditContext.map(AuditContextSnapshot::traceId)
+                .or(() -> operationContext.map(OperationContext::traceId).filter(value -> !value.isBlank()))
+                .orElse(event.traceId());
+    }
+
+    private Map<String, String> enrichAttributes(
+            Map<String, String> attributes,
+            Optional<OperationContext> operationContext
+    ) {
+        Map<String, String> enriched = new LinkedHashMap<>(attributes == null ? Map.of() : attributes);
+        operationContext.ifPresent(context -> {
+            putActor(enriched, "operation.actor", context.actor());
+            putActor(enriched, "operation.initiator", context.initiator());
+            putIfPresent(enriched, "operation.requestId", context.requestId());
+            putSource(enriched, context.source());
+        });
+        return enriched;
+    }
+
+    private void putActor(Map<String, String> attributes, String prefix, OperationActor actor) {
+        if (actor == null) {
+            return;
+        }
+        if (actor.type() == OperationActorType.SYSTEM || actor.type() == OperationActorType.UNKNOWN) {
+            return;
+        }
+        putIfPresent(attributes, prefix + ".type", actor.type() == null ? null : actor.type().name());
+        putIfPresent(attributes, prefix + ".id", actor.id());
+        putIfPresent(attributes, prefix + ".name", actor.name());
+    }
+
+    private void putSource(Map<String, String> attributes, OperationSource source) {
+        if (source == null) {
+            return;
+        }
+        putIfPresent(attributes, "operation.source.type", source.type());
+        putIfPresent(attributes, "operation.source.name", source.name());
+        putIfPresent(attributes, "operation.source.instanceId", source.instanceId());
+        putIfPresent(attributes, "operation.source.entrypoint", source.entrypoint());
+    }
+
+    private void putIfPresent(Map<String, String> attributes, String key, String value) {
+        if (value == null || value.isBlank()) {
+            return;
+        }
+        attributes.putIfAbsent(key, value);
+    }
+}

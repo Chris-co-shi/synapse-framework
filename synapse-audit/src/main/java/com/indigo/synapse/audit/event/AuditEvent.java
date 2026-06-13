@@ -18,9 +18,6 @@ public record AuditEvent(
         if (action == null || action.isBlank()) {
             throw new IllegalArgumentException("action must not be blank");
         }
-        if (subject == null) {
-            throw new IllegalArgumentException("subject must not be null");
-        }
         if (target == null) {
             throw new IllegalArgumentException("target must not be null");
         }
@@ -30,10 +27,16 @@ public record AuditEvent(
         if (outcome == null) {
             throw new IllegalArgumentException("outcome must not be null");
         }
+        attributes = SensitiveAuditValueMasker.mask(attributes);
+    }
+
+    public void requireRecordable() {
+        if (subject == null) {
+            throw new IllegalArgumentException("subject must not be null");
+        }
         if (traceId == null || traceId.isBlank()) {
             throw new IllegalArgumentException("traceId must not be blank");
         }
-        attributes = SensitiveAuditValueMasker.mask(attributes);
     }
 
     public static Builder builder() {

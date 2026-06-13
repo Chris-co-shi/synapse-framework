@@ -1,17 +1,19 @@
 package com.indigo.synapse.audit.recorder;
 
 import com.indigo.synapse.audit.event.AuditEvent;
+import com.indigo.synapse.audit.event.AuditEventContextEnricher;
 import com.indigo.synapse.audit.event.AuditOutcome;
 import com.indigo.synapse.audit.event.AuditSubject;
 import com.indigo.synapse.audit.event.AuditTarget;
 import com.indigo.synapse.audit.port.AuditLogPort;
+import com.indigo.synapse.core.context.DefaultOperationContextProvider;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AuditRecorderTest {
@@ -24,7 +26,7 @@ class AuditRecorderTest {
 
         recorder.record(event);
 
-        assertSame(event, port.event);
+        assertEquals(event, port.event);
     }
 
     @Test
@@ -44,7 +46,31 @@ class AuditRecorderTest {
         });
 
         assertThrows(IllegalArgumentException.class, () -> new AuditRecorder(null));
+        assertThrows(IllegalArgumentException.class, () -> new AuditRecorder(event -> {
+        }, null));
         assertThrows(IllegalArgumentException.class, () -> recorder.record(null));
+    }
+
+    @Test
+    void shouldRejectEventMissingSubjectBeforeWritingPort() {
+        CapturingAuditLogPort port = new CapturingAuditLogPort();
+        AuditRecorder recorder = new AuditRecorder(
+                port,
+                new AuditEventContextEnricher(new DefaultOperationContextProvider())
+        );
+        AuditEvent event = new AuditEvent(
+                "system:user:create",
+                null,
+                new AuditTarget("USER", "2"),
+                Instant.parse("2026-05-20T10:00:00Z"),
+                AuditOutcome.SUCCESS,
+                "trace-1",
+                "created user",
+                Map.of()
+        );
+
+        assertThrows(IllegalArgumentException.class, () -> recorder.record(event));
+        assertNull(port.event);
     }
 
     private static AuditEvent event() {

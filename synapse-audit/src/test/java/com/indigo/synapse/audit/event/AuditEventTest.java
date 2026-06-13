@@ -54,10 +54,20 @@ class AuditEventTest {
         Instant now = Instant.parse("2026-05-20T10:00:00Z");
 
         assertThrows(IllegalArgumentException.class, () -> new AuditEvent("", subject, target, now, AuditOutcome.SUCCESS, "trace", null, Map.of()));
-        assertThrows(IllegalArgumentException.class, () -> new AuditEvent("a", null, target, now, AuditOutcome.SUCCESS, "trace", null, Map.of()));
         assertThrows(IllegalArgumentException.class, () -> new AuditEvent("a", subject, null, now, AuditOutcome.SUCCESS, "trace", null, Map.of()));
         assertThrows(IllegalArgumentException.class, () -> new AuditEvent("a", subject, target, null, AuditOutcome.SUCCESS, "trace", null, Map.of()));
         assertThrows(IllegalArgumentException.class, () -> new AuditEvent("a", subject, target, now, null, "trace", null, Map.of()));
-        assertThrows(IllegalArgumentException.class, () -> new AuditEvent("a", subject, target, now, AuditOutcome.SUCCESS, "", null, Map.of()));
+    }
+
+    @Test
+    void shouldValidateRecordableEventSeparately() {
+        AuditTarget target = new AuditTarget("USER", "2");
+        Instant now = Instant.parse("2026-05-20T10:00:00Z");
+
+        AuditEvent missingSubject = new AuditEvent("a", null, target, now, AuditOutcome.SUCCESS, "trace", null, Map.of());
+        AuditEvent missingTrace = new AuditEvent("a", new AuditSubject("USER", "1", null), target, now, AuditOutcome.SUCCESS, "", null, Map.of());
+
+        assertThrows(IllegalArgumentException.class, missingSubject::requireRecordable);
+        assertThrows(IllegalArgumentException.class, missingTrace::requireRecordable);
     }
 }
