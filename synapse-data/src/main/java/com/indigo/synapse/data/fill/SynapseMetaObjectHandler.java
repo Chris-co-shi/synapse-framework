@@ -27,6 +27,8 @@ public class SynapseMetaObjectHandler implements MetaObjectHandler {
             fillIfNull(metaObject, "createdBy", auditor);
             fillIfNull(metaObject, "updatedBy", auditor);
         });
+        auditorProvider.currentTenantId()
+                .ifPresent(tenantId -> fillIfNull(metaObject, "tenantId", tenantId));
     }
 
     @Override

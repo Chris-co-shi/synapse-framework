@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import com.indigo.synapse.core.context.DefaultOperationContextProvider;
+import com.indigo.synapse.core.context.OperationContextProvider;
 import com.indigo.synapse.data.fill.SynapseAuditorProvider;
 import com.indigo.synapse.data.fill.SynapseMetaObjectHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -40,8 +42,14 @@ public class SynapseDataAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SynapseAuditorProvider synapseAuditorProvider() {
-        return SynapseAuditorProvider.empty();
+    public OperationContextProvider synapseOperationContextProvider() {
+        return new DefaultOperationContextProvider();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SynapseAuditorProvider synapseAuditorProvider(OperationContextProvider operationContextProvider) {
+        return SynapseAuditorProvider.from(operationContextProvider);
     }
 
     @Bean
