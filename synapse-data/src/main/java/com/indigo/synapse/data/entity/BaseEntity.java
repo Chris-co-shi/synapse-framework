@@ -6,9 +6,11 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.Version;
+import lombok.Data;
 
 import java.time.Instant;
 
+@Data
 public abstract class BaseEntity {
 
     @TableId(value = "id", type = IdType.ASSIGN_ID)
@@ -36,91 +38,4 @@ public abstract class BaseEntity {
     @Version
     @TableField("version")
     private Integer version;
-
-    public BaseEntity() {
-    }
-
-    public BaseEntity(
-            String id,
-            String tenantId,
-            Instant createdAt,
-            String createdBy,
-            Instant updatedAt,
-            String updatedBy,
-            Integer deleted,
-            Integer version
-    ) {
-        this.id = id;
-        this.tenantId = tenantId;
-        this.createdAt = createdAt;
-        this.createdBy = createdBy;
-        this.updatedAt = updatedAt;
-        this.updatedBy = updatedBy;
-        this.deleted = deleted;
-        this.version = version;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public String getUpdatedBy() {
-        return updatedBy;
-    }
-
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
-    }
-
-    public Integer getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Integer deleted) {
-        this.deleted = deleted;
-    }
-
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
 }

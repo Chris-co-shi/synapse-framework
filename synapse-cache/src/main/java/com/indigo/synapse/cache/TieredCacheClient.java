@@ -4,12 +4,18 @@ import com.indigo.synapse.cache.local.LocalCacheStore;
 import com.indigo.synapse.cache.redis.RedisCacheStore;
 
 import java.time.Duration;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 
+/**
+ * 两级缓存客户端。
+ *
+ * <p>L1 为可选本地缓存，L2 为 Redis。该实现只在当前 JVM 内对同一个 key 做
+ * single-flight 加载保护，不承担跨 JVM 的分布式加载互斥；跨进程互斥应使用
+ * {@code RedisReentrantLock} 或消费方更高层的并发控制。</p>
+ */
 public final class TieredCacheClient implements CacheClient {
 
     private static final ConcurrentMap<String, Object> LOCAL_LOCKS = new ConcurrentHashMap<>();
@@ -51,7 +57,7 @@ public final class TieredCacheClient implements CacheClient {
         Optional<String> remote = redisCacheStore.get(cacheKey);
         remote.ifPresent(value -> {
             if (localCacheStore != null) {
-                localCacheStore.put(cacheKey, value, defaultCacheSpec.l1Ttl());
+                localCacheStore.put(cacheKey, value, backfillLocalTtl(cacheKey));
             }
         });
         return remote.map(value -> cacheValueCodec.decode(value, valueType));
@@ -69,7 +75,7 @@ public final class TieredCacheClient implements CacheClient {
         String encoded = cacheValueCodec.encode(value);
         redisCacheStore.put(cacheKey, encoded, ttl);
         if (localCacheStore != null) {
-            localCacheStore.put(cacheKey, encoded, defaultCacheSpec.l1Ttl());
+            localCacheStore.put(cacheKey, encoded, localTtl(defaultCacheSpec.l1Ttl(), ttl));
         }
     }
 
@@ -109,7 +115,7 @@ public final class TieredCacheClient implements CacheClient {
                 String encoded = cacheValueCodec.encode(loaded);
                 redisCacheStore.put(key.value(), encoded, effectiveSpec.l2Ttl());
                 if (localCacheStore != null) {
-                    localCacheStore.put(key.value(), encoded, effectiveSpec.l1Ttl());
+                    localCacheStore.put(key.value(), encoded, localTtl(effectiveSpec.l1Ttl(), effectiveSpec.l2Ttl()));
                 }
                 return loaded;
             } finally {
@@ -135,5 +141,18 @@ public final class TieredCacheClient implements CacheClient {
         if (ttl == null || ttl.isZero() || ttl.isNegative()) {
             throw new IllegalArgumentException("ttl must be positive");
         }
+    }
+
+    private Duration backfillLocalTtl(String cacheKey) {
+        return redisCacheStore.ttl(cacheKey)
+                .map(remoteTtl -> localTtl(defaultCacheSpec.l1Ttl(), remoteTtl))
+                .orElse(defaultCacheSpec.l1Ttl());
+    }
+
+    private static Duration localTtl(Duration preferredLocalTtl, Duration remoteTtl) {
+        validateTtl(preferredLocalTtl);
+        validateTtl(remoteTtl);
+        // L1 不能比 L2 活得更久，否则远端已过期时本地仍可能返回旧值。
+        return preferredLocalTtl.compareTo(remoteTtl) <= 0 ? preferredLocalTtl : remoteTtl;
     }
 }

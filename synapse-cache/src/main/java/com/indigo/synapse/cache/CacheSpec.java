@@ -2,6 +2,13 @@ package com.indigo.synapse.cache;
 
 import java.time.Duration;
 
+/**
+ * 两级缓存规格。
+ *
+ * @param l1Ttl L1 本地缓存默认 TTL
+ * @param l1MaximumSize L1 本地缓存最大条目数
+ * @param l2Ttl L2 Redis 缓存默认 TTL
+ */
 public record CacheSpec(
         Duration l1Ttl,
         long l1MaximumSize,
@@ -12,6 +19,9 @@ public record CacheSpec(
     public static final long DEFAULT_L1_MAXIMUM_SIZE = 1_000L;
     public static final Duration DEFAULT_L2_TTL = Duration.ofMinutes(30);
 
+    /**
+     * 返回框架默认缓存规格。
+     */
     public static CacheSpec defaults() {
         return new CacheSpec(DEFAULT_L1_TTL, DEFAULT_L1_MAXIMUM_SIZE, DEFAULT_L2_TTL);
     }

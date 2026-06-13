@@ -101,6 +101,48 @@ class TieredCacheClientTest {
     }
 
     @Test
+    void shouldNotWriteLocalCacheLongerThanPutTtl() {
+        InMemoryLocalCacheStore local = new InMemoryLocalCacheStore();
+        InMemoryRedisCacheStore redis = new InMemoryRedisCacheStore();
+        CacheSpec cacheSpec = new CacheSpec(Duration.ofMinutes(5), 100, Duration.ofMinutes(30));
+        TieredCacheClient client = new TieredCacheClient(local, redis, new DefaultCacheValueCodec(null), cacheSpec);
+        CacheKey key = CacheKey.of("cache", "config", "item", "short-put");
+
+        client.put(key, new UserProfile("u-7", "short"), Duration.ofSeconds(10));
+
+        assertEquals(Duration.ofSeconds(10), local.ttlOf(key.value()));
+    }
+
+    @Test
+    void shouldNotWriteLocalCacheLongerThanLoadedRemoteTtl() {
+        InMemoryLocalCacheStore local = new InMemoryLocalCacheStore();
+        InMemoryRedisCacheStore redis = new InMemoryRedisCacheStore();
+        TieredCacheClient client = new TieredCacheClient(local, redis, new DefaultCacheValueCodec(null), CacheSpec.defaults());
+        CacheKey key = CacheKey.of("cache", "config", "item", "short-load");
+        CacheSpec shortRemoteSpec = new CacheSpec(Duration.ofMinutes(5), 100, Duration.ofSeconds(20));
+
+        client.getOrLoad(key, UserProfile.class, () -> new UserProfile("u-8", "short-load"), shortRemoteSpec);
+
+        assertEquals(Duration.ofSeconds(20), local.ttlOf(key.value()));
+    }
+
+    @Test
+    void shouldBackfillLocalCacheWithRedisRemainingTtlWhenShorter() {
+        InMemoryLocalCacheStore local = new InMemoryLocalCacheStore();
+        InMemoryRedisCacheStore redis = new InMemoryRedisCacheStore();
+        CacheValueCodec codec = new DefaultCacheValueCodec(null);
+        CacheSpec cacheSpec = new CacheSpec(Duration.ofMinutes(5), 100, Duration.ofMinutes(30));
+        CacheKey key = CacheKey.of("cache", "config", "item", "remote-short");
+        redis.put(key.value(), codec.encode(new UserProfile("u-9", "remote")), Duration.ofSeconds(15));
+        TieredCacheClient client = new TieredCacheClient(local, redis, codec, cacheSpec);
+
+        Optional<UserProfile> result = client.get(key, UserProfile.class);
+
+        assertTrue(result.isPresent());
+        assertEquals(Duration.ofSeconds(15), local.ttlOf(key.value()));
+    }
+
+    @Test
     void shouldSingleFlightConcurrentLoadsInSameJvm() throws Exception {
         InMemoryLocalCacheStore local = new InMemoryLocalCacheStore();
         InMemoryRedisCacheStore redis = new InMemoryRedisCacheStore();
@@ -136,6 +178,7 @@ class TieredCacheClientTest {
 
     private static final class InMemoryLocalCacheStore implements LocalCacheStore {
         private final Map<String, String> map = new HashMap<>();
+        private final Map<String, Duration> ttls = new HashMap<>();
 
         @Override
         public Optional<String> get(String key) {
@@ -145,16 +188,23 @@ class TieredCacheClientTest {
         @Override
         public void put(String key, String value, Duration ttl) {
             map.put(key, value);
+            ttls.put(key, ttl);
         }
 
         @Override
         public void evict(String key) {
             map.remove(key);
+            ttls.remove(key);
+        }
+
+        private Duration ttlOf(String key) {
+            return ttls.get(key);
         }
     }
 
     private static final class InMemoryRedisCacheStore implements RedisCacheStore {
         private final Map<String, String> map = new HashMap<>();
+        private final Map<String, Duration> ttls = new HashMap<>();
 
         @Override
         public Optional<String> get(String key) {
@@ -164,11 +214,18 @@ class TieredCacheClientTest {
         @Override
         public void put(String key, String value, Duration ttl) {
             map.put(key, value);
+            ttls.put(key, ttl);
         }
 
         @Override
         public void evict(String key) {
             map.remove(key);
+            ttls.remove(key);
+        }
+
+        @Override
+        public Optional<Duration> ttl(String key) {
+            return Optional.ofNullable(ttls.get(key));
         }
     }
 

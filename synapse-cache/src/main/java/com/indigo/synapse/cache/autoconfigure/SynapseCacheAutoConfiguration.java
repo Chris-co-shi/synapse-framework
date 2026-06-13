@@ -29,6 +29,12 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
+/**
+ * Synapse Cache 自动配置。
+ *
+ * <p>该配置只在 Spring Data Redis 可用时启用，并允许消费方通过声明同类型 Bean
+ * 覆盖默认实现。消息发布订阅能力属于 synapse-message，不在 cache 模块装配。</p>
+ */
 @AutoConfiguration(after = RedisAutoConfiguration.class)
 @ConditionalOnClass(StringRedisTemplate.class)
 @EnableConfigurationProperties(com.indigo.synapse.cache.SynapseCacheProperties.class)

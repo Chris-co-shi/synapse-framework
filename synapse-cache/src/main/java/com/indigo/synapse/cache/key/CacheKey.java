@@ -6,6 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Synapse 默认缓存 key 构造器。
+ *
+ * <p>key 采用 {@code namespace:module:domain:purpose:parts...} 分段格式。
+ * 各段禁止包含冒号，避免消费方拼接后出现无法区分的 key 边界。</p>
+ */
 public final class CacheKey implements CacheKeyRef {
 
     public static final String DEFAULT_NAMESPACE = "synapse";
@@ -17,10 +23,16 @@ public final class CacheKey implements CacheKeyRef {
         this.value = value;
     }
 
+    /**
+     * 使用默认命名空间构造缓存 key。
+     */
     public static CacheKey of(String module, String domain, String purpose, Object... parts) {
         return withNamespace(DEFAULT_NAMESPACE, module, domain, purpose, parts);
     }
 
+    /**
+     * 使用指定命名空间构造缓存 key。
+     */
     public static CacheKey withNamespace(String namespace, String module, String domain, String purpose, Object... parts) {
         List<String> segments = new ArrayList<>();
         segments.add(normalize(namespace, "namespace"));

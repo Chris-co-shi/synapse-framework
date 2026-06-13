@@ -2,8 +2,14 @@ package com.indigo.synapse.cache.script;
 
 import java.util.List;
 
+/**
+ * Synapse Cache 内置 Redis Lua 脚本集合。
+ */
 public final class SynapseRedisScripts {
 
+    /**
+     * 可重入加锁脚本：返回 1 表示首次获取，2 表示同 owner 重入，0 表示被其他 owner 持有。
+     */
     public static final RedisLuaScript<Long> REENTRANT_LOCK = new RedisLuaScript<>(
             "synapse-reentrant-lock",
             """
@@ -24,6 +30,9 @@ public final class SynapseRedisScripts {
             Long.class
     );
 
+    /**
+     * 可重入解锁脚本：返回 -1 表示 owner 不匹配，0 表示完全释放，正数表示剩余重入次数。
+     */
     public static final RedisLuaScript<Long> REENTRANT_UNLOCK = new RedisLuaScript<>(
             "synapse-reentrant-unlock",
             """
@@ -42,6 +51,9 @@ public final class SynapseRedisScripts {
             Long.class
     );
 
+    /**
+     * 滑动窗口限流脚本：返回 allowed、remaining、resetAtMillis 三元组。
+     */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static final RedisLuaScript<List> SLIDING_WINDOW_RATE_LIMIT = new RedisLuaScript<>(
             "synapse-sliding-window-rate-limit",

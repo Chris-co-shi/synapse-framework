@@ -8,6 +8,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Redis Lua 滑动窗口限流器。
+ *
+ * <p>窗口数据使用 ZSET 保存请求时间戳。该实现依赖调用方传入当前毫秒时间，
+ * 多实例部署时建议使用统一时钟来源，避免节点时钟漂移影响限流精度。</p>
+ */
 public final class SlidingWindowRateLimiter {
 
     private final RedisScriptExecutor scriptExecutor;

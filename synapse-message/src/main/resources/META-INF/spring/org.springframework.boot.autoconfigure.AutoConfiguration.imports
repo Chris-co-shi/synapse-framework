@@ -1,1 +1,3 @@
 com.indigo.synapse.message.autoconfigure.SynapseMessageAutoConfiguration
+com.indigo.synapse.message.autoconfigure.SynapseRedisPubSubMessageAutoConfiguration
+com.indigo.synapse.message.autoconfigure.SynapseReliableMessageAutoConfiguration

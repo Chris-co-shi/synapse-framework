@@ -6,6 +6,12 @@ import com.indigo.synapse.cache.script.SynapseRedisScripts;
 import java.time.Duration;
 import java.util.List;
 
+/**
+ * Redis Lua 可重入锁。
+ *
+ * <p>锁数据使用 Redis Hash 保存 owner 与重入次数。释放锁时必须传入同一个 owner，
+ * 非 owner 释放会被 Lua 脚本拒绝。</p>
+ */
 public final class RedisReentrantLock {
 
     private final RedisScriptExecutor scriptExecutor;

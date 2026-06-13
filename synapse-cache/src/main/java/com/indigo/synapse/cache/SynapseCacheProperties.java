@@ -4,6 +4,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
 
+/**
+ * Synapse Cache 配置属性。
+ *
+ * <p>当前只包含两级缓存默认配置。具体 key 粒度、幂等范围、锁粒度和限流维度
+ * 由消费方决定，框架不沉淀业务语义。</p>
+ */
 @ConfigurationProperties(prefix = "synapse.cache")
 public class SynapseCacheProperties {
 
@@ -22,6 +28,9 @@ public class SynapseCacheProperties {
         return new CacheSpec(l1.getExpireAfterWrite(), l1.getMaximumSize(), l2.getTtl());
     }
 
+    /**
+     * L1 本地缓存配置。
+     */
     public static final class L1 {
 
         private boolean enabled = true;
@@ -53,6 +62,9 @@ public class SynapseCacheProperties {
         }
     }
 
+    /**
+     * L2 Redis 缓存配置。
+     */
     public static final class L2 {
 
         private Duration ttl = CacheSpec.DEFAULT_L2_TTL;

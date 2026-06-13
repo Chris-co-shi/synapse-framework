@@ -12,6 +12,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * 基于 {@link StringRedisTemplate} 的 Redis 常用数据结构客户端。
+ */
 public final class StringRedisDataStructureClient implements RedisDataStructureClient {
 
     private final StringRedisTemplate redisTemplate;
@@ -84,6 +87,29 @@ public final class StringRedisDataStructureClient implements RedisDataStructureC
     }
 
     @Override
+    public void listSet(String key, long index, String value) {
+        validateKey(key);
+        validateValue(value, "value");
+        redisTemplate.opsForList().set(key, index, value);
+    }
+
+    @Override
+    public Long listLeftPush(String key, String pivot, String value) {
+        validateKey(key);
+        validateValue(pivot, "pivot");
+        validateValue(value, "value");
+        return redisTemplate.opsForList().leftPush(key, pivot, value);
+    }
+
+    @Override
+    public Long listRightPush(String key, String pivot, String value) {
+        validateKey(key);
+        validateValue(pivot, "pivot");
+        validateValue(value, "value");
+        return redisTemplate.opsForList().rightPush(key, pivot, value);
+    }
+
+    @Override
     public void hashPut(String key, String hashKey, String value) {
         validateKey(key);
         validateValue(hashKey, "hashKey");
@@ -129,6 +155,34 @@ public final class StringRedisDataStructureClient implements RedisDataStructureC
     }
 
     @Override
+    public boolean hashHasKey(String key, String hashKey) {
+        validateKey(key);
+        validateValue(hashKey, "hashKey");
+        return redisTemplate.opsForHash().hasKey(key, hashKey);
+    }
+
+    @Override
+    public Set<Object> hashKeys(String key) {
+        validateKey(key);
+        Set<Object> keys = redisTemplate.opsForHash().keys(key);
+        return keys == null ? Set.of() : keys;
+    }
+
+    @Override
+    public List<Object> hashValues(String key) {
+        validateKey(key);
+        List<Object> values = redisTemplate.opsForHash().values(key);
+        return values == null ? List.of() : values;
+    }
+
+    @Override
+    public Long hashSize(String key) {
+        validateKey(key);
+        Long size = redisTemplate.opsForHash().size(key);
+        return size == null ? 0L : size;
+    }
+
+    @Override
     public Long setAdd(String key, String... values) {
         validateKey(key);
         validateValues(values);
@@ -162,6 +216,42 @@ public final class StringRedisDataStructureClient implements RedisDataStructureC
         validateKey(key);
         Long size = redisTemplate.opsForSet().size(key);
         return size == null ? 0L : size;
+    }
+
+    @Override
+    public Set<String> setIntersect(String key, String otherKey) {
+        validateKey(key);
+        validateKey(otherKey);
+        Set<String> values = redisTemplate.opsForSet().intersect(key, otherKey);
+        return values == null ? Set.of() : values;
+    }
+
+    @Override
+    public Set<String> setUnion(String key, String otherKey) {
+        validateKey(key);
+        validateKey(otherKey);
+        Set<String> values = redisTemplate.opsForSet().union(key, otherKey);
+        return values == null ? Set.of() : values;
+    }
+
+    @Override
+    public Set<String> setDifference(String key, String otherKey) {
+        validateKey(key);
+        validateKey(otherKey);
+        Set<String> values = redisTemplate.opsForSet().difference(key, otherKey);
+        return values == null ? Set.of() : values;
+    }
+
+    @Override
+    public String setRandomMember(String key) {
+        validateKey(key);
+        return redisTemplate.opsForSet().randomMember(key);
+    }
+
+    @Override
+    public String setPop(String key) {
+        validateKey(key);
+        return redisTemplate.opsForSet().pop(key);
     }
 
     @Override
@@ -224,6 +314,46 @@ public final class StringRedisDataStructureClient implements RedisDataStructureC
         validateKey(key);
         validateValue(value, "value");
         return redisTemplate.opsForZSet().incrementScore(key, value, delta);
+    }
+
+    @Override
+    public Set<String> zsetReverseRange(String key, long start, long end) {
+        validateKey(key);
+        Set<String> values = redisTemplate.opsForZSet().reverseRange(key, start, end);
+        return values == null ? Set.of() : values;
+    }
+
+    @Override
+    public Long zsetRemoveRangeByScore(String key, double min, double max) {
+        validateKey(key);
+        return redisTemplate.opsForZSet().removeRangeByScore(key, min, max);
+    }
+
+    @Override
+    public Long zsetRemoveRange(String key, long start, long end) {
+        validateKey(key);
+        return redisTemplate.opsForZSet().removeRange(key, start, end);
+    }
+
+    @Override
+    public Long zsetRank(String key, String value) {
+        validateKey(key);
+        validateValue(value, "value");
+        return redisTemplate.opsForZSet().rank(key, value);
+    }
+
+    @Override
+    public Long zsetReverseRank(String key, String value) {
+        validateKey(key);
+        validateValue(value, "value");
+        return redisTemplate.opsForZSet().reverseRank(key, value);
+    }
+
+    @Override
+    public Long zsetCount(String key, double min, double max) {
+        validateKey(key);
+        Long count = redisTemplate.opsForZSet().count(key, min, max);
+        return count == null ? 0L : count;
     }
 
     private static void validateKey(String key) {
