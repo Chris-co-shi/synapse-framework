@@ -31,6 +31,7 @@ class MvcTraceFilterTest {
 
         assertEquals("trace-mvc", response.getHeader(TraceHeaders.TRACE_ID));
         assertTrue(TraceContext.currentTraceId().isEmpty());
+        assertTrue(TraceMdc.currentTraceId().isEmpty());
         assertTrue(RequestContextHolder.current().isEmpty());
     }
 }

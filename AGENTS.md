@@ -4,115 +4,148 @@
 
 ## 1. 项目定位
 
-Synapse Framework 是面向企业内部应用的 Java 通用技术基座和后台快速开发底座。
+Synapse Framework 是面向 Java 企业应用的通用技术底座。
+
+它只提供可复用的架构抽象、基础模块、自动配置、SPI、Adapter 和测试规范，供其他业务项目集成使用。本仓库不是后台管理系统、不是业务系统、不是可直接启动的应用。
 
 核心目标：
 
-1. 提供 Web、Data、Cache、Security、Audit、Starter 等可复用技术基座能力。
-2. 提供统一认证、授权、菜单、组织、数据权限、审计日志、字典配置等后台验证能力。
-3. 提供标准化 Java 后端开发包结构、接口规范、数据库规范和测试规范。
-4. 提供可被 AI Agent 长期协作的工程约束，避免不同 Agent 生成风格冲突的代码。
-5. 支持未来扩展到多租户、工作流、消息通知、文件存储、代码生成器、业务模块脚手架。
+1. 提供 Web、Data、Cache、Security、Audit、Starter、Tenant、Message、File、Task、Data Permission、Cloud 等可复用技术能力。
+2. 提供统一异常、响应、追踪、数据访问、缓存、认证资源保护、审计、幂等、限流、租户上下文、消息与文件抽象等基础设施。
+3. 提供标准化 Java 后端开发包结构、接口规范、数据库规范和测试规范，作为消费方项目的工程约束。
+4. 提供可被 AI Agent 长期协作的文档和 Skill 约束，避免不同 Agent 生成风格冲突的代码。
+5. 为未来业务项目、Admin 项目、IAM 项目或行业应用提供技术支撑，但这些业务实现不进入本仓库。
 
 ## 2. 当前阶段
 
 当前处于框架 v0.1 阶段：
 
-- 优先单体模块化，不直接拆微服务。
-- 优先完成通用技术基座，不追求完整后台管理系统或低代码平台。
-- 优先保证工程边界、测试闭环和可维护性。
+- 优先完成纯技术底座模块。
+- 不实现业务模块。
+- 不提供启动应用。
+- 不提供后台管理前端。
+- 不把 IAM/Auth/RBAC、用户、角色、菜单、字典、组织等业务模型作为本仓库交付物。
+- 优先保证模块边界、测试闭环和可维护性。
 
 ## 3. 技术基线
 
-- Java 21
-- Spring Boot 3.5.14
-- Spring Security 6.5.x
-- OAuth2 Authorization Server + Resource Server
-- JWT + JWK
-- MyBatis-Plus 3.5.9，完整使用官方能力
-- dynamic-datasource Spring Boot 3 starter，配置级多数据源切换
-- Maven 3.9.0 多模块，当前工作站使用 `/Users/sxc/Documents/tool/apache-maven-3.9.0`
-- 数据库不绑定具体厂商，通过方言适配层支持切换
-- Redis / Spring Data Redis / Lettuce
-- Redis + Lua 可重入分布式锁
-- Redis + Lua 滑动窗口限流
-- Flyway
-- H2 + Testcontainers
-- springdoc OpenAPI 2.8.x
-- Lombok + MapStruct
-- Vue 3 + TypeScript + Vite
-- Element Plus 或 Naive UI
+| 组件 | 推荐版本 | 说明 |
+|---|---:|---|
+| Java | 21 | 当前主线运行时基线。 |
+| Maven | 3.9.0 | 当前工作站使用 `/Users/sxc/Documents/tool/apache-maven-3.9.0`。 |
+| Spring Boot | 3.5.15 | 3.5.x 稳定线；本框架暂不切到 Spring Boot 4.x。 |
+| Spring Cloud | 2025.0.2 | 2025.0.x 对应 Spring Boot 3.5.x。 |
+| Spring Cloud Alibaba | 2025.0.0.0 | 适配 Spring Boot 3.5.x / Spring Cloud 2025.0.x。 |
+| Spring Security | Boot 管理，6.5.x | 不单独覆盖 Boot 管理版本。 |
+| OAuth2 | Authorization Server + Resource Server | security 模块提供基础设施，不提供业务登录系统。 |
+| Token | JWT + JWK | 支持签发、验签、密钥轮换预留。 |
+| MyBatis-Plus | 3.5.16 | 使用 `mybatis-plus-spring-boot3-starter`。 |
+| dynamic-datasource | Spring Boot 3 starter | 配置级多数据源切换。 |
+| Redis Server | 7.2.7 可用 | 服务端可保留；客户端版本跟随 Spring Boot 管理。 |
+| Redis Client | Boot 管理 | 默认 Spring Data Redis + Lettuce，不手动指定 Lettuce/Jedis 版本。 |
+| Seata | 2.5.0 优先 / 2.6.0 可选 | 使用 SCA BOM 时优先 2.5.0；独立接入时可评估 2.6.0。 |
+| RocketMQ Server | 5.3.1 优先 | 跟随 SCA 2025.0.0.0 组件关系。 |
+| RocketMQ Spring Boot Starter | 2.3.4 | 不走 SCA starter 管理时的直接依赖选择；升级需单独验证兼容性。 |
+| OpenFeign | Spring Cloud 2025.0.2 管理 | 仅通过 cloud adapter 可选启用。 |
+| Spring Cloud LoadBalancer | Spring Cloud 2025.0.2 管理 | 仅提供负载均衡抽象和默认集成。 |
+| Resilience4j | Spring Cloud 2025.0.2 管理 | 用于熔断、限流、重试等微服务韧性能力。 |
+| Flyway | Boot 管理 | 只提供迁移规范和测试约束。 |
+| H2 / Testcontainers | Boot 管理 | 用于模块测试和兼容性验证。 |
+| springdoc OpenAPI | 2.8.x | 由 BOM 统一管理。 |
+| Lombok / MapStruct | BOM 管理 | 只用于减少样板代码和模型转换。 |
 
 ## 4. 强制读取文档
 
 任何后端开发任务必须先读取：
 
-- `docs/00-positioning.md`
-- `docs/01-architecture.md`
-- `docs/02-module-boundary.md`
-- `docs/03-package-rules.md`
-- `docs/04-database-rules.md`
-- `docs/05-api-rules.md`
-- `docs/06-security-rules.md`
-- `docs/07-test-rules.md`
-- `docs/08-ai-development-rules.md`
+- `docs/01-项目定位与边界.md`
+- `docs/02-总体架构设计.md`
+- `docs/03-核心链路设计.md`
+- `docs/04-技术复杂点.md`
+- `docs/05-面试表达.md`
+- `docs/06-待补充问题.md`
+- `docs/22-基座与业务域边界设计.md`
+- `docs/23-工程结构与模块边界设计.md`
+- `docs/25-开发前技术决策记录.md`
+- `docs/26-工程初始化实施清单.md`
 
 涉及 MyBatis-Plus 或动态数据源必须读取：
 
 - `skills/synapse-data/SKILL.md`
 
-涉及 Redis、缓存、分布式锁或限流必须读取：
+涉及 Redis、缓存、分布式锁、幂等或限流必须读取：
 
 - `skills/synapse-cache/SKILL.md`
 
-涉及 OAuth2、JWT、资源服务器或权限认证必须读取：
+涉及 OAuth2、JWT、JWK、资源服务器或权限基础设施必须读取：
 
 - `skills/synapse-security/SKILL.md`
 
-涉及前端后台页面必须读取：
-
-- `skills/synapse-vue-admin/SKILL.md`
-
-涉及测试必须读取：
-
-- `skills/synapse-test-engineering/SKILL.md`
+涉及测试必须读取对应模块 Skill；若存在测试工程 Skill，也必须读取。
 
 ## 5. 架构硬约束
 
-### 5.1 禁止 Controller 直接访问持久化层
+### 5.1 禁止把业务代码放进框架仓库
 
-禁止：
+禁止在本仓库新增：
 
-```java
-@RestController
-class UserController {
-    private final UserMapper userMapper;
-}
+- 业务 Controller。
+- 业务 Application Service。
+- 业务 Domain Model。
+- 业务 Entity / Mapper / migration。
+- 业务启动类，如 `XxxApplication`。
+- Admin UI、业务页面或前端应用。
+- 示例应用模块。
+
+允许：
+
+- 技术模块的自动配置。
+- 技术模块的属性类。
+- 技术模块的 SPI / Port / Adapter。
+- 技术模块测试用的 test fixture、test application、test configuration。
+
+### 5.2 框架模块只能提供技术能力
+
+框架模块可以提供：
+
+```text
+Web response / exception / trace / validation
+Data dialect / MyBatis-Plus configuration / datasource abstraction
+Cache / lock / rate limit / idempotency
+Security resource protection / token infrastructure / permission abstraction
+Audit event / audit publisher / audit repository port
+Tenant context / tenant resolver / tenant propagation
+Message abstraction / producer-consumer SPI / RocketMQ adapter
+File storage abstraction / local-minio-oss adapter
+Task scheduling abstraction / execution record SPI
+Cloud client abstraction / service discovery / remote call / resilience / config refresh
+Starter auto-configuration / feature switch
 ```
 
-必须：
+框架模块不得沉淀具体业务语义，如用户、角色、菜单、组织、字典、订单、工单、客户、库存。
+
+### 5.3 分层规则只约束消费方和可选 adapter
+
+当本仓库提供 adapter 或生成规则时，必须保持：
 
 ```text
 Controller -> Application Service -> Domain/Repository Port -> Repository Adapter -> Mapper
 ```
 
-### 5.2 禁止 Domain Model 依赖 MyBatis-Plus
-
-MyBatis-Plus 允许按官方最佳实践完整使用，包括 `IService`、`ServiceImpl` 和 ActiveRecord。
-
 边界要求：
 
+- Controller 不直接依赖 Mapper。
 - Entity、Mapper、ServiceImpl、ActiveRecord 模型属于持久化实现，不允许直接暴露给 Controller 或前端。
 - Domain Model 如独立存在，不承载 MyBatis-Plus 注解和持久化行为。
-- 业务 API 返回对象必须是 response/result DTO，不直接返回 Entity。
+- API 返回对象必须是 response/result DTO，不直接返回 Entity。
 
-### 5.3 Entity 只允许存在于 infrastructure.persistence.entity
+### 5.4 Entity 只允许存在于 persistence entity 包
 
-MyBatis-Plus Entity 是持久化模型，不是领域模型，不允许直接暴露给 Controller 或前端。
+MyBatis-Plus Entity 是持久化模型，不是领域模型。
 
-### 5.4 Repository Port 与 Adapter 必须分离
+推荐包：
 
-- Port：`domain.repository`
+- Port：`domain.repository` 或模块暴露的 `port`
 - Adapter：`infrastructure.persistence.repository`
 - Mapper：`infrastructure.persistence.mapper`
 - Entity：`infrastructure.persistence.entity`
@@ -131,25 +164,34 @@ MyBatis-Plus Entity 是持久化模型，不是领域模型，不允许直接暴
 
 每次实现前，Agent 必须先输出：
 
-1. 本次涉及哪些模块？
-2. 本次涉及哪些表？
-3. 是否新增数据库 migration？
-4. Entity 放在哪个包？
-5. Mapper 放在哪个包？
-6. Repository Port 放在哪个包？
-7. Repository Adapter 放在哪个包？
-8. 是否会使用 JdbcTemplate？
-9. 是否会使用 JdbcClient？
-10. 是否会使用 java.sql？
-11. 是否会使用 IService / ServiceImpl？
-12. 是否会使用 ActiveRecord Model<T>，边界如何控制？
-13. 是否会让 MyBatis-Plus 模型直接暴露到 Controller 或前端？
-14. 是否会让 Controller 直接依赖 Mapper？
-15. 需要补充哪些测试？
+1. 本次目标是什么？
+2. 本次涉及哪些模块？
+3. 会修改哪些文件或目录？
+4. 明确不会修改哪些内容？
+5. 是否新增生产依赖？
+6. 是否新增启动类或示例应用？
+7. 是否引入业务概念、业务表或业务接口？
+8. 是否新增数据库 migration？
+9. Entity 放在哪个包？
+10. Mapper 放在哪个包？
+11. Repository Port 放在哪个包？
+12. Repository Adapter 放在哪个包？
+13. 是否会使用 JdbcTemplate？
+14. 是否会使用 JdbcClient？
+15. 是否会使用 java.sql？
+16. 是否会使用 IService / ServiceImpl？
+17. 是否会使用 ActiveRecord Model<T>，边界如何控制？
+18. 是否会让 MyBatis-Plus 模型直接暴露到 Controller 或前端？
+19. 是否会让 Controller 直接依赖 Mapper？
+20. 需要执行哪些验证命令？
 
-## 6.1 模块完成后的 Skill 交付规则
+## 7. 模块完成后的 Skill 交付规则
 
-每完成一个模块并通过测试后，必须为该模块沉淀 `skills/<module-name>/SKILL.md`。
+每完成一个技术模块并通过测试后，必须新增或更新：
+
+```text
+skills/<module-name>/SKILL.md
+```
 
 要求：
 
@@ -159,50 +201,79 @@ MyBatis-Plus Entity 是持久化模型，不是领域模型，不允许直接暴
 - 后续同类模块开发前，Agent 必须先读取对应 `SKILL.md`。
 - 如果实现过程中发现原 Skill 规则不适用，必须先说明原因，再更新 Skill。
 
-## 7. 测试要求
+## 8. 测试要求
 
-每个模块至少覆盖：
+每个技术模块至少覆盖：
 
-- 正常流程
-- 参数为空
-- 参数非法
-- 权限不足
-- 数据不存在
-- 重复提交
-- 并发更新冲突
-- 多租户隔离预留
-- 数据权限越权预留
-- 审计日志写入
+- 正常流程。
+- 参数为空。
+- 参数非法。
+- 自动配置启用。
+- 自动配置关闭。
+- 缺少依赖时不误装配。
+- 多实例或并发场景。
+- 异常传播和错误码。
+- 与 Spring Boot 条件装配兼容。
+- 与消费方可覆盖配置兼容。
 
-## 8. 输出要求
+涉及安全、租户、数据权限、审计、缓存、消息、文件、任务时，必须补充对应边界测试。
+
+## 9. 输出要求
 
 任务完成后必须输出：
 
-1. 修改文件列表
-2. 新增文件列表
-3. 删除文件列表
-4. 测试命令
-5. 测试结果
-6. 设计取舍
-7. 风险点
-8. 后续建议
+1. 修改文件列表。
+2. 新增文件列表。
+3. 删除文件列表。
+4. 核心实现说明。
+5. 执行过的验证命令。
+6. 验证结果。
+7. 未完成事项。
+8. 风险点。
 
-## 9. 禁止行为
+## 10. 禁止行为
 
 - 禁止大范围重构无关代码。
 - 禁止为了测试通过降低测试标准。
 - 禁止吞异常。
 - 禁止返回 `null` 表示错误。
-- 禁止绕过权限校验。
+- 禁止绕过安全校验。
 - 禁止直接复制开源框架源码。
 - 禁止把业务模块代码放进框架基础模块。
 - 禁止把临时实验代码提交到主模块。
+- 禁止新增启动应用、示例应用或 Admin UI。
 - 禁止使用宽泛的 `catch (Exception e)` 后只打印日志不处理。
 
-## 10. 默认开发原则
+## 11. 代码注释要求
+
+框架代码必须补充必要注释，但禁止为了显得完整而机械注释。
+
+必须注释：
+
+- 对外公开的 SPI、Port、Annotation、AutoConfiguration、Properties。
+- 会被消费方直接依赖的公共类和公共方法。
+- 复杂算法、并发控制、Lua 脚本、缓存一致性、幂等、限流、重试、熔断、事务边界。
+- 安全、租户、数据权限、审计、Trace 等容易误用的边界。
+- 非显而易见的设计取舍、兼容性处理和降级策略。
+
+注释要求：
+
+- 优先使用中文，除非文件已有英文注释约定。
+- 公共 API 优先使用 Javadoc。
+- 普通实现只在必要处写短注释。
+- 注释说明“为什么”和“边界”，不要重复代码在做什么。
+
+禁止：
+
+- 给 getter/setter、简单赋值、显而易见分支写噪音注释。
+- 注释与代码行为不一致。
+- 用注释掩盖临时实现或未完成逻辑。
+
+## 12. 默认开发原则
 
 - 正确性优先于速度。
 - 可维护性优先于炫技。
 - 框架边界优先于功能堆叠。
+- 技术底座优先于业务闭环。
 - 先有规则，再写代码。
-- 先做最小闭环，再做扩展能力。
+- 先做最小技术闭环，再做扩展能力。

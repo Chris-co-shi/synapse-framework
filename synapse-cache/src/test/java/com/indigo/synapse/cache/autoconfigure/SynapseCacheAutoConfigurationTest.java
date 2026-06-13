@@ -1,7 +1,11 @@
 package com.indigo.synapse.cache.autoconfigure;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.indigo.synapse.cache.CacheClient;
 import com.indigo.synapse.cache.CacheSpec;
+import com.indigo.synapse.cache.CacheValueCodec;
+import com.indigo.synapse.cache.idempotency.IdempotencyGuard;
 import com.indigo.synapse.cache.lock.RedisReentrantLock;
 import com.indigo.synapse.cache.local.LocalCacheStore;
 import com.indigo.synapse.cache.ratelimit.SlidingWindowRateLimiter;
@@ -21,6 +25,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SynapseCacheAutoConfigurationTest {
 
@@ -39,6 +44,7 @@ class SynapseCacheAutoConfigurationTest {
             assertNotNull(context.getBean(RedisCacheStore.class));
             assertNotNull(context.getBean(LocalCacheStore.class));
             assertNotNull(context.getBean(CacheClient.class));
+            assertNotNull(context.getBean(IdempotencyGuard.class));
         });
     }
 
@@ -50,6 +56,25 @@ class SynapseCacheAutoConfigurationTest {
                     assertFalse(context.containsBean("synapseLocalCacheStore"));
                     assertNotNull(context.getBean(CacheClient.class));
                 });
+    }
+
+    @Test
+    void shouldReuseObjectMapperFromApplicationContext() {
+        ObjectMapper objectMapper = new ObjectMapper()
+                .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+
+        contextRunner
+                .withBean(ObjectMapper.class, () -> objectMapper)
+                .run(context -> {
+                    assertNotNull(context.getBean(ObjectMapper.class));
+
+                    String encoded = context.getBean(CacheValueCodec.class).encode(new CacheJsonSample("value"));
+
+                    assertTrue(encoded.contains("\"some_value\":\"value\""));
+                });
+    }
+
+    private record CacheJsonSample(String someValue) {
     }
 
     private static final class TestRedisConnectionFactory implements RedisConnectionFactory {

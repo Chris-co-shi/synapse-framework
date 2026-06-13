@@ -1,6 +1,6 @@
 package com.indigo.synapse.audit;
 
-import com.indigo.synapse.common.CommonModule;
+import com.indigo.synapse.common.CoreModule;
 
 public final class AuditModule {
 
@@ -10,6 +10,6 @@ public final class AuditModule {
     }
 
     public static String dependsOn() {
-        return CommonModule.NAME;
+        return CoreModule.NAME;
     }
 }

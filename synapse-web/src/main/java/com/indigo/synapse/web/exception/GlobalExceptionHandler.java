@@ -1,7 +1,7 @@
 package com.indigo.synapse.web.exception;
 
-import com.indigo.synapse.common.exception.BusinessException;
-import com.indigo.synapse.web.response.ApiResponse;
+import com.indigo.synapse.common.exception.SynapseException;
+import com.indigo.synapse.web.response.Result;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -16,58 +16,58 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException exception) {
+    @ExceptionHandler(SynapseException.class)
+    public ResponseEntity<Result<Void>> handleBusinessException(SynapseException exception) {
         return response(WebExceptionResponseFactory.mvc(exception));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException(
+    public ResponseEntity<Result<Void>> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException exception) {
         return response(WebExceptionResponseFactory.validation(WebExceptionResponseFactory.MVC_STACK));
     }
 
     @ExceptionHandler(BindException.class)
-    public ResponseEntity<ApiResponse<Void>> handleBindException(BindException exception) {
+    public ResponseEntity<Result<Void>> handleBindException(BindException exception) {
         return response(WebExceptionResponseFactory.validation(WebExceptionResponseFactory.MVC_STACK));
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMissingServletRequestParameterException(
+    public ResponseEntity<Result<Void>> handleMissingServletRequestParameterException(
             MissingServletRequestParameterException exception) {
         return response(WebExceptionResponseFactory.validation(WebExceptionResponseFactory.MVC_STACK));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatchException(
+    public ResponseEntity<Result<Void>> handleMethodArgumentTypeMismatchException(
             MethodArgumentTypeMismatchException exception) {
         return response(WebExceptionResponseFactory.validation(WebExceptionResponseFactory.MVC_STACK));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ApiResponse<Void>> handleConstraintViolationException(
+    public ResponseEntity<Result<Void>> handleConstraintViolationException(
             ConstraintViolationException exception) {
         return response(WebExceptionResponseFactory.validation(WebExceptionResponseFactory.MVC_STACK));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ApiResponse<Void>> handleHttpRequestMethodNotSupportedException(
+    public ResponseEntity<Result<Void>> handleHttpRequestMethodNotSupportedException(
             HttpRequestMethodNotSupportedException exception) {
         return response(WebExceptionResponseFactory.mvc(exception));
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public ResponseEntity<ApiResponse<Void>> handleHttpMediaTypeNotSupportedException(
+    public ResponseEntity<Result<Void>> handleHttpMediaTypeNotSupportedException(
             HttpMediaTypeNotSupportedException exception) {
         return response(WebExceptionResponseFactory.mvc(exception));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleException(Exception exception) {
+    public ResponseEntity<Result<Void>> handleException(Exception exception) {
         return response(WebExceptionResponseFactory.mvc(exception));
     }
 
-    private ResponseEntity<ApiResponse<Void>> response(WebErrorResponse response) {
+    private ResponseEntity<Result<Void>> response(WebErrorResponse response) {
         return ResponseEntity.status(response.status())
                 .body(response.body());
     }

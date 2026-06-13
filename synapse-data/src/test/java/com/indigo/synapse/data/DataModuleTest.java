@@ -8,6 +8,6 @@ class DataModuleTest {
 
     @Test
     void shouldDependOnCommonModule() {
-        assertEquals("synapse-common", DataModule.dependsOn());
+        assertEquals("synapse-core", DataModule.dependsOn());
     }
 }

@@ -8,6 +8,6 @@ class SecurityModuleTest {
 
     @Test
     void shouldDependOnCommonModule() {
-        assertEquals("synapse-common", SecurityModule.dependsOn());
+        assertEquals("synapse-core", SecurityModule.dependsOn());
     }
 }

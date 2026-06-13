@@ -20,7 +20,8 @@ public final class WebFluxTraceWebFilter implements WebFilter {
         );
         exchange.getResponse().getHeaders().set(TraceHeaders.TRACE_ID, requestContext.traceId());
         return chain.filter(exchange)
-                .doFinally(signalType -> WebTraceLifecycle.end());
+                .doFinally(signalType -> WebTraceLifecycle.end())
+                .contextWrite(context -> context.put(TraceMdc.REACTOR_TRACE_ID_KEY, requestContext.traceId()));
     }
 
     private static String remoteAddress(ServerHttpRequest request) {

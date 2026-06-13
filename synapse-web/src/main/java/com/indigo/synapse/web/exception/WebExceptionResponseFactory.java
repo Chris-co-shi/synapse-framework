@@ -2,8 +2,8 @@ package com.indigo.synapse.web.exception;
 
 import com.indigo.synapse.common.error.CommonErrorCode;
 import com.indigo.synapse.common.error.ErrorCode;
-import com.indigo.synapse.common.exception.BusinessException;
-import com.indigo.synapse.web.response.ApiResponse;
+import com.indigo.synapse.common.exception.SynapseException;
+import com.indigo.synapse.web.response.Result;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -30,8 +30,8 @@ public final class WebExceptionResponseFactory {
     }
 
     public static WebErrorResponse from(String stack, Throwable throwable) {
-        if (throwable instanceof BusinessException businessException) {
-            return business(stack, businessException);
+        if (throwable instanceof SynapseException synapseException) {
+            return business(stack, synapseException);
         }
         if (throwable instanceof MissingServletRequestParameterException
                 || throwable instanceof MethodArgumentTypeMismatchException) {
@@ -66,12 +66,12 @@ public final class WebExceptionResponseFactory {
         return error(stack, CommonErrorCode.COMMON_BAD_REQUEST, CommonErrorCode.COMMON_BAD_REQUEST.message());
     }
 
-    private static WebErrorResponse business(String stack, BusinessException exception) {
+    private static WebErrorResponse business(String stack, SynapseException exception) {
         ErrorCode errorCode = exception.errorCode();
         return error(stack, errorCode, exception.getMessage());
     }
 
     private static WebErrorResponse error(String stack, ErrorCode errorCode, String message) {
-        return new WebErrorResponse(stack, errorCode.httpStatus(), ApiResponse.fail(errorCode, message));
+        return new WebErrorResponse(stack, errorCode.httpStatus(), Result.fail(errorCode, message));
     }
 }

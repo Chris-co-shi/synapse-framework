@@ -1,13 +1,22 @@
 package com.indigo.synapse.web.autoconfigure;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indigo.synapse.web.openapi.OpenApiProperties;
 import com.indigo.synapse.web.openapi.OpenApiVisibilityPolicy;
+import com.indigo.synapse.web.json.SynapseObjectMapperFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 
-@AutoConfiguration
+@AutoConfiguration(beforeName = "org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration")
 public class SynapseWebAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ObjectMapper synapseObjectMapper() {
+        return SynapseObjectMapperFactory.create();
+    }
 
     @Bean
     public OpenApiProperties synapseOpenApiProperties(Environment environment) {

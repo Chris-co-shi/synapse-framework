@@ -1,9 +1,12 @@
 package com.indigo.synapse.data.dialect;
 
+import com.indigo.synapse.data.json.JsonStorageType;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class StandardDatabaseDialectTest {
 
@@ -13,6 +16,8 @@ class StandardDatabaseDialectTest {
 
         assertTrue(dialect.supportsPartialIndex());
         assertTrue(dialect.supportsJsonColumn());
+        assertEquals("json", dialect.jsonColumnType(JsonStorageType.JSON));
+        assertEquals("jsonb", dialect.jsonColumnType(JsonStorageType.JSONB));
     }
 
     @Test
@@ -21,6 +26,8 @@ class StandardDatabaseDialectTest {
 
         assertFalse(dialect.supportsPartialIndex());
         assertTrue(dialect.supportsJsonColumn());
+        assertEquals("json", dialect.jsonColumnType(JsonStorageType.JSON));
+        assertEquals("json", dialect.jsonColumnType(JsonStorageType.JSONB));
     }
 
     @Test
@@ -29,5 +36,6 @@ class StandardDatabaseDialectTest {
 
         assertFalse(dialect.supportsPartialIndex());
         assertFalse(dialect.supportsJsonColumn());
+        assertThrows(UnsupportedOperationException.class, () -> dialect.jsonColumnType(JsonStorageType.JSON));
     }
 }

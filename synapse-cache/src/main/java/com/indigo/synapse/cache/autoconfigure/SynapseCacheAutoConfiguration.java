@@ -6,6 +6,8 @@ import com.indigo.synapse.cache.CacheSpec;
 import com.indigo.synapse.cache.CacheValueCodec;
 import com.indigo.synapse.cache.DefaultCacheValueCodec;
 import com.indigo.synapse.cache.TieredCacheClient;
+import com.indigo.synapse.cache.idempotency.IdempotencyGuard;
+import com.indigo.synapse.cache.idempotency.RedisIdempotencyGuard;
 import com.indigo.synapse.cache.local.CaffeineLocalCacheStore;
 import com.indigo.synapse.cache.local.LocalCacheStore;
 import com.indigo.synapse.cache.lock.RedisReentrantLock;
@@ -79,6 +81,12 @@ public class SynapseCacheAutoConfiguration {
     @ConditionalOnMissingBean
     public SlidingWindowRateLimiter synapseSlidingWindowRateLimiter(RedisScriptExecutor redisScriptExecutor) {
         return new SlidingWindowRateLimiter(redisScriptExecutor);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IdempotencyGuard synapseIdempotencyGuard(StringRedisTemplate stringRedisTemplate) {
+        return new RedisIdempotencyGuard(stringRedisTemplate);
     }
 
     @Bean

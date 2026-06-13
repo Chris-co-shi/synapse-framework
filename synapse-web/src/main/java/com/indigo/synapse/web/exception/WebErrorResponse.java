@@ -1,8 +1,8 @@
 package com.indigo.synapse.web.exception;
 
-import com.indigo.synapse.web.response.ApiResponse;
+import com.indigo.synapse.web.response.Result;
 
-public record WebErrorResponse(String stack, int status, ApiResponse<Void> body) {
+public record WebErrorResponse(String stack, int status, Result<Void> body) {
 
     public WebErrorResponse {
         if (stack == null || stack.isBlank()) {

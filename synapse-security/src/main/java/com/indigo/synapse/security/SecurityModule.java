@@ -1,6 +1,6 @@
 package com.indigo.synapse.security;
 
-import com.indigo.synapse.common.CommonModule;
+import com.indigo.synapse.common.CoreModule;
 
 public final class SecurityModule {
 
@@ -10,6 +10,6 @@ public final class SecurityModule {
     }
 
     public static String dependsOn() {
-        return CommonModule.NAME;
+        return CoreModule.NAME;
     }
 }

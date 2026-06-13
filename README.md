@@ -33,7 +33,7 @@ synapse-framework
 │   ├── 10-technical-foundation-baseline.md
 │   └── benchmark
 ├── skills
-│   ├── synapse-common
+│   ├── synapse-core
 │   ├── synapse-web
 │   ├── synapse-data
 │   ├── synapse-cache

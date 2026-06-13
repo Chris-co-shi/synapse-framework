@@ -9,15 +9,19 @@
         <artifactId>synapse-framework</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
-
     <artifactId>synapse-web</artifactId>
-
+    <packaging>jar</packaging>
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.indigo.synapse</groupId>
                 <artifactId>synapse-bom</artifactId>
-                <version>${project.version}</version>
+                <version>0.1.0-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -27,8 +31,20 @@
     <dependencies>
         <dependency>
             <groupId>com.indigo.synapse</groupId>
-            <artifactId>synapse-common</artifactId>
-            <version>${project.version}</version>
+            <artifactId>synapse-core</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -75,10 +91,22 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/chris-co-shi/synapse-framework</url>
+        </repository>
+    </distributionManagement>
 </project>

@@ -21,11 +21,13 @@ class WebTraceLifecycleTest {
 
         assertEquals("trace-1", context.traceId());
         assertEquals("trace-1", TraceContext.currentTraceId().orElseThrow());
+        assertEquals("trace-1", TraceMdc.currentTraceId().orElseThrow());
         assertEquals(context, RequestContextHolder.current().orElseThrow());
 
         WebTraceLifecycle.end();
 
         assertTrue(TraceContext.currentTraceId().isEmpty());
+        assertTrue(TraceMdc.currentTraceId().isEmpty());
         assertTrue(RequestContextHolder.current().isEmpty());
     }
 }

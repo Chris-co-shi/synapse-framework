@@ -3,21 +3,20 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>com.indigo.synapse</groupId>
         <artifactId>synapse-framework</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
-
     <artifactId>synapse-audit</artifactId>
+    <packaging>jar</packaging>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.indigo.synapse</groupId>
                 <artifactId>synapse-bom</artifactId>
-                <version>${project.version}</version>
+                <version>0.1.0-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -27,8 +26,17 @@
     <dependencies>
         <dependency>
             <groupId>com.indigo.synapse</groupId>
-            <artifactId>synapse-common</artifactId>
-            <version>${project.version}</version>
+            <artifactId>synapse-core</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.indigo.synapse</groupId>
+            <artifactId>synapse-data</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -55,4 +63,11 @@
         </dependency>
     </dependencies>
 
+<!--    <distributionManagement>-->
+<!--        <repository>-->
+<!--            <id>github</id>-->
+<!--            <name>GitHub Packages</name>-->
+<!--            <url>https://maven.pkg.github.com/chris-co-shi/synapse-framework</url>-->
+<!--        </repository>-->
+<!--    </distributionManagement>-->
 </project>

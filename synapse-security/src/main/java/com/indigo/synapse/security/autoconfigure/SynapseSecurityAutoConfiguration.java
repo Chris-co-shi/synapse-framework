@@ -3,7 +3,6 @@ package com.indigo.synapse.security.autoconfigure;
 import com.indigo.synapse.security.jwk.SecurityKeyPolicy;
 import com.indigo.synapse.security.jwk.SynapseRsaKeyFactory;
 import com.indigo.synapse.security.jwt.SynapseJwtService;
-import com.indigo.synapse.security.oauth2.InMemoryRegisteredClientRepository;
 import com.indigo.synapse.security.oauth2.OAuth2PublicEndpointPolicy;
 import com.indigo.synapse.security.password.SynapsePasswordEncoderFactory;
 import com.indigo.synapse.security.token.NoopTokenDenylistPort;
@@ -27,13 +26,13 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationConsentService;
-import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
-import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+//import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationConsentService;
+//import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationService;
+//import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
+//import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+//import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+//import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+//import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.web.SecurityFilterChain;
 
 @AutoConfiguration
@@ -81,34 +80,34 @@ public class SynapseSecurityAutoConfiguration {
         return SynapsePasswordEncoderFactory.bcrypt();
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public AuthorizationServerSettings synapseAuthorizationServerSettings(SynapseSecurityProperties properties) {
-        return AuthorizationServerSettings.builder()
-                .issuer(properties.getIssuer())
-                .build();
-    }
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public AuthorizationServerSettings synapseAuthorizationServerSettings(SynapseSecurityProperties properties) {
+//        return AuthorizationServerSettings.builder()
+//                .issuer(properties.getIssuer())
+//                .build();
+//    }
+//
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public RegisteredClientRepository synapseRegisteredClientRepository(SynapseSecurityProperties properties) {
+//        if (properties.isProduction()) {
+//            throw new IllegalStateException("production registered client repository must be provided by the application");
+//        }
+//        return new InMemoryRegisteredClientRepository();
+//    }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public RegisteredClientRepository synapseRegisteredClientRepository(SynapseSecurityProperties properties) {
-        if (properties.isProduction()) {
-            throw new IllegalStateException("production registered client repository must be provided by the application");
-        }
-        return new InMemoryRegisteredClientRepository();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public OAuth2AuthorizationService synapseOAuth2AuthorizationService(RegisteredClientRepository registeredClientRepository) {
-        return new InMemoryOAuth2AuthorizationService();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public OAuth2AuthorizationConsentService synapseOAuth2AuthorizationConsentService(RegisteredClientRepository registeredClientRepository) {
-        return new InMemoryOAuth2AuthorizationConsentService();
-    }
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public OAuth2AuthorizationService synapseOAuth2AuthorizationService(RegisteredClientRepository registeredClientRepository) {
+//        return new InMemoryOAuth2AuthorizationService();
+//    }
+//
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public OAuth2AuthorizationConsentService synapseOAuth2AuthorizationConsentService(RegisteredClientRepository registeredClientRepository) {
+//        return new InMemoryOAuth2AuthorizationConsentService();
+//    }
 
     @Bean
     @ConditionalOnMissingBean(TokenDenylistPort.class)
@@ -119,16 +118,16 @@ public class SynapseSecurityAutoConfiguration {
         return new NoopTokenDenylistPort();
     }
 
-    @Bean
-    @Order(1)
-    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    @ConditionalOnMissingBean(name = "synapseAuthorizationServerSecurityFilterChain")
-    public SecurityFilterChain synapseAuthorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = OAuth2AuthorizationServerConfigurer.authorizationServer();
-        http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
-                .with(authorizationServerConfigurer, Customizer.withDefaults());
-        return http.build();
-    }
+//    @Bean
+//    @Order(1)
+//    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+//    @ConditionalOnMissingBean(name = "synapseAuthorizationServerSecurityFilterChain")
+//    public SecurityFilterChain synapseAuthorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
+//        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = OAuth2AuthorizationServerConfigurer.authorizationServer();
+//        http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
+//                .with(authorizationServerConfigurer, Customizer.withDefaults());
+//        return http.build();
+//    }
 
     @Bean
     @Order(2)

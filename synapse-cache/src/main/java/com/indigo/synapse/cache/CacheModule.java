@@ -1,6 +1,6 @@
 package com.indigo.synapse.cache;
 
-import com.indigo.synapse.common.CommonModule;
+import com.indigo.synapse.common.CoreModule;
 
 public final class CacheModule {
 
@@ -10,6 +10,6 @@ public final class CacheModule {
     }
 
     public static String dependsOn() {
-        return CommonModule.NAME;
+        return CoreModule.NAME;
     }
 }

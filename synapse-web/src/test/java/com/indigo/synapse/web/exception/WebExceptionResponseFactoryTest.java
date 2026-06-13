@@ -1,7 +1,7 @@
 package com.indigo.synapse.web.exception;
 
 import com.indigo.synapse.common.error.CommonErrorCode;
-import com.indigo.synapse.common.exception.BusinessException;
+import com.indigo.synapse.common.exception.SynapseException;
 import com.indigo.synapse.web.trace.TraceContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class WebExceptionResponseFactoryTest {
     @Test
     void shouldCreateSameBusinessResponseForMvcAndWebFlux() {
         TraceContext.setTraceId("trace-same");
-        BusinessException exception = new BusinessException(CommonErrorCode.COMMON_CONFLICT, "版本冲突");
+        SynapseException exception = new SynapseException(CommonErrorCode.COMMON_CONFLICT, "版本冲突");
 
         WebErrorResponse mvc = WebExceptionResponseFactory.mvc(exception);
         WebErrorResponse webflux = WebExceptionResponseFactory.webflux(exception);

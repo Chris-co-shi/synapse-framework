@@ -8,6 +8,6 @@ class WebModuleTest {
 
     @Test
     void shouldDependOnCommonModule() {
-        assertEquals("synapse-common", WebModule.dependsOn());
+        assertEquals("synapse-core", WebModule.dependsOn());
     }
 }

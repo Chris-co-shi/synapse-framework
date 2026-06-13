@@ -8,6 +8,8 @@ import org.springframework.mock.web.server.MockServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -24,12 +26,18 @@ class WebFluxTraceWebFilterTest {
                 MockServerHttpRequest.get("/api/admin/users")
                         .header(TraceHeaders.TRACE_ID, "trace-webflux")
         );
-        WebFilterChain chain = serverWebExchange -> Mono.empty();
+        AtomicReference<String> reactorTraceId = new AtomicReference<>();
+        WebFilterChain chain = serverWebExchange -> Mono.deferContextual(contextView -> {
+            reactorTraceId.set(contextView.get(TraceMdc.REACTOR_TRACE_ID_KEY));
+            return Mono.empty();
+        });
 
         new WebFluxTraceWebFilter().filter(exchange, chain).block();
 
         assertEquals("trace-webflux", exchange.getResponse().getHeaders().getFirst(TraceHeaders.TRACE_ID));
+        assertEquals("trace-webflux", reactorTraceId.get());
         assertTrue(TraceContext.currentTraceId().isEmpty());
+        assertTrue(TraceMdc.currentTraceId().isEmpty());
         assertTrue(RequestContextHolder.current().isEmpty());
     }
 }

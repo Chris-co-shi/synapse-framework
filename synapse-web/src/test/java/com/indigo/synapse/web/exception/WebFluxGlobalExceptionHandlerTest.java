@@ -1,8 +1,8 @@
 package com.indigo.synapse.web.exception;
 
 import com.indigo.synapse.common.error.CommonErrorCode;
-import com.indigo.synapse.common.exception.BusinessException;
-import com.indigo.synapse.web.response.ApiResponse;
+import com.indigo.synapse.common.exception.SynapseException;
+import com.indigo.synapse.web.response.Result;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.MethodNotAllowedException;
@@ -17,8 +17,8 @@ class WebFluxGlobalExceptionHandlerTest {
 
     @Test
     void shouldHandleBusinessException() {
-        ResponseEntity<ApiResponse<Void>> response = handler.handleBusinessException(
-                new BusinessException(CommonErrorCode.COMMON_CONFLICT, "版本冲突"));
+        ResponseEntity<Result<Void>> response = handler.handleBusinessException(
+                new SynapseException(CommonErrorCode.COMMON_CONFLICT, "版本冲突"));
 
         assertEquals(409, response.getStatusCode().value());
         assertEquals("COMMON_CONFLICT", response.getBody().getCode());

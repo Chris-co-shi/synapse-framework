@@ -3,8 +3,8 @@ package com.indigo.synapse.web.exception;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.indigo.synapse.common.error.CommonErrorCode;
-import com.indigo.synapse.common.exception.BusinessException;
-import com.indigo.synapse.web.response.ApiResponse;
+import com.indigo.synapse.common.exception.SynapseException;
+import com.indigo.synapse.web.response.Result;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +24,8 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void businessExceptionShouldUseBusinessErrorCode() {
-        ResponseEntity<ApiResponse<Void>> response = handler.handleBusinessException(
-                new BusinessException(CommonErrorCode.COMMON_CONFLICT, "资源版本冲突"));
+        ResponseEntity<Result<Void>> response = handler.handleBusinessException(
+                new SynapseException(CommonErrorCode.COMMON_CONFLICT, "资源版本冲突"));
 
         assertEquals(409, response.getStatusCode().value());
         assertEquals("COMMON_CONFLICT", response.getBody().getCode());
@@ -34,7 +34,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void bindExceptionShouldReturnBadRequest() {
-        ResponseEntity<ApiResponse<Void>> response = handler.handleBindException(
+        ResponseEntity<Result<Void>> response = handler.handleBindException(
                 new BindException(new Object(), "request"));
 
         assertEquals(400, response.getStatusCode().value());
@@ -44,7 +44,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void constraintViolationExceptionShouldReturnBadRequest() {
-        ResponseEntity<ApiResponse<Void>> response = handler.handleConstraintViolationException(
+        ResponseEntity<Result<Void>> response = handler.handleConstraintViolationException(
                 new ConstraintViolationException(Set.of()));
 
         assertEquals(400, response.getStatusCode().value());
@@ -54,7 +54,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void unknownExceptionShouldReturnInternalErrorWithoutStackTrace() {
-        ResponseEntity<ApiResponse<Void>> response = handler.handleException(new IllegalStateException("boom"));
+        ResponseEntity<Result<Void>> response = handler.handleException(new IllegalStateException("boom"));
 
         assertEquals(500, response.getStatusCode().value());
         assertEquals("COMMON_INTERNAL_ERROR", response.getBody().getCode());
@@ -63,7 +63,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void missingParameterShouldReturnBadRequest() {
-        ResponseEntity<ApiResponse<Void>> response = handler.handleMissingServletRequestParameterException(
+        ResponseEntity<Result<Void>> response = handler.handleMissingServletRequestParameterException(
                 new MissingServletRequestParameterException("id", "String"));
 
         assertEquals(400, response.getStatusCode().value());
@@ -72,7 +72,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void typeMismatchShouldReturnBadRequest() {
-        ResponseEntity<ApiResponse<Void>> response = handler.handleMethodArgumentTypeMismatchException(
+        ResponseEntity<Result<Void>> response = handler.handleMethodArgumentTypeMismatchException(
                 new MethodArgumentTypeMismatchException("x", String.class, "id", methodParameter(), null));
 
         assertEquals(400, response.getStatusCode().value());
@@ -81,7 +81,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void methodNotAllowedShouldReturn405() {
-        ResponseEntity<ApiResponse<Void>> response = handler.handleHttpRequestMethodNotSupportedException(
+        ResponseEntity<Result<Void>> response = handler.handleHttpRequestMethodNotSupportedException(
                 new HttpRequestMethodNotSupportedException("POST"));
 
         assertEquals(405, response.getStatusCode().value());
@@ -90,7 +90,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void unsupportedMediaTypeShouldReturn415() {
-        ResponseEntity<ApiResponse<Void>> response = handler.handleHttpMediaTypeNotSupportedException(
+        ResponseEntity<Result<Void>> response = handler.handleHttpMediaTypeNotSupportedException(
                 new HttpMediaTypeNotSupportedException("application/x-test"));
 
         assertEquals(415, response.getStatusCode().value());
