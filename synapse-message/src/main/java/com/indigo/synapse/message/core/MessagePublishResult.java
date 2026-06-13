@@ -5,7 +5,7 @@ package com.indigo.synapse.message.core;
  *
  * @param topic 目标 topic
  * @param messageId 消息 ID
- * @param subscriberCount Redis 返回的当前在线订阅者数量
+ * @param subscriberCount 传输实现返回的当前接收方数量
  */
 public record MessagePublishResult(String topic, String messageId, long subscriberCount) {
 

@@ -1,6 +1,7 @@
 package com.indigo.synapse.message.autoconfigure;
 
-import com.indigo.synapse.message.publisher.DomainEventPublisher;
+import com.indigo.synapse.message.context.OperationContextMessageCodec;
+import com.indigo.synapse.message.context.OperationContextMessagePropagator;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -13,15 +14,24 @@ class SynapseMessageAutoConfigurationTest {
             .withConfiguration(AutoConfigurations.of(SynapseMessageAutoConfiguration.class));
 
     @Test
-    void shouldCreatePublisherByDefault() {
-        contextRunner.run(context -> assertThat(context).hasSingleBean(DomainEventPublisher.class));
+    void shouldCreateContextPropagationBeansByDefault() {
+        contextRunner.run(context -> {
+            assertThat(context).hasSingleBean(OperationContextMessageCodec.class);
+            assertThat(context).hasSingleBean(OperationContextMessagePropagator.class);
+        });
     }
 
     @Test
-    void shouldBackOffWhenApplicationProvidesPublisher() {
+    void shouldBackOffWhenApplicationProvidesContextPropagationBeans() {
+        OperationContextMessageCodec codec = new OperationContextMessageCodec();
+        OperationContextMessagePropagator propagator = new OperationContextMessagePropagator(codec);
+
         contextRunner
-                .withBean("customPublisher", DomainEventPublisher.class, () -> event -> {
-                })
-                .run(context -> assertThat(context).hasSingleBean(DomainEventPublisher.class));
+                .withBean(OperationContextMessageCodec.class, () -> codec)
+                .withBean(OperationContextMessagePropagator.class, () -> propagator)
+                .run(context -> {
+                    assertThat(context.getBean(OperationContextMessageCodec.class)).isSameAs(codec);
+                    assertThat(context.getBean(OperationContextMessagePropagator.class)).isSameAs(propagator);
+                });
     }
 }
