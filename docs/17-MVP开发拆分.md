@@ -4,7 +4,7 @@
 
 完成纯技术底座最小闭环。
 
-## 2. 第一批模块
+## 2. 一阶段固定模块
 
 - synapse-bom。
 - synapse-core。
@@ -12,17 +12,18 @@
 - synapse-data。
 - synapse-cache。
 - synapse-security。
+- synapse-oauth2。
 - synapse-audit。
-
-
-## 3. 第二批模块
-
-- synapse-tenant。
-- synapse-data-permission。
-- synapse-message。
 - synapse-file。
-- synapse-task。
-- synapse-cloud。
+- synapse-message。
+
+
+## 3. 一阶段不进入 reactor 的模块
+
+- synapse-task：一阶段移除。
+- synapse-tenant：二阶段暂不实现。
+- synapse-data-permission：二阶段暂不实现。
+- synapse-cloud：二阶段暂不实现。
 
 ## 4. 每个模块验收
 

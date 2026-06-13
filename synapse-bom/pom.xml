@@ -87,7 +87,25 @@
 
             <dependency>
                 <groupId>com.indigo.synapse</groupId>
+                <artifactId>synapse-oauth2</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.indigo.synapse</groupId>
                 <artifactId>synapse-audit</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.indigo.synapse</groupId>
+                <artifactId>synapse-file</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.indigo.synapse</groupId>
+                <artifactId>synapse-message</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

@@ -22,14 +22,11 @@
         <module>synapse-web</module>
         <module>synapse-data</module>
         <module>synapse-cache</module>
+        <module>synapse-security</module>
+        <module>synapse-oauth2</module>
+        <module>synapse-audit</module>
         <module>synapse-file</module>
         <module>synapse-message</module>
-        <module>synapse-task</module>
-        <module>synapse-data-permission</module>
-        <module>synapse-tenant</module>
-        <module>synapse-security</module>
-        <module>synapse-audit</module>
-<!--        <module>synapse-starter</module>-->
     </modules>
 
     <build>
