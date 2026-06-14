@@ -149,7 +149,7 @@ Synapse Framework
 - `synapse-mq` 不包含真实 MQ / DB / 外部渠道 SDK 实现。
 - `synapse-cache` 不包含业务缓存 key 或业务规则。
 - `synapse-file` 不包含上传下载 API、附件表或文件权限业务。
-- 全量测试与 validate 已通过。
+- 本次模块重命名后需要重新执行全量测试与 validate。
 
 ## 许可证
 
