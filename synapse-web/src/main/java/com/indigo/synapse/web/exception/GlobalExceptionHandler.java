@@ -16,6 +16,16 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+/**
+ * Servlet MVC 全局异常处理器。
+ *
+ * <p>该处理器只负责进入 DispatcherServlet 之后的异常，例如 Controller、参数绑定、消息转换、
+ * MVC 资源匹配等阶段的异常。Servlet Filter 阶段的异常由 {@link SynapseExceptionBridgeFilter}
+ * 在更外层桥接。</p>
+ *
+ * <p>本类不直接拼装错误响应，而是委托 {@link WebExceptionResponseFactory}，保证 MVC 阶段和
+ * Filter 阶段返回一致的 {@link Result} 结构。</p>
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -89,6 +99,12 @@ public class GlobalExceptionHandler {
         return response(responseFactory.mvc(exception));
     }
 
+    /**
+     * 处理未被更具体分支覆盖的异常。
+     *
+     * <p>该分支会返回通用 500 响应。新增常见 Web 异常时，应优先增加更具体映射，
+     * 避免客户端错误被误判为服务端错误。</p>
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Result<Void>> handleException(Exception exception) {
         return response(responseFactory.mvc(exception));
