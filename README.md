@@ -31,7 +31,7 @@ synapse-framework
 
 | 模块 | 定位 | 手册 |
 | --- | --- | --- |
-| `synapse-bom` | 统一依赖版本管理 | 待补充 |
+| `synapse-bom` | 统一依赖版本管理 | [查看](docs/modules/synapse-bom.md) |
 | `synapse-core` | 错误码、异常、ID、OperationContext 等核心契约 | [查看](docs/modules/synapse-core.md) |
 | `synapse-web` | Servlet MVC 响应、异常处理、Filter 异常桥接 | [查看](docs/modules/synapse-web.md) |
 | `synapse-data` | 数据层基础能力，当前聚焦 OperationContext 自动填充 | [查看](docs/modules/synapse-data.md) |
