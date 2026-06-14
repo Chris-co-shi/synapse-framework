@@ -25,25 +25,40 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 /**
  * Security 模块自动配置。
  *
- * <p>本配置只提供轻量安全上下文、密码编码器和 trusted-header Servlet Filter。
- * 它不创建 Spring Security FilterChain，也不引入资源服务器或登录能力。</p>
+ * <p>本配置只提供轻量安全上下文、密码编码器、PermissionChecker、RequirePermission AOP 适配器和
+ * trusted-header Servlet Filter。它不创建 Spring Security FilterChain，也不提供 OAuth2 Resource Server、
+ * 登录认证、授权后台或用户数据加载能力。</p>
  */
 @AutoConfiguration
 @EnableConfigurationProperties(SynapseSecurityProperties.class)
 public class SynapseSecurityAutoConfiguration {
 
+    /**
+     * 默认密码编码器。
+     *
+     * <p>仅依赖 spring-security-crypto，不引入 spring-security-web。业务系统提供 PasswordEncoder Bean 时，
+     * 默认 Bean 不覆盖。</p>
+     */
     @Bean
     @ConditionalOnMissingBean
     public PasswordEncoder synapsePasswordEncoder() {
         return SynapsePasswordEncoderFactory.bcrypt();
     }
 
+    /**
+     * 默认权限检查器。
+     */
     @Bean
     @ConditionalOnMissingBean(PermissionChecker.class)
     public PermissionChecker permissionChecker() {
         return new DefaultPermissionChecker();
     }
 
+    /**
+     * RequirePermission 声明式权限检查适配器。
+     *
+     * <p>该 Bean 只在 Spring AOP MethodInterceptor 存在、PermissionChecker 存在且注解开关开启时注册。</p>
+     */
     @Bean
     @ConditionalOnClass(MethodInterceptor.class)
     @ConditionalOnBean(PermissionChecker.class)
@@ -58,6 +73,11 @@ public class SynapseSecurityAutoConfiguration {
         return new RequirePermissionAspect(permissionChecker);
     }
 
+    /**
+     * Spring AOP 自动代理创建器。
+     *
+     * <p>只有在业务系统没有提供自己的 AutoProxyCreator 时才注册，避免覆盖消费方代理策略。</p>
+     */
     @Bean
     @ConditionalOnClass(DefaultAdvisorAutoProxyCreator.class)
     @ConditionalOnMissingBean(AbstractAutoProxyCreator.class)
@@ -71,6 +91,11 @@ public class SynapseSecurityAutoConfiguration {
         return new DefaultAdvisorAutoProxyCreator();
     }
 
+    /**
+     * trusted-header 认证 Filter。
+     *
+     * <p>该 Filter 默认不启用，必须显式配置 synapse.security.trusted-header.enabled=true。</p>
+     */
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
@@ -85,6 +110,11 @@ public class SynapseSecurityAutoConfiguration {
         );
     }
 
+    /**
+     * 注册 trusted-header 认证 Filter。
+     *
+     * <p>order=-100，预期晚于 synapse-web 的异常桥接 Filter，早于业务 Controller。</p>
+     */
     @Bean
     @ConditionalOnMissingBean(name = "trustedHeaderAuthenticationFilterRegistration")
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
