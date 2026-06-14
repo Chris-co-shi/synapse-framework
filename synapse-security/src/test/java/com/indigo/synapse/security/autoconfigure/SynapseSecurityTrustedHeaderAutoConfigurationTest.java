@@ -1,6 +1,8 @@
 package com.indigo.synapse.security.autoconfigure;
 
 import com.indigo.synapse.security.web.TrustedHeaderAuthenticationFilter;
+import com.indigo.synapse.security.permission.DefaultPermissionChecker;
+import com.indigo.synapse.security.permission.PermissionChecker;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -63,6 +65,25 @@ class SynapseSecurityTrustedHeaderAutoConfigurationTest {
         assertNotNull(filter);
         assertEquals("trustedHeaderAuthenticationFilter", registration.getFilterName());
         assertEquals(-100, registration.getOrder());
+    }
+
+    @Test
+    void shouldCreateDefaultPermissionChecker() {
+        SynapseSecurityAutoConfiguration autoConfiguration = new SynapseSecurityAutoConfiguration();
+
+        PermissionChecker permissionChecker = autoConfiguration.permissionChecker();
+
+        assertTrue(permissionChecker instanceof DefaultPermissionChecker);
+    }
+
+    @Test
+    void shouldNotOverrideCustomPermissionChecker() throws NoSuchMethodException {
+        Method permissionCheckerMethod = SynapseSecurityAutoConfiguration.class.getDeclaredMethod("permissionChecker");
+
+        ConditionalOnMissingBean conditional = permissionCheckerMethod.getAnnotation(ConditionalOnMissingBean.class);
+
+        assertNotNull(conditional);
+        assertEquals(PermissionChecker.class, conditional.value()[0]);
     }
 
     @Test

@@ -4,6 +4,8 @@ import com.indigo.synapse.security.header.TrustedHeaderAuthenticatedUserResolver
 import com.indigo.synapse.security.header.TrustedHeaderSignatureVerifier;
 import com.indigo.synapse.security.header.TrustedHeaderTimestampValidator;
 import com.indigo.synapse.security.password.SynapsePasswordEncoderFactory;
+import com.indigo.synapse.security.permission.DefaultPermissionChecker;
+import com.indigo.synapse.security.permission.PermissionChecker;
 import com.indigo.synapse.security.web.TrustedHeaderAuthenticationFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -28,6 +30,12 @@ public class SynapseSecurityAutoConfiguration {
     @ConditionalOnMissingBean
     public PasswordEncoder synapsePasswordEncoder() {
         return SynapsePasswordEncoderFactory.bcrypt();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(PermissionChecker.class)
+    public PermissionChecker permissionChecker() {
+        return new DefaultPermissionChecker();
     }
 
     @Bean
