@@ -1,26 +1,80 @@
 package com.indigo.synapse.mq.core;
 
+import java.util.Objects;
+
 /**
  * 消息消费结果。
  *
- * <p>消费方通过该结果表达本次处理是否成功，以及失败时是否建议重试。
- * 具体重试、死信和确认机制由 MQ 适配器实现。</p>
+ * <p>消费方通过该结果表达本次处理结论。
+ * 具体 ACK、重试、死信、丢弃等行为由 MQ 适配器根据状态转换。</p>
  */
 public record MessageConsumeResult(
-        boolean success,
-        boolean retryable,
+        Status status,
         String reason
 ) {
 
+    public MessageConsumeResult {
+        status = Objects.requireNonNull(status, "status must not be null");
+        reason = reason == null ? "" : reason;
+    }
+
+    /**
+     * 消费成功。
+     *
+     * <p>适配器通常应将其转换为 ACK / CONSUME_SUCCESS。</p>
+     */
     public static MessageConsumeResult success() {
-        return new MessageConsumeResult(true, false, null);
+        return new MessageConsumeResult(Status.SUCCESS, "");
     }
 
-    public static MessageConsumeResult retryableFailure(String reason) {
-        return new MessageConsumeResult(false, true, reason);
+    /**
+     * 消费失败，建议后续重试。
+     *
+     * <p>适配器通常应将其转换为 RECONSUME / retry。</p>
+     */
+    public static MessageConsumeResult retry(String reason) {
+        return new MessageConsumeResult(Status.RETRY, reason);
     }
 
-    public static MessageConsumeResult nonRetryableFailure(String reason) {
-        return new MessageConsumeResult(false, false, reason);
+    /**
+     * 消费失败，但不建议继续重试。
+     *
+     * <p>适配器可以根据自身策略选择 ACK 后记录、投递死信、告警或丢弃。</p>
+     */
+    public static MessageConsumeResult discard(String reason) {
+        return new MessageConsumeResult(Status.DISCARD, reason);
+    }
+
+    public boolean isSuccess() {
+        return status == Status.SUCCESS;
+    }
+
+    public boolean isRetryable() {
+        return status == Status.RETRY;
+    }
+
+    public boolean isDiscardable() {
+        return status == Status.DISCARD;
+    }
+
+    /**
+     * 消费处理状态。
+     */
+    public enum Status {
+
+        /**
+         * 处理成功。
+         */
+        SUCCESS,
+
+        /**
+         * 处理失败，建议重试。
+         */
+        RETRY,
+
+        /**
+         * 处理失败，不建议继续重试。
+         */
+        DISCARD
     }
 }
