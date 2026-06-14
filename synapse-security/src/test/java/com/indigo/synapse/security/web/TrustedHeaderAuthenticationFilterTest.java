@@ -10,7 +10,7 @@ import com.indigo.synapse.security.context.SecurityContext;
 import com.indigo.synapse.security.exception.SecurityErrorCode;
 import com.indigo.synapse.security.exception.SynapseAuthenticationException;
 import com.indigo.synapse.security.header.SecurityHeaders;
-import com.indigo.synapse.security.header.TrustedHeaderLoginUserResolver;
+import com.indigo.synapse.security.header.TrustedHeaderAuthenticatedUserResolver;
 import com.indigo.synapse.security.header.TrustedHeaderSignatureVerifier;
 import com.indigo.synapse.security.header.TrustedHeaderTimestampValidator;
 import jakarta.servlet.FilterChain;
@@ -176,7 +176,7 @@ class TrustedHeaderAuthenticationFilterTest {
     private static TrustedHeaderAuthenticationFilter filter(SynapseSecurityProperties properties) {
         return new TrustedHeaderAuthenticationFilter(
                 properties,
-                new TrustedHeaderLoginUserResolver(),
+                new TrustedHeaderAuthenticatedUserResolver(),
                 new TrustedHeaderSignatureVerifier(),
                 new TrustedHeaderTimestampValidator(),
                 CLOCK

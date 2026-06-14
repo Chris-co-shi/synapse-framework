@@ -7,7 +7,7 @@ import java.util.Set;
  * trusted-header 解析后的认证主体快照。
  *
  * <p>该模型只保存业务服务恢复安全上下文所需的轻量字段，不包含认证令牌、
- * 具体授权协议对象、组织部门或 ABAC 属性。</p>
+ * 具体授权协议对象、组织部门或扩展授权属性。</p>
  */
 public record TrustedHeaderPrincipal(
         String userId,

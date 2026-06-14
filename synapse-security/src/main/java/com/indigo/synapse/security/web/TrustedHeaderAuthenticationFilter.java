@@ -1,12 +1,12 @@
 package com.indigo.synapse.security.web;
 
 import com.indigo.synapse.security.autoconfigure.SynapseSecurityProperties;
-import com.indigo.synapse.security.context.LoginUser;
+import com.indigo.synapse.security.context.AuthenticatedUser;
 import com.indigo.synapse.security.context.SecurityContext;
 import com.indigo.synapse.security.exception.SecurityErrorCode;
 import com.indigo.synapse.security.exception.SynapseAuthenticationException;
 import com.indigo.synapse.security.header.SecurityHeaders;
-import com.indigo.synapse.security.header.TrustedHeaderLoginUserResolver;
+import com.indigo.synapse.security.header.TrustedHeaderAuthenticatedUserResolver;
 import com.indigo.synapse.security.header.TrustedHeaderSignatureVerifier;
 import com.indigo.synapse.security.header.TrustedHeaderTimestampValidator;
 import jakarta.servlet.Filter;
@@ -28,7 +28,7 @@ import java.util.Map;
  * 基于 trusted-header 的轻量认证 Filter。
  *
  * <p>该 Filter 面向位于 Gateway / IAM 后方的业务服务：它只恢复可信 Header 中的
- * {@link LoginUser} 并写入 {@link SecurityContext}，不做登录、不验签认证令牌、
+ * {@link AuthenticatedUser} 并写入 {@link SecurityContext}，不做登录、不验签认证令牌、
  * 不创建 Spring Security 过滤链。</p>
  */
 public class TrustedHeaderAuthenticationFilter implements Filter {
@@ -48,30 +48,30 @@ public class TrustedHeaderAuthenticationFilter implements Filter {
     );
 
     private final SynapseSecurityProperties properties;
-    private final TrustedHeaderLoginUserResolver loginUserResolver;
+    private final TrustedHeaderAuthenticatedUserResolver authenticatedUserResolver;
     private final TrustedHeaderSignatureVerifier signatureVerifier;
     private final TrustedHeaderTimestampValidator timestampValidator;
     private final Clock clock;
 
     public TrustedHeaderAuthenticationFilter(
             SynapseSecurityProperties properties,
-            TrustedHeaderLoginUserResolver loginUserResolver,
+            TrustedHeaderAuthenticatedUserResolver authenticatedUserResolver,
             TrustedHeaderSignatureVerifier signatureVerifier,
             TrustedHeaderTimestampValidator timestampValidator) {
-        this(properties, loginUserResolver, signatureVerifier, timestampValidator, Clock.systemUTC());
+        this(properties, authenticatedUserResolver, signatureVerifier, timestampValidator, Clock.systemUTC());
     }
 
     public TrustedHeaderAuthenticationFilter(
             SynapseSecurityProperties properties,
-            TrustedHeaderLoginUserResolver loginUserResolver,
+            TrustedHeaderAuthenticatedUserResolver authenticatedUserResolver,
             TrustedHeaderSignatureVerifier signatureVerifier,
             TrustedHeaderTimestampValidator timestampValidator,
             Clock clock) {
         if (properties == null) {
             throw new IllegalArgumentException("properties must not be null");
         }
-        if (loginUserResolver == null) {
-            throw new IllegalArgumentException("loginUserResolver must not be null");
+        if (authenticatedUserResolver == null) {
+            throw new IllegalArgumentException("authenticatedUserResolver must not be null");
         }
         if (signatureVerifier == null) {
             throw new IllegalArgumentException("signatureVerifier must not be null");
@@ -83,7 +83,7 @@ public class TrustedHeaderAuthenticationFilter implements Filter {
             throw new IllegalArgumentException("clock must not be null");
         }
         this.properties = properties;
-        this.loginUserResolver = loginUserResolver;
+        this.authenticatedUserResolver = authenticatedUserResolver;
         this.signatureVerifier = signatureVerifier;
         this.timestampValidator = timestampValidator;
         this.clock = clock;
@@ -121,7 +121,7 @@ public class TrustedHeaderAuthenticationFilter implements Filter {
                 && !signatureVerifier.verify(headers, trustedHeader.getSecret())) {
             throw new SynapseAuthenticationException(SecurityErrorCode.SECURITY_INVALID_SIGNATURE);
         }
-        SecurityContext.set(loginUserResolver.resolveLoginUser(headers));
+        SecurityContext.set(authenticatedUserResolver.resolveAuthenticatedUser(headers));
     }
 
     private static Map<String, String> extractTrustedHeaders(HttpServletRequest request) {

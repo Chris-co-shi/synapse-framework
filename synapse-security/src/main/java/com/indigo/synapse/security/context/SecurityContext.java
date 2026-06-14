@@ -8,24 +8,24 @@ import java.util.Optional;
 
 public final class SecurityContext {
 
-    private static final ThreadLocal<LoginUser> CURRENT_USER = new ThreadLocal<>();
+    private static final ThreadLocal<AuthenticatedUser> CURRENT_USER = new ThreadLocal<>();
     private static final ThreadLocal<OperationContextScope> OPERATION_CONTEXT_SCOPE = new ThreadLocal<>();
 
     private SecurityContext() {
     }
 
-    public static void set(LoginUser loginUser) {
-        if (loginUser == null) {
+    public static void set(AuthenticatedUser authenticatedUser) {
+        if (authenticatedUser == null) {
             clear();
             return;
         }
         closeOperationContextScope();
-        CURRENT_USER.set(loginUser);
-        OperationContext operationContext = SecurityOperationContextAdapter.toOperationContext(loginUser);
+        CURRENT_USER.set(authenticatedUser);
+        OperationContext operationContext = SecurityOperationContextAdapter.toOperationContext(authenticatedUser);
         OPERATION_CONTEXT_SCOPE.set(OperationContextHolder.scope(operationContext));
     }
 
-    public static Optional<LoginUser> currentUser() {
+    public static Optional<AuthenticatedUser> currentUser() {
         return Optional.ofNullable(CURRENT_USER.get());
     }
 

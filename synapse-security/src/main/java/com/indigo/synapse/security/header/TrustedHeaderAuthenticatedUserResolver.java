@@ -1,6 +1,6 @@
 package com.indigo.synapse.security.header;
 
-import com.indigo.synapse.security.context.LoginUser;
+import com.indigo.synapse.security.context.AuthenticatedUser;
 import com.indigo.synapse.security.exception.SecurityErrorCode;
 import com.indigo.synapse.security.exception.SynapseAuthenticationException;
 
@@ -11,12 +11,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 将 trusted-header 解析为 {@link LoginUser}。
+ * 将 trusted-header 解析为 {@link AuthenticatedUser}。
  *
  * <p>解析器只处理可信入口已经注入的 Header 快照，不查询用户、角色或权限数据源。
  * roles 和 permissions 为空时保持为空集合，不自动伪造系统角色或默认权限。</p>
  */
-public class TrustedHeaderLoginUserResolver {
+public class TrustedHeaderAuthenticatedUserResolver {
 
     /**
      * 解析 trusted-header 主体。
@@ -44,14 +44,14 @@ public class TrustedHeaderLoginUserResolver {
     }
 
     /**
-     * 解析 trusted-header 并转换为安全上下文使用的登录用户。
+     * 解析 trusted-header 并转换为安全上下文使用的已认证用户主体。
      *
      * @param headers 请求头 Map
-     * @return 登录用户
+     * @return 已认证用户主体
      */
-    public LoginUser resolveLoginUser(Map<String, String> headers) {
+    public AuthenticatedUser resolveAuthenticatedUser(Map<String, String> headers) {
         TrustedHeaderPrincipal principal = resolvePrincipal(headers);
-        return new LoginUser(
+        return new AuthenticatedUser(
                 principal.userId(),
                 principal.username(),
                 principal.tenantId(),

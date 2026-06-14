@@ -27,7 +27,7 @@ class SecurityContextTest {
 
     @Test
     void shouldStoreAndClearCurrentUser() {
-        LoginUser user = new LoginUser("1", "admin", "tenant-a", Set.of(), Set.of());
+        AuthenticatedUser user = new AuthenticatedUser("1", "admin", "tenant-a", Set.of(), Set.of());
 
         SecurityContext.set(user);
 
@@ -48,7 +48,7 @@ class SecurityContextTest {
 
     @Test
     void shouldClearWhenSetNull() {
-        SecurityContext.set(new LoginUser("1", "admin", null, Set.of(), Set.of()));
+        SecurityContext.set(new AuthenticatedUser("1", "admin", null, Set.of(), Set.of()));
 
         SecurityContext.set(null);
 
@@ -58,7 +58,7 @@ class SecurityContextTest {
 
     @Test
     void shouldClearOperationContextScopeWhenEmpty() {
-        SecurityContext.set(new LoginUser("1", "admin", null, Set.of(), Set.of()));
+        SecurityContext.set(new AuthenticatedUser("1", "admin", null, Set.of(), Set.of()));
         SecurityContext.clear();
 
         SecurityContext.clearIfEmpty();
@@ -70,7 +70,7 @@ class SecurityContextTest {
     @Test
     void shouldRestorePreviousOperationContextWhenCleared() {
         OperationContext jobContext = context(OperationActorType.JOB, "job-1");
-        LoginUser user = new LoginUser("1", "admin", "tenant-a", Set.of("ADMIN"), Set.of("system:user:list"));
+        AuthenticatedUser user = new AuthenticatedUser("1", "admin", "tenant-a", Set.of("ADMIN"), Set.of("system:user:list"));
 
         try (OperationContextScope ignored = OperationContextHolder.scope(jobContext)) {
             SecurityContext.set(user);

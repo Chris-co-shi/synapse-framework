@@ -15,10 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SecurityOperationContextAdapterTest {
 
     @Test
-    void shouldMapLoginUserToOperationActor() {
-        LoginUser loginUser = loginUser();
+    void shouldMapAuthenticatedUserToOperationActor() {
+        AuthenticatedUser authenticatedUser = authenticatedUser();
 
-        OperationActor actor = SecurityOperationContextAdapter.toOperationActor(loginUser);
+        OperationActor actor = SecurityOperationContextAdapter.toOperationActor(authenticatedUser);
 
         assertEquals(OperationActorType.USER, actor.type());
         assertEquals("user-1", actor.id());
@@ -28,10 +28,10 @@ class SecurityOperationContextAdapterTest {
     }
 
     @Test
-    void shouldMapLoginUserToOperationContextWithoutSecurityModel() {
-        LoginUser loginUser = loginUser();
+    void shouldMapAuthenticatedUserToOperationContextWithoutSecurityModel() {
+        AuthenticatedUser authenticatedUser = authenticatedUser();
 
-        OperationContext context = SecurityOperationContextAdapter.toOperationContext(loginUser);
+        OperationContext context = SecurityOperationContextAdapter.toOperationContext(authenticatedUser);
 
         assertEquals(context.actor(), context.initiator());
         assertEquals("tenant-a", context.tenantId());
@@ -44,13 +44,13 @@ class SecurityOperationContextAdapterTest {
     }
 
     @Test
-    void shouldRejectNullLoginUser() {
+    void shouldRejectNullAuthenticatedUser() {
         assertThrows(IllegalArgumentException.class, () -> SecurityOperationContextAdapter.toOperationActor(null));
         assertThrows(IllegalArgumentException.class, () -> SecurityOperationContextAdapter.toOperationContext(null));
     }
 
-    private static LoginUser loginUser() {
-        return new LoginUser(
+    private static AuthenticatedUser authenticatedUser() {
+        return new AuthenticatedUser(
                 "user-1",
                 "admin",
                 "tenant-a",

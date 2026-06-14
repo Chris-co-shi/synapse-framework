@@ -8,11 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class LoginUserTest {
+class AuthenticatedUserTest {
 
     @Test
     void shouldExposeImmutablePermissions() {
-        LoginUser user = new LoginUser(
+        AuthenticatedUser user = new AuthenticatedUser(
                 "1",
                 "admin",
                 "tenant-a",
@@ -22,12 +22,13 @@ class LoginUserTest {
 
         assertTrue(user.hasPermission("system:user:list"));
         assertFalse(user.hasPermission("system:user:create"));
+        assertThrows(UnsupportedOperationException.class, () -> user.roles().add("x"));
         assertThrows(UnsupportedOperationException.class, () -> user.permissions().add("x"));
     }
 
     @Test
-    void shouldRejectInvalidLoginUser() {
-        assertThrows(IllegalArgumentException.class, () -> new LoginUser("", "admin", null, Set.of(), Set.of()));
-        assertThrows(IllegalArgumentException.class, () -> new LoginUser("1", "", null, Set.of(), Set.of()));
+    void shouldRejectInvalidAuthenticatedUser() {
+        assertThrows(IllegalArgumentException.class, () -> new AuthenticatedUser("", "admin", null, Set.of(), Set.of()));
+        assertThrows(IllegalArgumentException.class, () -> new AuthenticatedUser("1", "", null, Set.of(), Set.of()));
     }
 }

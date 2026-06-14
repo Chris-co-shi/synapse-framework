@@ -1,6 +1,6 @@
 package com.indigo.synapse.security.header;
 
-import com.indigo.synapse.security.context.LoginUser;
+import com.indigo.synapse.security.context.AuthenticatedUser;
 import com.indigo.synapse.security.exception.SecurityErrorCode;
 import com.indigo.synapse.security.exception.SynapseAuthenticationException;
 import org.junit.jupiter.api.Test;
@@ -13,9 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class TrustedHeaderLoginUserResolverTest {
+class TrustedHeaderAuthenticatedUserResolverTest {
 
-    private final TrustedHeaderLoginUserResolver resolver = new TrustedHeaderLoginUserResolver();
+    private final TrustedHeaderAuthenticatedUserResolver resolver = new TrustedHeaderAuthenticatedUserResolver();
 
     @Test
     void shouldResolvePrincipalWithTrimmedRolesAndPermissions() {
@@ -43,13 +43,13 @@ class TrustedHeaderLoginUserResolverTest {
     }
 
     @Test
-    void shouldResolveLoginUserWithoutForgingRolesOrPermissions() {
-        LoginUser loginUser = resolver.resolveLoginUser(headers(Map.of()));
+    void shouldResolveAuthenticatedUserWithoutForgingRolesOrPermissions() {
+        AuthenticatedUser authenticatedUser = resolver.resolveAuthenticatedUser(headers(Map.of()));
 
-        assertEquals("1", loginUser.userId());
-        assertEquals("admin", loginUser.username());
-        assertTrue(loginUser.roles().isEmpty());
-        assertTrue(loginUser.permissions().isEmpty());
+        assertEquals("1", authenticatedUser.userId());
+        assertEquals("admin", authenticatedUser.username());
+        assertTrue(authenticatedUser.roles().isEmpty());
+        assertTrue(authenticatedUser.permissions().isEmpty());
     }
 
     @Test

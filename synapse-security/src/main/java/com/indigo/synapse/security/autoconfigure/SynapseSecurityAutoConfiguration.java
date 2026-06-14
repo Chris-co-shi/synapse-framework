@@ -1,6 +1,6 @@
 package com.indigo.synapse.security.autoconfigure;
 
-import com.indigo.synapse.security.header.TrustedHeaderLoginUserResolver;
+import com.indigo.synapse.security.header.TrustedHeaderAuthenticatedUserResolver;
 import com.indigo.synapse.security.header.TrustedHeaderSignatureVerifier;
 import com.indigo.synapse.security.header.TrustedHeaderTimestampValidator;
 import com.indigo.synapse.security.password.SynapsePasswordEncoderFactory;
@@ -38,7 +38,7 @@ public class SynapseSecurityAutoConfiguration {
         properties.validateTrustedHeaderConfiguration();
         return new TrustedHeaderAuthenticationFilter(
                 properties,
-                new TrustedHeaderLoginUserResolver(),
+                new TrustedHeaderAuthenticatedUserResolver(),
                 new TrustedHeaderSignatureVerifier(),
                 new TrustedHeaderTimestampValidator()
         );
