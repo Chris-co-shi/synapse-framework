@@ -29,18 +29,20 @@ synapse-framework
 └── synapse-message
 ```
 
-| 模块 | 定位 |
-| --- | --- |
-| `synapse-bom` | 统一依赖版本管理 |
-| `synapse-core` | 错误码、异常、ID、OperationContext 等核心契约 |
-| `synapse-web` | Servlet MVC 响应、异常处理、Filter 异常桥接 |
-| `synapse-data` | 数据层基础能力，当前聚焦 OperationContext 自动填充 |
-| `synapse-cache` | 缓存、锁、限流、幂等基础设施 |
-| `synapse-security` | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 |
-| `synapse-oauth2` | OAuth2 / JWT / JWK 技术能力 |
-| `synapse-audit` | 审计事件契约 |
-| `synapse-file` | 文件存储抽象与本地轻量实现 |
-| `synapse-message` | 消息头、上下文传播、发送 SPI、交互追踪契约 |
+| 模块 | 定位 | 手册 |
+| --- | --- | --- |
+| `synapse-bom` | 统一依赖版本管理 | 待补充 |
+| `synapse-core` | 错误码、异常、ID、OperationContext 等核心契约 | [查看](docs/modules/synapse-core.md) |
+| `synapse-web` | Servlet MVC 响应、异常处理、Filter 异常桥接 | 待补充 |
+| `synapse-data` | 数据层基础能力，当前聚焦 OperationContext 自动填充 | 待补充 |
+| `synapse-cache` | 缓存、锁、限流、幂等基础设施 | 待补充 |
+| `synapse-security` | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 | 待补充 |
+| `synapse-oauth2` | OAuth2 / JWT / JWK 技术能力 | 待补充 |
+| `synapse-audit` | 审计事件契约 | 待补充 |
+| `synapse-file` | 文件存储抽象与本地轻量实现 | 待补充 |
+| `synapse-message` | 消息头、上下文传播、发送 SPI、交互追踪契约 | 待补充 |
+
+模块手册索引：[docs/modules/README.md](docs/modules/README.md)
 
 ## 快速开始
 
@@ -105,6 +107,7 @@ mvn validate
 | [07-工程结构与模块边界设计](docs/07-工程结构与模块边界设计.md) | 包结构、模块边界、禁止结构、测试规则 |
 | [08-开发前技术决策记录](docs/08-开发前技术决策记录.md) | 一阶段关键技术决策 |
 | [09-工程初始化实施清单](docs/09-工程初始化实施清单.md) | 开发前检查、自动配置检查、测试与验收命令 |
+| [模块使用手册](docs/modules/README.md) | 各模块接入方式、扩展点和边界说明 |
 
 ## 不做什么
 
