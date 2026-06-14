@@ -39,7 +39,7 @@ synapse-framework
 | `synapse-security` | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 | [查看](docs/modules/synapse-security.md) |
 | `synapse-oauth2` | OAuth2 / JWT / JWK 技术能力 | [查看](docs/modules/synapse-oauth2.md) |
 | `synapse-audit` | 审计事件契约 | [查看](docs/modules/synapse-audit.md) |
-| `synapse-file` | 文件存储抽象与本地轻量实现 | 待补充 |
+| `synapse-file` | 文件存储抽象与本地轻量实现 | [查看](docs/modules/synapse-file.md) |
 | `synapse-message` | 消息头、上下文传播、发送 SPI、交互追踪契约 | 待补充 |
 
 模块手册索引：[docs/modules/README.md](docs/modules/README.md)
