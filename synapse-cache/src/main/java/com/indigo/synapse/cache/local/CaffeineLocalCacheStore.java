@@ -7,6 +7,14 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * 基于 Caffeine 的 L1 本地缓存实现。
+ *
+ * <p>该实现只作为 Redis L2 的近端加速层，保存已经编码后的字符串值。每条记录使用写入时传入的 TTL，
+ * 因此可以保证 L1 过期时间不超过调用方计算后的本地 TTL。</p>
+ *
+ * <p>本地缓存只在当前 JVM 内生效，不提供跨实例一致性通知。强一致数据不应仅依赖 L1。</p>
+ */
 public final class CaffeineLocalCacheStore implements LocalCacheStore {
 
     private final Cache<String, LocalCacheValue> cache;
