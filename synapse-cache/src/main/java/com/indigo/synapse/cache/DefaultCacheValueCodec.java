@@ -5,6 +5,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.io.UncheckedIOException;
 
+/**
+ * 默认缓存值编解码器。
+ *
+ * <p>该实现使用 Jackson 将对象序列化为字符串，再由 Redis 和 L1 本地缓存保存。消费方如果需要跨语言、
+ * 压缩、加密、版本兼容或特殊类型处理，应提供自己的 {@link CacheValueCodec} Bean。</p>
+ */
 public final class DefaultCacheValueCodec implements CacheValueCodec {
 
     private final ObjectMapper objectMapper;
