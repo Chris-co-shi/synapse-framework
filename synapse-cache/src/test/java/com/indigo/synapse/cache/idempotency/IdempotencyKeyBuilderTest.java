@@ -10,10 +10,10 @@ class IdempotencyKeyBuilderTest {
 
     @Test
     void shouldBuildStableHashedKey() {
-        String key = IdempotencyKeyBuilder.build("order:create", "key-1");
+        String key = IdempotencyKeyBuilder.build("operation:create", "key-1");
 
         assertTrue(key.startsWith("synapse:idempotency:"));
-        assertEquals(key, IdempotencyKeyBuilder.build(" order:create ", " key-1 "));
+        assertEquals(key, IdempotencyKeyBuilder.build(" operation:create ", " key-1 "));
     }
 
     @Test

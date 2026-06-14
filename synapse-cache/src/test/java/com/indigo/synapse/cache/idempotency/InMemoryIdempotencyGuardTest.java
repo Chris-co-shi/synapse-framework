@@ -17,9 +17,9 @@ class InMemoryIdempotencyGuardTest {
     void shouldRejectDuplicateWithinTtl() {
         InMemoryIdempotencyGuard guard = new InMemoryIdempotencyGuard();
 
-        assertTrue(guard.tryAcquire("order:create", "key-1", Duration.ofMinutes(5)));
-        assertFalse(guard.tryAcquire("order:create", "key-1", Duration.ofMinutes(5)));
-        assertTrue(guard.tryAcquire("order:update", "key-1", Duration.ofMinutes(5)));
+        assertTrue(guard.tryAcquire("operation:create", "key-1", Duration.ofMinutes(5)));
+        assertFalse(guard.tryAcquire("operation:create", "key-1", Duration.ofMinutes(5)));
+        assertTrue(guard.tryAcquire("operation:update", "key-1", Duration.ofMinutes(5)));
     }
 
     @Test
@@ -27,10 +27,10 @@ class InMemoryIdempotencyGuardTest {
         MutableClock clock = new MutableClock(Instant.parse("2026-05-21T00:00:00Z"));
         InMemoryIdempotencyGuard guard = new InMemoryIdempotencyGuard(clock);
 
-        assertTrue(guard.tryAcquire("order:create", "key-1", Duration.ofSeconds(1)));
+        assertTrue(guard.tryAcquire("operation:create", "key-1", Duration.ofSeconds(1)));
         clock.advance(Duration.ofSeconds(2));
 
-        assertTrue(guard.tryAcquire("order:create", "key-1", Duration.ofSeconds(1)));
+        assertTrue(guard.tryAcquire("operation:create", "key-1", Duration.ofSeconds(1)));
     }
 
     @Test

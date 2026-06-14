@@ -19,12 +19,12 @@ class RedisReentrantLockTest {
         CapturingExecutor executor = new CapturingExecutor(1L);
         RedisReentrantLock lock = new RedisReentrantLock(executor);
 
-        LockAcquireResult result = lock.acquire("synapse:cache:order:lock:1", "owner-1", Duration.ofSeconds(30));
+        LockAcquireResult result = lock.acquire("synapse:cache:test:lock:1", "owner-1", Duration.ofSeconds(30));
 
         assertTrue(result.acquired());
         assertFalse(result.reentered());
         assertEquals("synapse-reentrant-lock", executor.scriptName);
-        assertEquals(List.of("synapse:cache:order:lock:1"), executor.keys);
+        assertEquals(List.of("synapse:cache:test:lock:1"), executor.keys);
         assertEquals(List.of("owner-1", "30000"), executor.args);
     }
 

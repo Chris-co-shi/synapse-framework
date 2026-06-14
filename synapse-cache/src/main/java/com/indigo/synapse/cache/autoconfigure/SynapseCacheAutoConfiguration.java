@@ -33,7 +33,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  * Synapse Cache 自动配置。
  *
  * <p>该配置只在 Spring Data Redis 可用时启用，并允许消费方通过声明同类型 Bean
- * 覆盖默认实现。消息发布订阅能力属于 synapse-message，不在 cache 模块装配。</p>
+ * 覆盖默认实现。缓存模块只装配缓存、锁、限流和幂等基础设施，不装配消息发布订阅能力。</p>
  */
 @AutoConfiguration(after = RedisAutoConfiguration.class)
 @ConditionalOnClass(StringRedisTemplate.class)

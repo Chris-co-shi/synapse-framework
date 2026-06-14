@@ -66,7 +66,7 @@ class RedisLuaIntegrationTest {
     @Test
     void shouldApplySlidingWindowRateLimitOnRedis() {
         SlidingWindowRateLimiter limiter = new SlidingWindowRateLimiter(new SpringDataRedisScriptExecutor(redisTemplate()));
-        String key = "synapse:cache:test:rate:user-1";
+        String key = "synapse:cache:test:rate:subject-1";
 
         RateLimitDecision first = limiter.allow(key, 2, Duration.ofSeconds(10), 1000L);
         RateLimitDecision second = limiter.allow(key, 2, Duration.ofSeconds(10), 2000L);

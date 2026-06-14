@@ -19,14 +19,14 @@ class SlidingWindowRateLimiterTest {
         CapturingExecutor executor = new CapturingExecutor(List.of(1L, 4L, 11000L));
         SlidingWindowRateLimiter limiter = new SlidingWindowRateLimiter(executor);
 
-        RateLimitDecision decision = limiter.allow("synapse:web:login:rate:user-1", 5, Duration.ofSeconds(10), 1000L);
+        RateLimitDecision decision = limiter.allow("synapse:cache:test:rate:subject-1", 5, Duration.ofSeconds(10), 1000L);
 
         assertTrue(decision.allowed());
         assertEquals(5, decision.limit());
         assertEquals(4, decision.remaining());
         assertEquals(11000L, decision.resetAtMillis());
         assertEquals("synapse-sliding-window-rate-limit", executor.scriptName);
-        assertEquals(List.of("synapse:web:login:rate:user-1"), executor.keys);
+        assertEquals(List.of("synapse:cache:test:rate:subject-1"), executor.keys);
         assertEquals("1000", executor.args.get(0));
         assertEquals("10000", executor.args.get(1));
         assertEquals("5", executor.args.get(2));
