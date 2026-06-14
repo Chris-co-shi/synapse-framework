@@ -8,19 +8,38 @@ import java.util.Objects;
 /**
  * 认证失败异常。
  *
- * <p>该异常只表达通用认证失败语义，不绑定 security、OAuth2 或 Web 实现。
- * 消费方或 synapse-web 可以根据错误码统一映射为 401 响应。</p>
+ * <p>该异常只表达“调用方尚未完成认证或认证信息无效”的通用技术语义，不绑定 security、OAuth2、
+ * Servlet MVC 或 WebFlux 实现。synapse-web 可以将它统一映射为 HTTP 401，security / oauth2 可以在
+ * 抛出时显式传入本模块之外的细分错误码。</p>
+ *
+ * <p>默认构造器使用 {@link CommonErrorCode#COMMON_UNAUTHORIZED}。如果某个上层模块需要表达
+ * trusted-header 签名错误、token 过期等细分语义，应传入该模块自己的 {@link ErrorCode} 实现，
+ * 但不得把这些细分错误码放回 core。</p>
  */
 public class SynapseAuthenticationException extends SynapseException {
 
+    /**
+     * 使用 core 通用未认证错误码创建异常。
+     */
     public SynapseAuthenticationException() {
         super(CommonErrorCode.COMMON_UNAUTHORIZED);
     }
 
+    /**
+     * 使用调用方指定的认证错误码创建异常。
+     *
+     * @param errorCode 认证失败错误码，不能为空
+     */
     public SynapseAuthenticationException(ErrorCode errorCode) {
         super(requireAuthenticationCode(errorCode));
     }
 
+    /**
+     * 使用调用方指定的认证错误码和文案创建异常。
+     *
+     * @param errorCode 认证失败错误码，不能为空
+     * @param message 异常文案
+     */
     public SynapseAuthenticationException(ErrorCode errorCode, String message) {
         super(requireAuthenticationCode(errorCode), message);
     }
