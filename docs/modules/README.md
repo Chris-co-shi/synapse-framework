@@ -12,7 +12,7 @@
 | 模块 | 手册 | 说明 |
 | --- | --- | --- |
 | `synapse-core` | [synapse-core.md](synapse-core.md) | 错误码、异常、ID、OperationContext 等核心契约 |
-| `synapse-web` | 待补充 | Servlet MVC 响应、异常处理、Filter 异常桥接 |
+| `synapse-web` | [synapse-web.md](synapse-web.md) | Servlet MVC 响应、异常处理、Filter 异常桥接 |
 | `synapse-data` | 待补充 | 数据层基础能力，当前聚焦 OperationContext 自动填充 |
 | `synapse-cache` | 待补充 | 缓存、锁、限流、幂等基础设施 |
 | `synapse-security` | 待补充 | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 |
