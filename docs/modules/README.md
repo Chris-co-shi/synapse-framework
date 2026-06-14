@@ -15,7 +15,7 @@
 | `synapse-web` | [synapse-web.md](synapse-web.md) | Servlet MVC 响应、异常处理、Filter 异常桥接 |
 | `synapse-data` | 待补充 | 数据层基础能力，当前聚焦 OperationContext 自动填充 |
 | `synapse-cache` | 待补充 | 缓存、锁、限流、幂等基础设施 |
-| `synapse-security` | 待补充 | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 |
+| `synapse-security` | [synapse-security.md](synapse-security.md) | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 |
 | `synapse-oauth2` | 待补充 | OAuth2 / JWT / JWK 技术能力 |
 | `synapse-audit` | 待补充 | 审计事件契约 |
 | `synapse-file` | 待补充 | 文件存储抽象与本地轻量实现 |
