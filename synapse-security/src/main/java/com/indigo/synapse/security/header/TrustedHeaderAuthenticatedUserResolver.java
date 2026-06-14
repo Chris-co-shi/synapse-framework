@@ -1,8 +1,8 @@
 package com.indigo.synapse.security.header;
 
-import com.indigo.synapse.security.context.AuthenticatedUser;
-import com.indigo.synapse.core.error.CommonErrorCode;
 import com.indigo.synapse.core.exception.SynapseAuthenticationException;
+import com.indigo.synapse.security.context.AuthenticatedUser;
+import com.indigo.synapse.security.exception.SecurityErrorCode;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -95,6 +95,6 @@ public class TrustedHeaderAuthenticatedUserResolver {
     }
 
     private static SynapseAuthenticationException invalidHeader(String message) {
-        return new SynapseAuthenticationException(CommonErrorCode.SECURITY_INVALID_TRUSTED_HEADER, message);
+        return new SynapseAuthenticationException(SecurityErrorCode.SECURITY_INVALID_TRUSTED_HEADER, message);
     }
 }

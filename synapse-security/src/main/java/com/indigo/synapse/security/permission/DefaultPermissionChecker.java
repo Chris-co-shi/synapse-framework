@@ -1,9 +1,10 @@
 package com.indigo.synapse.security.permission;
-import com.indigo.synapse.core.error.CommonErrorCode;
-import com.indigo.synapse.security.context.AuthenticatedUser;
-import com.indigo.synapse.security.context.SecurityContext;
+
 import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
 import com.indigo.synapse.core.exception.SynapseAuthenticationException;
+import com.indigo.synapse.security.context.AuthenticatedUser;
+import com.indigo.synapse.security.context.SecurityContext;
+import com.indigo.synapse.security.exception.SecurityErrorCode;
 
 /**
  * 基于 {@link SecurityContext} 的默认权限检查器。
@@ -20,7 +21,7 @@ public class DefaultPermissionChecker implements PermissionChecker {
         }
         AuthenticatedUser authenticatedUser = requireUser();
         if (!authenticatedUser.hasPermission(permission)) {
-            throw new SynapseAccessDeniedException();
+            throw new SynapseAccessDeniedException(SecurityErrorCode.SECURITY_PERMISSION_DENIED);
         }
     }
 
@@ -37,6 +38,6 @@ public class DefaultPermissionChecker implements PermissionChecker {
     @Override
     public AuthenticatedUser requireUser() {
         return SecurityContext.currentUser()
-                .orElseThrow(() -> new SynapseAuthenticationException(CommonErrorCode.SECURITY_UNAUTHENTICATED));
+                .orElseThrow(() -> new SynapseAuthenticationException(SecurityErrorCode.SECURITY_UNAUTHENTICATED));
     }
 }

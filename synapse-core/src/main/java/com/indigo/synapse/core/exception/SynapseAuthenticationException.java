@@ -1,24 +1,29 @@
 package com.indigo.synapse.core.exception;
 
 import com.indigo.synapse.core.error.CommonErrorCode;
+import com.indigo.synapse.core.error.ErrorCode;
 
 /**
  * 认证失败异常。
  *
- * <p>用于 trusted-header 缺失、格式非法、签名非法、时间戳过期等认证阶段失败。
- * 该异常不依赖 Web 层，由消费方或 synapse-web 统一映射为 401 响应。</p>
+ * <p>该异常只表达通用认证失败语义，不绑定 security、OAuth2 或 Web 实现。
+ * 消费方或 synapse-web 可以根据错误码统一映射为 401 响应。</p>
  */
 public class SynapseAuthenticationException extends SynapseException {
 
-    public SynapseAuthenticationException(CommonErrorCode errorCode) {
+    public SynapseAuthenticationException() {
+        super(CommonErrorCode.COMMON_UNAUTHORIZED);
+    }
+
+    public SynapseAuthenticationException(ErrorCode errorCode) {
         super(requireAuthenticationCode(errorCode));
     }
 
-    public SynapseAuthenticationException(CommonErrorCode errorCode, String message) {
+    public SynapseAuthenticationException(ErrorCode errorCode, String message) {
         super(requireAuthenticationCode(errorCode), message);
     }
 
-    private static CommonErrorCode requireAuthenticationCode(CommonErrorCode errorCode) {
+    private static ErrorCode requireAuthenticationCode(ErrorCode errorCode) {
         if (errorCode == null) {
             throw new IllegalArgumentException("errorCode must not be null");
         }

@@ -1,7 +1,7 @@
 package com.indigo.synapse.security.header;
 
-import com.indigo.synapse.core.error.CommonErrorCode;
 import com.indigo.synapse.core.exception.SynapseAuthenticationException;
+import com.indigo.synapse.security.exception.SecurityErrorCode;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;
@@ -35,7 +35,7 @@ class TrustedHeaderTimestampValidatorTest {
                 () -> validator.validate(headers(timestamp), Duration.ofMinutes(1), CLOCK)
         );
 
-        assertEquals(CommonErrorCode.SECURITY_TRUSTED_HEADER_EXPIRED, exception.errorCode());
+        assertEquals(SecurityErrorCode.SECURITY_TRUSTED_HEADER_EXPIRED, exception.errorCode());
     }
 
     @Test
@@ -47,7 +47,7 @@ class TrustedHeaderTimestampValidatorTest {
                 () -> validator.validate(headers(timestamp), Duration.ofMinutes(1), CLOCK)
         );
 
-        assertEquals(CommonErrorCode.SECURITY_TRUSTED_HEADER_EXPIRED, exception.errorCode());
+        assertEquals(SecurityErrorCode.SECURITY_TRUSTED_HEADER_EXPIRED, exception.errorCode());
     }
 
     @Test
@@ -57,7 +57,7 @@ class TrustedHeaderTimestampValidatorTest {
                 () -> validator.validate(Map.of(SecurityHeaders.TIMESTAMP, "invalid"), Duration.ofMinutes(1), CLOCK)
         );
 
-        assertEquals(CommonErrorCode.SECURITY_INVALID_TRUSTED_HEADER, exception.errorCode());
+        assertEquals(SecurityErrorCode.SECURITY_INVALID_TRUSTED_HEADER, exception.errorCode());
     }
 
     @Test
@@ -67,7 +67,7 @@ class TrustedHeaderTimestampValidatorTest {
                 () -> validator.validate(Map.of(), Duration.ofMinutes(1), CLOCK)
         );
 
-        assertEquals(CommonErrorCode.SECURITY_INVALID_TRUSTED_HEADER, exception.errorCode());
+        assertEquals(SecurityErrorCode.SECURITY_INVALID_TRUSTED_HEADER, exception.errorCode());
     }
 
     private static Map<String, String> headers(long timestamp) {

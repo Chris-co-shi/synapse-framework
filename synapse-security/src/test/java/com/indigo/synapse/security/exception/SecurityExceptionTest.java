@@ -1,40 +1,43 @@
 package com.indigo.synapse.security.exception;
 
-import com.indigo.synapse.core.error.CommonErrorCode;
-import org.junit.jupiter.api.Test;
-import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
+import com.indigo.synapse.core.exception.SynapseAuthenticationException;
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SecurityExceptionTest {
 
     @Test
-    void shouldExposeCommonErrorCodes() {
-        assertEquals(401, CommonErrorCode.SECURITY_UNAUTHENTICATED.httpStatus());
-        assertEquals(401, CommonErrorCode.SECURITY_INVALID_TRUSTED_HEADER.httpStatus());
-        assertEquals(401, CommonErrorCode.SECURITY_INVALID_SIGNATURE.httpStatus());
-        assertEquals(401, CommonErrorCode.SECURITY_TRUSTED_HEADER_EXPIRED.httpStatus());
-        assertEquals(403, CommonErrorCode.SECURITY_PERMISSION_DENIED.httpStatus());
+    void shouldExposeSecurityErrorCodes() {
+        assertEquals(401, SecurityErrorCode.SECURITY_UNAUTHENTICATED.httpStatus());
+        assertEquals(401, SecurityErrorCode.SECURITY_INVALID_TRUSTED_HEADER.httpStatus());
+        assertEquals(401, SecurityErrorCode.SECURITY_INVALID_SIGNATURE.httpStatus());
+        assertEquals(401, SecurityErrorCode.SECURITY_TRUSTED_HEADER_EXPIRED.httpStatus());
+        assertEquals(403, SecurityErrorCode.SECURITY_PERMISSION_DENIED.httpStatus());
     }
 
     @Test
     void shouldCreateAuthenticationAndAccessDeniedExceptions() {
-        com.indigo.synapse.core.exception.SynapseAuthenticationException authenticationException = new com.indigo.synapse.core.exception.SynapseAuthenticationException(
-                CommonErrorCode.SECURITY_INVALID_SIGNATURE,
+        SynapseAuthenticationException authenticationException = new SynapseAuthenticationException(
+                SecurityErrorCode.SECURITY_INVALID_SIGNATURE,
                 "invalid signature"
         );
-        SynapseAccessDeniedException accessDeniedException = new SynapseAccessDeniedException("permission denied");
+        SynapseAccessDeniedException accessDeniedException = new SynapseAccessDeniedException(
+                SecurityErrorCode.SECURITY_PERMISSION_DENIED,
+                "permission denied"
+        );
 
-        assertEquals(CommonErrorCode.SECURITY_INVALID_SIGNATURE, authenticationException.errorCode());
+        assertEquals(SecurityErrorCode.SECURITY_INVALID_SIGNATURE, authenticationException.errorCode());
         assertEquals("invalid signature", authenticationException.getMessage());
-        assertEquals(CommonErrorCode.SECURITY_PERMISSION_DENIED, accessDeniedException.errorCode());
+        assertEquals(SecurityErrorCode.SECURITY_PERMISSION_DENIED, accessDeniedException.errorCode());
         assertEquals("permission denied", accessDeniedException.getMessage());
     }
 
     @Test
     void shouldRejectForbiddenCodeForAuthenticationException() {
         assertThrows(IllegalArgumentException.class, () ->
-                new SynapseAuthenticationException(CommonErrorCode.SECURITY_PERMISSION_DENIED));
+                new SynapseAuthenticationException(SecurityErrorCode.SECURITY_PERMISSION_DENIED));
     }
 }

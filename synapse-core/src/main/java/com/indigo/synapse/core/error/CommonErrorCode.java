@@ -43,28 +43,7 @@ public enum CommonErrorCode implements ErrorCode {
     /**
      * 未被更具体错误码覆盖的框架内部异常。
      */
-    COMMON_INTERNAL_ERROR("COMMON_INTERNAL_ERROR", "系统内部错误", 500),
-
-    /**
-     * 当前请求没有可用认证主体。
-     */
-    SECURITY_UNAUTHENTICATED("SECURITY_UNAUTHENTICATED", "未认证", 401),
-    /**
-     * trusted-header 缺失必需字段或格式非法。
-     */
-    SECURITY_INVALID_TRUSTED_HEADER("SECURITY_INVALID_TRUSTED_HEADER", "非法可信请求头", 401),
-    /**
-     * trusted-header 签名缺失或校验失败。
-     */
-    SECURITY_INVALID_SIGNATURE("SECURITY_INVALID_SIGNATURE", "可信请求头签名无效", 401),
-    /**
-     * trusted-header 时间戳超出允许窗口。
-     */
-    SECURITY_TRUSTED_HEADER_EXPIRED("SECURITY_TRUSTED_HEADER_EXPIRED", "可信请求头已过期", 401),
-    /**
-     * 当前主体没有访问目标资源所需权限。
-     */
-    SECURITY_PERMISSION_DENIED("SECURITY_PERMISSION_DENIED", "无权限", 403);
+    COMMON_INTERNAL_ERROR("COMMON_INTERNAL_ERROR", "系统内部错误", 500);
 
     private final String code;
     private final String message;

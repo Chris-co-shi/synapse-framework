@@ -23,4 +23,20 @@ class SynapseExceptionTest {
         assertSame(CommonErrorCode.COMMON_BAD_REQUEST, exception.errorCode());
         assertEquals("字段不能为空", exception.getMessage());
     }
+
+    @Test
+    void shouldUseCommonUnauthorizedForDefaultAuthenticationException() {
+        SynapseAuthenticationException exception = new SynapseAuthenticationException();
+
+        assertSame(CommonErrorCode.COMMON_UNAUTHORIZED, exception.errorCode());
+        assertEquals("未认证", exception.getMessage());
+    }
+
+    @Test
+    void shouldUseCommonForbiddenForDefaultAccessDeniedException() {
+        SynapseAccessDeniedException exception = new SynapseAccessDeniedException();
+
+        assertSame(CommonErrorCode.COMMON_FORBIDDEN, exception.errorCode());
+        assertEquals("无权限", exception.getMessage());
+    }
 }

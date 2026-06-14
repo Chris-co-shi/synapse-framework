@@ -4,12 +4,10 @@ import com.indigo.synapse.core.error.CommonErrorCode;
 import com.indigo.synapse.core.error.ErrorCode;
 import com.indigo.synapse.web.trace.TraceContext;
 import com.indigo.synapse.web.trace.TraceIdGenerator;
-import lombok.Getter;
 
 import java.time.Instant;
 import java.util.Objects;
 
-@Getter
 public final class Result<T> {
 
     private final String code;
@@ -46,6 +44,26 @@ public final class Result<T> {
 
     private static ErrorCode requireErrorCode(ErrorCode errorCode) {
         return Objects.requireNonNull(errorCode, "errorCode must not be null");
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public String getTraceId() {
+        return traceId;
+    }
+
+    public Instant getTimestamp() {
+        return timestamp;
     }
 
     private static String traceId() {
