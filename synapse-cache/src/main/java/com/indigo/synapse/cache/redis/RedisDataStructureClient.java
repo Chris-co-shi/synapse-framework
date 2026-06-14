@@ -65,13 +65,17 @@ public interface RedisDataStructureClient {
 
     /**
      * 在 pivot 左侧插入元素。
+     *
+     * <p>该方法显式使用 insert 命名，避免和批量 listLeftPush(String, String...) 产生 Java 重载歧义。</p>
      */
-    Long listLeftPush(String key, String pivot, String value);
+    Long listInsertBefore(String key, String pivot, String value);
 
     /**
      * 在 pivot 右侧插入元素。
+     *
+     * <p>该方法显式使用 insert 命名，避免和批量 listRightPush(String, String...) 产生 Java 重载歧义。</p>
      */
-    Long listRightPush(String key, String pivot, String value);
+    Long listInsertAfter(String key, String pivot, String value);
 
     /**
      * 写入 hash 字段。
