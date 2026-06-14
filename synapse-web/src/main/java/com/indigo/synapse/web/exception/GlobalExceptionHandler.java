@@ -4,6 +4,7 @@ import com.indigo.synapse.core.exception.SynapseException;
 import com.indigo.synapse.web.response.Result;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -54,6 +57,24 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Result<Void>> handleConstraintViolationException(
             ConstraintViolationException exception) {
         return response(responseFactory.validation(WebExceptionResponseFactory.MVC_STACK));
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<Result<Void>> handleNoHandlerFoundException(
+            NoHandlerFoundException exception) {
+        return response(responseFactory.mvc(exception));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Result<Void>> handleNoResourceFoundException(
+            NoResourceFoundException exception) {
+        return response(responseFactory.mvc(exception));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Result<Void>> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException exception) {
+        return response(responseFactory.mvc(exception));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)

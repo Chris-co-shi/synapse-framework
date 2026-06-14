@@ -7,7 +7,6 @@ import com.indigo.synapse.web.openapi.OpenApiProperties;
 import com.indigo.synapse.web.openapi.OpenApiVisibilityPolicy;
 import com.indigo.synapse.web.exception.SynapseExceptionBridgeFilter;
 import com.indigo.synapse.web.trace.MvcTraceFilter;
-import com.indigo.synapse.web.trace.WebFluxTraceWebFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;

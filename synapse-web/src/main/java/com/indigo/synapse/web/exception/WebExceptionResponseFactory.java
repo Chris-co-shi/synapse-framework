@@ -6,6 +6,7 @@ import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
 import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import com.indigo.synapse.core.exception.SynapseException;
 import com.indigo.synapse.web.response.Result;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -14,6 +15,7 @@ import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 public final class WebExceptionResponseFactory {
 
@@ -33,9 +35,9 @@ public final class WebExceptionResponseFactory {
         if (throwable instanceof SynapseException synapseException) {
             return business(stack, synapseException);
         }
-
         if (throwable instanceof MissingServletRequestParameterException
                 || throwable instanceof MethodArgumentTypeMismatchException
+                || throwable instanceof HttpMessageNotReadableException
                 || throwable instanceof ServerWebInputException) {
             return validation(stack);
         }
@@ -43,7 +45,6 @@ public final class WebExceptionResponseFactory {
         if (throwable instanceof NoHandlerFoundException) {
             return error(stack, CommonErrorCode.COMMON_NOT_FOUND, CommonErrorCode.COMMON_NOT_FOUND.message());
         }
-
         if (throwable instanceof HttpRequestMethodNotSupportedException
                 || throwable instanceof MethodNotAllowedException) {
             return error(stack, CommonErrorCode.COMMON_METHOD_NOT_ALLOWED,
