@@ -3,8 +3,8 @@ package com.indigo.synapse.security.web;
 import com.indigo.synapse.security.autoconfigure.SynapseSecurityProperties;
 import com.indigo.synapse.security.context.AuthenticatedUser;
 import com.indigo.synapse.security.context.SecurityContext;
-import com.indigo.synapse.security.exception.SecurityErrorCode;
-import com.indigo.synapse.security.exception.SynapseAuthenticationException;
+import com.indigo.synapse.core.error.CommonErrorCode;
+import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import com.indigo.synapse.security.header.SecurityHeaders;
 import com.indigo.synapse.security.header.TrustedHeaderAuthenticatedUserResolver;
 import com.indigo.synapse.security.header.TrustedHeaderSignatureVerifier;
@@ -119,7 +119,7 @@ public class TrustedHeaderAuthenticationFilter implements Filter {
         timestampValidator.validate(headers, trustedHeader.getTimestampTolerance(), clock);
         if (trustedHeader.isSignatureEnabled()
                 && !signatureVerifier.verify(headers, trustedHeader.getSecret())) {
-            throw new SynapseAuthenticationException(SecurityErrorCode.SECURITY_INVALID_SIGNATURE);
+            throw new SynapseAuthenticationException(CommonErrorCode.SECURITY_INVALID_SIGNATURE);
         }
         SecurityContext.set(authenticatedUserResolver.resolveAuthenticatedUser(headers));
     }

@@ -3,9 +3,9 @@ package com.indigo.synapse.security.permission;
 import com.indigo.synapse.core.context.OperationContextHolder;
 import com.indigo.synapse.security.context.AuthenticatedUser;
 import com.indigo.synapse.security.context.SecurityContext;
-import com.indigo.synapse.security.exception.SecurityErrorCode;
-import com.indigo.synapse.security.exception.SynapseAccessDeniedException;
-import com.indigo.synapse.security.exception.SynapseAuthenticationException;
+import com.indigo.synapse.core.error.CommonErrorCode;
+import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
+import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -71,7 +71,7 @@ class DefaultPermissionCheckerTest {
                 () -> permissionChecker.require("system:user:create")
         );
 
-        assertEquals(SecurityErrorCode.SECURITY_PERMISSION_DENIED, exception.errorCode());
+        assertEquals(CommonErrorCode.SECURITY_PERMISSION_DENIED, exception.errorCode());
         assertEquals(403, exception.errorCode().httpStatus());
     }
 
@@ -82,7 +82,7 @@ class DefaultPermissionCheckerTest {
                 () -> permissionChecker.require("system:user:create")
         );
 
-        assertEquals(SecurityErrorCode.SECURITY_UNAUTHENTICATED, exception.errorCode());
+        assertEquals(CommonErrorCode.SECURITY_UNAUTHENTICATED, exception.errorCode());
         assertEquals(401, exception.errorCode().httpStatus());
     }
 
@@ -108,7 +108,7 @@ class DefaultPermissionCheckerTest {
                 permissionChecker::requireUser
         );
 
-        assertEquals(SecurityErrorCode.SECURITY_UNAUTHENTICATED, exception.errorCode());
+        assertEquals(CommonErrorCode.SECURITY_UNAUTHENTICATED, exception.errorCode());
         assertEquals(401, exception.errorCode().httpStatus());
     }
 

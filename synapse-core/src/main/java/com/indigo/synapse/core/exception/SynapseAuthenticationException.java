@@ -1,6 +1,6 @@
 package com.indigo.synapse.core.exception;
 
-import com.indigo.synapse.security.exception.SecurityErrorCode;
+import com.indigo.synapse.core.error.CommonErrorCode;
 
 /**
  * 认证失败异常。
@@ -10,15 +10,15 @@ import com.indigo.synapse.security.exception.SecurityErrorCode;
  */
 public class SynapseAuthenticationException extends SynapseException {
 
-    public SynapseAuthenticationException(SecurityErrorCode errorCode) {
+    public SynapseAuthenticationException(CommonErrorCode errorCode) {
         super(requireAuthenticationCode(errorCode));
     }
 
-    public SynapseAuthenticationException(SecurityErrorCode errorCode, String message) {
+    public SynapseAuthenticationException(CommonErrorCode errorCode, String message) {
         super(requireAuthenticationCode(errorCode), message);
     }
 
-    private static SecurityErrorCode requireAuthenticationCode(SecurityErrorCode errorCode) {
+    private static CommonErrorCode requireAuthenticationCode(CommonErrorCode errorCode) {
         if (errorCode == null) {
             throw new IllegalArgumentException("errorCode must not be null");
         }

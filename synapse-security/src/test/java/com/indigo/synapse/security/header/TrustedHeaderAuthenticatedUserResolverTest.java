@@ -1,8 +1,8 @@
 package com.indigo.synapse.security.header;
 
+import com.indigo.synapse.core.error.CommonErrorCode;
 import com.indigo.synapse.security.context.AuthenticatedUser;
-import com.indigo.synapse.security.exception.SecurityErrorCode;
-import com.indigo.synapse.security.exception.SynapseAuthenticationException;
+import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -74,8 +74,8 @@ class TrustedHeaderAuthenticatedUserResolverTest {
                 () -> resolver.resolvePrincipal(Map.of(SecurityHeaders.USER_ID, "1"))
         );
 
-        assertEquals(SecurityErrorCode.SECURITY_INVALID_TRUSTED_HEADER, missingUserId.errorCode());
-        assertEquals(SecurityErrorCode.SECURITY_INVALID_TRUSTED_HEADER, missingUsername.errorCode());
+        assertEquals(CommonErrorCode.SECURITY_INVALID_TRUSTED_HEADER, missingUserId.errorCode());
+        assertEquals(CommonErrorCode.SECURITY_INVALID_TRUSTED_HEADER, missingUsername.errorCode());
     }
 
     private static Map<String, String> headers(Map<String, String> overrides) {

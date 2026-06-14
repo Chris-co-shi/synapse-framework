@@ -7,8 +7,8 @@ import com.indigo.synapse.core.context.OperationContextHolder;
 import com.indigo.synapse.core.context.OperationContextScope;
 import com.indigo.synapse.security.autoconfigure.SynapseSecurityProperties;
 import com.indigo.synapse.security.context.SecurityContext;
-import com.indigo.synapse.security.exception.SecurityErrorCode;
-import com.indigo.synapse.security.exception.SynapseAuthenticationException;
+import com.indigo.synapse.core.error.CommonErrorCode;
+import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import com.indigo.synapse.security.header.SecurityHeaders;
 import com.indigo.synapse.security.header.TrustedHeaderAuthenticatedUserResolver;
 import com.indigo.synapse.security.header.TrustedHeaderSignatureVerifier;
@@ -100,7 +100,7 @@ class TrustedHeaderAuthenticationFilterTest {
                 () -> filter.doFilter(request(headers), null, new CapturingChain())
         );
 
-        assertEquals(SecurityErrorCode.SECURITY_INVALID_SIGNATURE, exception.errorCode());
+        assertEquals(CommonErrorCode.SECURITY_INVALID_SIGNATURE, exception.errorCode());
         assertTrue(SecurityContext.currentUser().isEmpty());
         assertTrue(OperationContextHolder.current().isEmpty());
     }
@@ -130,7 +130,7 @@ class TrustedHeaderAuthenticationFilterTest {
                 () -> filter.doFilter(request(headers), null, new CapturingChain())
         );
 
-        assertEquals(SecurityErrorCode.SECURITY_TRUSTED_HEADER_EXPIRED, exception.errorCode());
+        assertEquals(CommonErrorCode.SECURITY_TRUSTED_HEADER_EXPIRED, exception.errorCode());
     }
 
     @Test
@@ -145,7 +145,7 @@ class TrustedHeaderAuthenticationFilterTest {
                 () -> filter.doFilter(request(headers), null, new CapturingChain())
         );
 
-        assertEquals(SecurityErrorCode.SECURITY_INVALID_TRUSTED_HEADER, exception.errorCode());
+        assertEquals(CommonErrorCode.SECURITY_INVALID_TRUSTED_HEADER, exception.errorCode());
     }
 
     @Test

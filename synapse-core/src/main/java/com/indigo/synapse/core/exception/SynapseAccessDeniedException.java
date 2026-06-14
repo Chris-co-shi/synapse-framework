@@ -1,8 +1,6 @@
-package com.indigo.synapse.security.exception;
+package com.indigo.synapse.core.exception;
 
-import com.indigo.synapse.core.exception.SynapseException;
-
-/**
+import com.indigo.synapse.core.error.CommonErrorCode; /**
  * 授权失败异常。
  *
  * <p>用于认证主体存在但权限不足的场景。它只表达技术权限判断结果，
@@ -11,10 +9,10 @@ import com.indigo.synapse.core.exception.SynapseException;
 public class SynapseAccessDeniedException extends SynapseException {
 
     public SynapseAccessDeniedException() {
-        super(SecurityErrorCode.SECURITY_PERMISSION_DENIED);
+        super(CommonErrorCode.SECURITY_PERMISSION_DENIED);
     }
 
     public SynapseAccessDeniedException(String message) {
-        super(SecurityErrorCode.SECURITY_PERMISSION_DENIED, message);
+        super(CommonErrorCode.SECURITY_PERMISSION_DENIED, message);
     }
 }

@@ -1,7 +1,7 @@
 package com.indigo.synapse.security.header;
 
-import com.indigo.synapse.security.exception.SecurityErrorCode;
-import com.indigo.synapse.security.exception.SynapseAuthenticationException;
+import com.indigo.synapse.core.error.CommonErrorCode;
+import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -41,7 +41,7 @@ public class TrustedHeaderTimestampValidator {
         Duration delta = Duration.between(headerTime, clock.instant()).abs();
         if (delta.compareTo(tolerance) > 0) {
             throw new SynapseAuthenticationException(
-                    SecurityErrorCode.SECURITY_TRUSTED_HEADER_EXPIRED,
+                    CommonErrorCode.SECURITY_TRUSTED_HEADER_EXPIRED,
                     "trusted header timestamp is outside tolerance"
             );
         }
@@ -64,6 +64,6 @@ public class TrustedHeaderTimestampValidator {
     }
 
     private static SynapseAuthenticationException invalidHeader(String message) {
-        return new SynapseAuthenticationException(SecurityErrorCode.SECURITY_INVALID_TRUSTED_HEADER, message);
+        return new SynapseAuthenticationException(CommonErrorCode.SECURITY_INVALID_TRUSTED_HEADER, message);
     }
 }
