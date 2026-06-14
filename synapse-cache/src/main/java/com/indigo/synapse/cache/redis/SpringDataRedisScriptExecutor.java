@@ -7,6 +7,12 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 import java.util.List;
 
+/**
+ * 基于 Spring Data Redis 的 Lua 脚本执行器。
+ *
+ * <p>锁、限流等能力依赖 Redis Lua 的原子执行语义。该实现只负责按调用方传入的 key 和 args 执行脚本，
+ * 不解释业务 key，也不拆分脚本内部的关键操作。</p>
+ */
 public final class SpringDataRedisScriptExecutor implements RedisScriptExecutor {
 
     private final StringRedisTemplate redisTemplate;
