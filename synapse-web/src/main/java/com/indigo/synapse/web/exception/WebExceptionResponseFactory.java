@@ -2,6 +2,8 @@ package com.indigo.synapse.web.exception;
 
 import com.indigo.synapse.core.error.CommonErrorCode;
 import com.indigo.synapse.core.error.ErrorCode;
+import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
+import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import com.indigo.synapse.core.exception.SynapseException;
 import com.indigo.synapse.web.response.Result;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -16,7 +18,6 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 public final class WebExceptionResponseFactory {
 
     public static final String MVC_STACK = "mvc";
-    public static final String WEBFLUX_STACK = "webflux";
 
     private final CompositeErrorHttpStatusResolver statusResolver;
 
@@ -26,10 +27,6 @@ public final class WebExceptionResponseFactory {
 
     public WebErrorResponse mvc(Throwable throwable) {
         return from(MVC_STACK, throwable);
-    }
-
-    public WebErrorResponse webflux(Throwable throwable) {
-        return from(WEBFLUX_STACK, throwable);
     }
 
     public WebErrorResponse from(String stack, Throwable throwable) {
@@ -70,6 +67,23 @@ public final class WebExceptionResponseFactory {
 
     private WebErrorResponse business(String stack, SynapseException exception) {
         ErrorCode errorCode = exception.errorCode();
+
+        if (exception instanceof SynapseAuthenticationException) {
+            return new WebErrorResponse(
+                    stack,
+                    401,
+                    Result.fail(errorCode, exception.getMessage())
+            );
+        }
+
+        if (exception instanceof SynapseAccessDeniedException) {
+            return new WebErrorResponse(
+                    stack,
+                    403,
+                    Result.fail(errorCode, exception.getMessage())
+            );
+        }
+
         return error(stack, errorCode, exception.getMessage());
     }
 

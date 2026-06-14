@@ -5,17 +5,25 @@ import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SecurityExceptionTest {
 
     @Test
     void shouldExposeSecurityErrorCodes() {
-        assertEquals(401, SecurityErrorCode.SECURITY_UNAUTHENTICATED.httpStatus());
-        assertEquals(401, SecurityErrorCode.SECURITY_INVALID_TRUSTED_HEADER.httpStatus());
-        assertEquals(401, SecurityErrorCode.SECURITY_INVALID_SIGNATURE.httpStatus());
-        assertEquals(401, SecurityErrorCode.SECURITY_TRUSTED_HEADER_EXPIRED.httpStatus());
-        assertEquals(403, SecurityErrorCode.SECURITY_PERMISSION_DENIED.httpStatus());
+        assertEquals("SECURITY_UNAUTHENTICATED", SecurityErrorCode.SECURITY_UNAUTHENTICATED.code());
+        assertEquals("未认证", SecurityErrorCode.SECURITY_UNAUTHENTICATED.message());
+
+        assertEquals("SECURITY_INVALID_TRUSTED_HEADER", SecurityErrorCode.SECURITY_INVALID_TRUSTED_HEADER.code());
+        assertEquals("非法可信请求头", SecurityErrorCode.SECURITY_INVALID_TRUSTED_HEADER.message());
+
+        assertEquals("SECURITY_INVALID_SIGNATURE", SecurityErrorCode.SECURITY_INVALID_SIGNATURE.code());
+        assertEquals("可信请求头签名无效", SecurityErrorCode.SECURITY_INVALID_SIGNATURE.message());
+
+        assertEquals("SECURITY_TRUSTED_HEADER_EXPIRED", SecurityErrorCode.SECURITY_TRUSTED_HEADER_EXPIRED.code());
+        assertEquals("可信请求头已过期", SecurityErrorCode.SECURITY_TRUSTED_HEADER_EXPIRED.message());
+
+        assertEquals("SECURITY_PERMISSION_DENIED", SecurityErrorCode.SECURITY_PERMISSION_DENIED.code());
+        assertEquals("无权限", SecurityErrorCode.SECURITY_PERMISSION_DENIED.message());
     }
 
     @Test
@@ -31,13 +39,8 @@ class SecurityExceptionTest {
 
         assertEquals(SecurityErrorCode.SECURITY_INVALID_SIGNATURE, authenticationException.errorCode());
         assertEquals("invalid signature", authenticationException.getMessage());
+
         assertEquals(SecurityErrorCode.SECURITY_PERMISSION_DENIED, accessDeniedException.errorCode());
         assertEquals("permission denied", accessDeniedException.getMessage());
-    }
-
-    @Test
-    void shouldRejectForbiddenCodeForAuthenticationException() {
-        assertThrows(IllegalArgumentException.class, () ->
-                new SynapseAuthenticationException(SecurityErrorCode.SECURITY_PERMISSION_DENIED));
     }
 }

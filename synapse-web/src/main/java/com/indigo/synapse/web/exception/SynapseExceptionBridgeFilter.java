@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -29,20 +30,28 @@ public final class SynapseExceptionBridgeFilter extends OncePerRequestFilter {
 
     private final ObjectMapper objectMapper;
 
-    public SynapseExceptionBridgeFilter(ObjectMapper objectMapper) {
+    private final WebExceptionResponseFactory responseFactory;
+
+    public SynapseExceptionBridgeFilter(
+            ObjectMapper objectMapper,
+            WebExceptionResponseFactory responseFactory) {
         this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper must not be null");
+        this.responseFactory = Objects.requireNonNull(responseFactory, "responseFactory must not be null");
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
         try {
             filterChain.doFilter(request, response);
         } catch (SynapseException exception) {
             if (response.isCommitted()) {
                 throw exception;
             }
-            write(response, WebExceptionResponseFactory.mvc(exception));
+
+            write(response, responseFactory.mvc(exception));
         }
     }
 

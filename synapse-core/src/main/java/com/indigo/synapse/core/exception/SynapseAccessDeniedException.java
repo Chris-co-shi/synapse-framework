@@ -3,6 +3,8 @@ package com.indigo.synapse.core.exception;
 import com.indigo.synapse.core.error.CommonErrorCode;
 import com.indigo.synapse.core.error.ErrorCode;
 
+import java.util.Objects;
+
 /**
  * 授权失败异常。
  *
@@ -28,12 +30,6 @@ public class SynapseAccessDeniedException extends SynapseException {
     }
 
     private static ErrorCode requireForbiddenCode(ErrorCode errorCode) {
-        if (errorCode == null) {
-            throw new IllegalArgumentException("errorCode must not be null");
-        }
-        if (errorCode.httpStatus() != 403) {
-            throw new IllegalArgumentException("access denied error code must map to 403");
-        }
-        return errorCode;
+        return Objects.requireNonNull(errorCode, "errorCode must not be null");
     }
 }

@@ -72,7 +72,6 @@ class DefaultPermissionCheckerTest {
         );
 
         assertEquals(SecurityErrorCode.SECURITY_PERMISSION_DENIED, exception.errorCode());
-        assertEquals(403, exception.errorCode().httpStatus());
     }
 
     @Test
@@ -83,7 +82,6 @@ class DefaultPermissionCheckerTest {
         );
 
         assertEquals(SecurityErrorCode.SECURITY_UNAUTHENTICATED, exception.errorCode());
-        assertEquals(401, exception.errorCode().httpStatus());
     }
 
     @Test
@@ -109,7 +107,6 @@ class DefaultPermissionCheckerTest {
         );
 
         assertEquals(SecurityErrorCode.SECURITY_UNAUTHENTICATED, exception.errorCode());
-        assertEquals(401, exception.errorCode().httpStatus());
     }
 
     private static AuthenticatedUser user(String permission) {

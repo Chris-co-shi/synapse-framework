@@ -12,9 +12,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
@@ -22,8 +24,9 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 class CoreSecurityExceptionMvcIntegrationTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
     private final MockMvc mockMvc = standaloneSetup(new TestController())
-            .setControllerAdvice(new GlobalExceptionHandler())
+            .setControllerAdvice(new GlobalExceptionHandler(responseFactory()))
             .build();
 
     @Test
@@ -70,6 +73,14 @@ class CoreSecurityExceptionMvcIntegrationTest {
         return objectMapper.readTree(result.getResponse().getContentAsString());
     }
 
+    private static WebExceptionResponseFactory responseFactory() {
+        return new WebExceptionResponseFactory(
+                new CompositeErrorHttpStatusResolver(
+                        List.of(new CommonErrorHttpStatusResolver())
+                )
+        );
+    }
+
     @RestController
     static class TestController {
 
@@ -85,11 +96,15 @@ class CoreSecurityExceptionMvcIntegrationTest {
 
         @GetMapping("/signature-error")
         void signatureError() {
-            throw new SynapseAuthenticationException(TestAuthenticationErrorCode.AUTH_HEADER_INVALID, "签名错误");
+            throw new SynapseAuthenticationException(
+                    TestAuthenticationErrorCode.AUTH_HEADER_INVALID,
+                    "签名错误"
+            );
         }
     }
 
     enum TestAuthenticationErrorCode implements ErrorCode {
+
         AUTH_HEADER_INVALID;
 
         @Override
@@ -100,11 +115,6 @@ class CoreSecurityExceptionMvcIntegrationTest {
         @Override
         public String message() {
             return "认证头无效";
-        }
-
-        @Override
-        public int httpStatus() {
-            return 401;
         }
     }
 }

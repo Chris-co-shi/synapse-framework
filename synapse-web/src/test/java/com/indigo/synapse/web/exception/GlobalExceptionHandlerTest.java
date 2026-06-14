@@ -1,26 +1,28 @@
 package com.indigo.synapse.web.exception;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import com.indigo.synapse.core.error.CommonErrorCode;
 import com.indigo.synapse.core.exception.SynapseException;
 import com.indigo.synapse.web.response.Result;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.validation.BindException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.core.MethodParameter;
 
-import java.util.Set;
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class GlobalExceptionHandlerTest {
 
-    private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
+    private final GlobalExceptionHandler handler = new GlobalExceptionHandler(responseFactory());
 
     @Test
     void businessExceptionShouldUseBusinessErrorCode() {
@@ -28,8 +30,11 @@ class GlobalExceptionHandlerTest {
                 new SynapseException(CommonErrorCode.COMMON_CONFLICT, "资源版本冲突"));
 
         assertEquals(409, response.getStatusCode().value());
-        assertEquals("COMMON_CONFLICT", response.getBody().getCode());
-        assertEquals("资源版本冲突", response.getBody().getMessage());
+
+        Result<Void> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("COMMON_CONFLICT", body.code());
+        assertEquals("资源版本冲突", body.message());
     }
 
     @Test
@@ -38,8 +43,11 @@ class GlobalExceptionHandlerTest {
                 new BindException(new Object(), "request"));
 
         assertEquals(400, response.getStatusCode().value());
-        assertEquals("COMMON_BAD_REQUEST", response.getBody().getCode());
-        assertEquals("请求参数错误", response.getBody().getMessage());
+
+        Result<Void> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("COMMON_BAD_REQUEST", body.code());
+        assertEquals("请求参数错误", body.message());
     }
 
     @Test
@@ -48,17 +56,24 @@ class GlobalExceptionHandlerTest {
                 new ConstraintViolationException(Set.of()));
 
         assertEquals(400, response.getStatusCode().value());
-        assertEquals("COMMON_BAD_REQUEST", response.getBody().getCode());
-        assertEquals("请求参数错误", response.getBody().getMessage());
+
+        Result<Void> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("COMMON_BAD_REQUEST", body.code());
+        assertEquals("请求参数错误", body.message());
     }
 
     @Test
     void unknownExceptionShouldReturnInternalErrorWithoutStackTrace() {
-        ResponseEntity<Result<Void>> response = handler.handleException(new IllegalStateException("boom"));
+        ResponseEntity<Result<Void>> response = handler.handleException(
+                new IllegalStateException("boom"));
 
         assertEquals(500, response.getStatusCode().value());
-        assertEquals("COMMON_INTERNAL_ERROR", response.getBody().getCode());
-        assertEquals("系统内部错误", response.getBody().getMessage());
+
+        Result<Void> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("COMMON_INTERNAL_ERROR", body.code());
+        assertEquals("系统内部错误", body.message());
     }
 
     @Test
@@ -67,7 +82,10 @@ class GlobalExceptionHandlerTest {
                 new MissingServletRequestParameterException("id", "String"));
 
         assertEquals(400, response.getStatusCode().value());
-        assertEquals("COMMON_BAD_REQUEST", response.getBody().getCode());
+
+        Result<Void> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("COMMON_BAD_REQUEST", body.code());
     }
 
     @Test
@@ -76,7 +94,10 @@ class GlobalExceptionHandlerTest {
                 new MethodArgumentTypeMismatchException("x", String.class, "id", methodParameter(), null));
 
         assertEquals(400, response.getStatusCode().value());
-        assertEquals("COMMON_BAD_REQUEST", response.getBody().getCode());
+
+        Result<Void> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("COMMON_BAD_REQUEST", body.code());
     }
 
     @Test
@@ -85,7 +106,10 @@ class GlobalExceptionHandlerTest {
                 new HttpRequestMethodNotSupportedException("POST"));
 
         assertEquals(405, response.getStatusCode().value());
-        assertEquals("COMMON_METHOD_NOT_ALLOWED", response.getBody().getCode());
+
+        Result<Void> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("COMMON_METHOD_NOT_ALLOWED", body.code());
     }
 
     @Test
@@ -94,7 +118,18 @@ class GlobalExceptionHandlerTest {
                 new HttpMediaTypeNotSupportedException("application/x-test"));
 
         assertEquals(415, response.getStatusCode().value());
-        assertEquals("COMMON_UNSUPPORTED_MEDIA_TYPE", response.getBody().getCode());
+
+        Result<Void> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("COMMON_UNSUPPORTED_MEDIA_TYPE", body.code());
+    }
+
+    private static WebExceptionResponseFactory responseFactory() {
+        return new WebExceptionResponseFactory(
+                new CompositeErrorHttpStatusResolver(
+                        List.of(new CommonErrorHttpStatusResolver())
+                )
+        );
     }
 
     private static MethodParameter methodParameter() {

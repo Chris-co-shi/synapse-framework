@@ -2,6 +2,7 @@ package com.indigo.synapse.web.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indigo.synapse.web.exception.SynapseExceptionBridgeFilter;
+import com.indigo.synapse.web.exception.WebExceptionResponseFactory;
 import com.indigo.synapse.web.trace.MvcTraceFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -18,8 +19,10 @@ public class SynapseWebMvcAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SynapseExceptionBridgeFilter synapseExceptionBridgeFilter(ObjectMapper objectMapper) {
-        return new SynapseExceptionBridgeFilter(objectMapper);
+    public SynapseExceptionBridgeFilter synapseExceptionBridgeFilter(
+            ObjectMapper objectMapper,
+            WebExceptionResponseFactory responseFactory) {
+        return new SynapseExceptionBridgeFilter(objectMapper, responseFactory);
     }
 
     @Bean
@@ -29,6 +32,7 @@ public class SynapseWebMvcAutoConfiguration {
         FilterRegistrationBean<SynapseExceptionBridgeFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setName("synapseExceptionBridgeFilter");
         registration.setOrder(SynapseExceptionBridgeFilter.ORDER);
+        registration.addUrlPatterns("/*");
         return registration;
     }
 

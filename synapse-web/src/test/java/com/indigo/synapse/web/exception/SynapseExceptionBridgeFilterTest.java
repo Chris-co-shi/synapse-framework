@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,8 +19,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SynapseExceptionBridgeFilterTest {
 
-    private final SynapseExceptionBridgeFilter filter =
-            new SynapseExceptionBridgeFilter(SynapseObjectMapperFactory.create());
+    private final SynapseExceptionBridgeFilter filter = new SynapseExceptionBridgeFilter(
+            SynapseObjectMapperFactory.create(),
+            new WebExceptionResponseFactory(
+                    new CompositeErrorHttpStatusResolver(
+                            List.of(new CommonErrorHttpStatusResolver())
+                    )
+            )
+    );
 
     @Test
     void shouldWriteUnifiedResultWhenFilterChainThrowsSynapseException() throws Exception {
@@ -31,6 +39,7 @@ class SynapseExceptionBridgeFilterTest {
         );
 
         JsonNode body = SynapseObjectMapperFactory.create().readTree(response.getContentAsString());
+
         assertEquals(401, response.getStatus());
         assertTrue(MediaType.APPLICATION_JSON.isCompatibleWith(MediaType.parseMediaType(response.getContentType())));
         assertEquals("SECURITY_INVALID_TRUSTED_HEADER", body.get("code").asText());
@@ -94,6 +103,7 @@ class SynapseExceptionBridgeFilterTest {
     }
 
     private enum TestErrorCode implements ErrorCode {
+
         SECURITY_INVALID_TRUSTED_HEADER;
 
         @Override
@@ -104,11 +114,6 @@ class SynapseExceptionBridgeFilterTest {
         @Override
         public String message() {
             return "非法可信请求头";
-        }
-
-        @Override
-        public int httpStatus() {
-            return 401;
         }
     }
 }

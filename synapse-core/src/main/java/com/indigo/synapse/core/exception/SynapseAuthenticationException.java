@@ -3,6 +3,8 @@ package com.indigo.synapse.core.exception;
 import com.indigo.synapse.core.error.CommonErrorCode;
 import com.indigo.synapse.core.error.ErrorCode;
 
+import java.util.Objects;
+
 /**
  * 认证失败异常。
  *
@@ -24,12 +26,6 @@ public class SynapseAuthenticationException extends SynapseException {
     }
 
     private static ErrorCode requireAuthenticationCode(ErrorCode errorCode) {
-        if (errorCode == null) {
-            throw new IllegalArgumentException("errorCode must not be null");
-        }
-        if (errorCode.httpStatus() != 401) {
-            throw new IllegalArgumentException("authentication error code must map to 401");
-        }
-        return errorCode;
+        return Objects.requireNonNull(errorCode, "errorCode must not be null");
     }
 }
