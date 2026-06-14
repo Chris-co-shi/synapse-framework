@@ -20,7 +20,7 @@
 | `synapse-audit` | [synapse-audit.md](synapse-audit.md) | 审计事件契约 |
 | `synapse-file` | [synapse-file.md](synapse-file.md) | 文件存储抽象与本地轻量实现 |
 | `synapse-mq` | [synapse-mq.md](synapse-mq.md) | 消息外壳、MQ 发布/消费 SPI、上下文传播契约 |
-| `synapse-bom` | 待补充 | 依赖版本管理 |
+| `synapse-bom` | [synapse-bom.md](synapse-bom.md) | 依赖版本管理 |
 
 ## 手册编写规则
 
