@@ -9,6 +9,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Servlet MVC trace filter。
+ *
+ * <p>该 Filter 在请求进入业务 Controller 前建立 Web 请求上下文和 traceId，并在请求结束后清理。
+ * 它只处理 Web trace，不负责认证、授权或 OperationContext。</p>
+ */
 public final class MvcTraceFilter extends OncePerRequestFilter {
 
     @Override
