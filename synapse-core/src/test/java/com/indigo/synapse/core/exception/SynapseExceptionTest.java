@@ -25,6 +25,26 @@ class SynapseExceptionTest {
     }
 
     @Test
+    void shouldKeepCauseWithDefaultMessage() {
+        IllegalStateException cause = new IllegalStateException("origin");
+        SynapseException exception = new SynapseException(CommonErrorCode.COMMON_INTERNAL_ERROR, cause);
+
+        assertSame(CommonErrorCode.COMMON_INTERNAL_ERROR, exception.errorCode());
+        assertEquals("系统内部错误", exception.getMessage());
+        assertSame(cause, exception.getCause());
+    }
+
+    @Test
+    void shouldKeepCauseWithCustomMessage() {
+        IllegalStateException cause = new IllegalStateException("origin");
+        SynapseException exception = new SynapseException(CommonErrorCode.COMMON_INTERNAL_ERROR, "custom", cause);
+
+        assertSame(CommonErrorCode.COMMON_INTERNAL_ERROR, exception.errorCode());
+        assertEquals("custom", exception.getMessage());
+        assertSame(cause, exception.getCause());
+    }
+
+    @Test
     void shouldUseCommonUnauthorizedForDefaultAuthenticationException() {
         SynapseAuthenticationException exception = new SynapseAuthenticationException();
 

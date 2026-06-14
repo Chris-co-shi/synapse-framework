@@ -336,7 +336,7 @@ OperationContextProvider operationContextProvider() {
 
 ### Q3：AuditContext 和 OperationContext 有什么区别？
 
-`OperationContext` 是 core 的通用操作上下文，适合跨 data、audit、message、security 共享。
+`OperationContext` 是 core 的通用操作上下文，适合跨 data、audit、mq、security 共享。
 
 `AuditContext` 是 audit 模块的显式补充入口，适合只想为审计指定 subject 和 traceId 的特殊场景。
 

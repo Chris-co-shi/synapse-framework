@@ -24,7 +24,7 @@
 - 需要在业务服务中读取当前已认证用户。
 - 需要通过 `PermissionChecker` 显式校验权限。
 - 需要通过 `@RequirePermission` 对 Spring Bean 方法做轻量权限拦截。
-- 需要把当前认证用户同步为 `OperationContext`，供 data、audit、message 等模块使用。
+- 需要把当前认证用户同步为 `OperationContext`，供 data、audit、mq 等模块使用。
 - 需要一个默认 BCrypt 密码编码器。
 
 ## 3. 不适用场景
@@ -136,7 +136,7 @@ AuthenticatedUser
   -> OperationContext
 ```
 
-这样 data、audit、message 可以通过 `OperationContextProvider` 读取当前操作人，而不需要依赖 security。
+这样 data、audit、mq 可以通过 `OperationContextProvider` 读取当前操作人，而不需要依赖 security。
 
 ### 5.3 trusted-header 契约
 

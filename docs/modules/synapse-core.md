@@ -25,7 +25,7 @@
 - 需要统一错误码和异常模型。
 - 需要使用 `OperationContext` 承载当前操作人、来源、traceId、requestId 等技术上下文。
 - 需要在 HTTP、MQ、Task、Async、内部调用之间传递操作上下文。
-- 需要让 data、audit、message、security 等模块共享同一套上下文抽象。
+- 需要让 data、audit、mq、security 等模块共享同一套上下文抽象。
 - 需要一个不依赖 Redis、数据库、Web、Security 的基础 ID 生成抽象。
 
 ## 3. 不适用场景

@@ -8,7 +8,7 @@ package com.indigo.synapse.core.context;
  * {@link OperationContextHolder#restore(OperationContextSnapshot)} 恢复。</p>
  *
  * <p>本类型只保存上下文对象，不负责 HTTP Header、MQ Header 或 JSON 字符串的序列化；这些协议适配应由
- * web、message 或后续 adapter 模块负责。</p>
+ * web、mq 或后续 adapter 模块负责。</p>
  *
  * @param context 被快照的操作上下文；允许为空，表示快照时没有上下文
  */

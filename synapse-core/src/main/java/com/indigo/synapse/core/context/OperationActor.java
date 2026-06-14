@@ -6,7 +6,7 @@ import java.util.Map;
  * 操作执行者或最初发起人。
  *
  * <p>OperationActor 只表达技术链路中的操作主体，用于 createdBy、updatedBy、audit actor、
- * message propagation 等基础设施场景。它可以由 security 模块的 AuthenticatedUser 适配而来，
+ * mq propagation 等基础设施场景。它可以由 security 模块的 AuthenticatedUser 适配而来，
  * 也可以由任务、服务调用、消息消费等非 Web 场景显式构造。</p>
  *
  * <p>该类型不是业务用户模型，不应增加角色、菜单、组织树、业务权限码等字段。

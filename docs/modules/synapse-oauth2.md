@@ -352,7 +352,7 @@ framework 只定义 `TokenDenylistPort`，不在 oauth2 模块中引入 Redis、
 
 ### Q1：为什么 oauth2 依赖 synapse-security？
 
-OAuth2 是 security 能力的扩展方向，可以依赖 security 的基础安全模型；但 oauth2 不应反向依赖 web、data、audit、message 等模块。
+OAuth2 是 security 能力的扩展方向，可以依赖 security 的基础安全模型；但 oauth2 不应反向依赖 web、data、audit、mq 等模块。
 
 ### Q2：为什么没有 Spring Security Resource Server？
 

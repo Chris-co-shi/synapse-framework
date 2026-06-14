@@ -28,6 +28,16 @@ public class SynapseException extends RuntimeException {
     }
 
     /**
+     * 使用错误码默认文案和异常原因创建异常。
+     *
+     * @param errorCode 错误码，不能为空
+     * @param cause 原始异常原因
+     */
+    public SynapseException(ErrorCode errorCode, Throwable cause) {
+        this(errorCode, requireErrorCode(errorCode).message(), cause);
+    }
+
+    /**
      * 使用错误码和自定义文案创建异常。
      *
      * @param errorCode 错误码，不能为空
@@ -35,6 +45,18 @@ public class SynapseException extends RuntimeException {
      */
     public SynapseException(ErrorCode errorCode, String message) {
         super(message);
+        this.errorCode = requireErrorCode(errorCode);
+    }
+
+    /**
+     * 使用错误码、自定义文案和异常原因创建异常。
+     *
+     * @param errorCode 错误码，不能为空
+     * @param message 异常文案
+     * @param cause 原始异常原因
+     */
+    public SynapseException(ErrorCode errorCode, String message, Throwable cause) {
+        super(message, cause);
         this.errorCode = requireErrorCode(errorCode);
     }
 

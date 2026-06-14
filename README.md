@@ -40,7 +40,7 @@ synapse-framework
 | `synapse-oauth2` | OAuth2 / JWT / JWK 技术能力 | [查看](docs/modules/synapse-oauth2.md) |
 | `synapse-audit` | 审计事件契约 | [查看](docs/modules/synapse-audit.md) |
 | `synapse-file` | 文件存储抽象与本地轻量实现 | [查看](docs/modules/synapse-file.md) |
-| `synapse-mq` | 消息外壳、MQ 发布/消费 SPI、上下文传播契约 | [查看](docs/modules/synapse-mq.md) |
+| `synapse-mq` | MQ 消息外壳、发布/消费模板、SPI、上下文传播契约 | [查看](docs/modules/synapse-mq.md) |
 
 模块手册索引：[docs/modules/README.md](docs/modules/README.md)
 
@@ -146,7 +146,7 @@ Synapse Framework
 - 10 个 reactor 模块边界固定。
 - `synapse-web` 已移除 WebFlux / Gateway 残留。
 - `synapse-security` 不依赖 Spring Security Web / Config。
-- `synapse-mq` 不包含真实 MQ / DB / 外部渠道 SDK 实现。
+- `synapse-mq` 不包含真实 MQ / Redis 幂等 / DB / Outbox / 外部渠道 SDK 实现。
 - `synapse-cache` 不包含业务缓存 key 或业务规则。
 - `synapse-file` 不包含上传下载 API、附件表或文件权限业务。
 - 本次模块重命名后需要重新执行全量测试与 validate。

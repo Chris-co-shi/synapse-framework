@@ -5,7 +5,7 @@ import java.util.Optional;
 /**
  * 当前线程操作上下文持有器。
  *
- * <p>该类型基于 {@link ThreadLocal} 保存当前操作上下文，适用于一次同步调用链内的 data、audit、message、
+ * <p>该类型基于 {@link ThreadLocal} 保存当前操作上下文，适用于一次同步调用链内的 data、audit、mq、
  * security 等模块读取共同的操作元数据。它不是全局状态存储，也不会自动跨线程传播。</p>
  *
  * <p>使用线程池、异步执行、消息消费或定时任务时，调用方必须显式创建、快照或恢复上下文。

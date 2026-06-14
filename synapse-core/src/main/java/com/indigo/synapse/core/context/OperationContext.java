@@ -7,7 +7,7 @@ import java.util.Map;
  * 通用操作上下文。
  *
  * <p>OperationContext 是 framework 内部跨模块传递“本次操作是谁发起、从哪里来、何时发生、
- * 如何追踪”的统一载体。data、audit、message、security 等模块都应通过该类型读取操作元数据，
+ * 如何追踪”的统一载体。data、audit、mq、security 等模块都应通过该类型读取操作元数据，
  * 而不是直接依赖 Web Controller、SecurityContext 或某个业务用户表。</p>
  *
  * <p>该类型不是安全上下文，也不是业务用户模型；它不承载角色、菜单、业务权限码、组织树等业务语义。

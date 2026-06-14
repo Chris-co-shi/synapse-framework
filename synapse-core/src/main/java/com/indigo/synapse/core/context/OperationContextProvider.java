@@ -5,7 +5,7 @@ import java.util.Optional;
 /**
  * 操作上下文读取端口。
  *
- * <p>该接口是其他模块读取当前操作上下文的稳定入口。data、audit、message、file 等模块应依赖该接口，
+ * <p>该接口是其他模块读取当前操作上下文的稳定入口。data、audit、mq、file 等模块应依赖该接口，
  * 而不是直接依赖 security、web、ThreadLocal 或某个业务用户模型。这样可以保证 HTTP、MQ、Task、Async
  * 等不同入口都能用同一套上下文机制。</p>
  *
