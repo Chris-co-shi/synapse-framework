@@ -1,19 +1,19 @@
-# Synapse Framework Phase 0-1 设计包
+# Synapse Framework
 
-本目录用于启动 `synapse-framework` 的框架化沉淀工作，覆盖两个阶段：
+面向 Java 企业级业务系统的通用技术基座。
 
-- 阶段 0：开源后台框架对标分析
-- 阶段 1：Synapse Framework 框架定位、架构规则、工程规范、AI 协作规范
+Synapse Framework 不做业务系统、不做后台管理端、不做平台服务，而是沉淀可复用的框架契约、自动配置、上下文传播、安全基础、缓存并发能力、文件存储抽象、消息契约和审计事件模型。
 
-## 目标
+## 快速了解
 
-Synapse Framework 不是单一业务系统，也不是简单后台模板，而是面向企业内部应用的 Java 通用技术基座与后台快速开发底座。
+- **定位**：Java 企业应用技术基座。
+- **阶段**：一阶段技术封板。
+- **JDK**：Java 21。
+- **主栈**：Spring Boot 3.x / Maven 多模块。
+- **Web 边界**：仅 Servlet MVC，不包含 WebFlux / Gateway。
+- **核心原则**：framework 只做技术能力，业务语义由消费方拥有。
 
-第一版建议定位为：
-
-> 单体优先、模块化设计、可演进到微服务、可被 AI Agent 规范协作的企业技术基座。
-
-## 一阶段模块边界
+## 一阶段模块
 
 ```text
 synapse-framework
@@ -29,60 +29,125 @@ synapse-framework
 └── synapse-message
 ```
 
-`synapse-task` 不进入一阶段；`synapse-tenant`、`synapse-data-permission`、`synapse-cloud` 暂不实现。
+| 模块 | 定位 |
+| --- | --- |
+| `synapse-bom` | 统一依赖版本管理 |
+| `synapse-core` | 错误码、异常、ID、OperationContext 等核心契约 |
+| `synapse-web` | Servlet MVC 响应、异常处理、Filter 异常桥接 |
+| `synapse-data` | 数据层基础能力，当前聚焦 OperationContext 自动填充 |
+| `synapse-cache` | 缓存、锁、限流、幂等基础设施 |
+| `synapse-security` | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 |
+| `synapse-oauth2` | OAuth2 / JWT / JWK 技术能力 |
+| `synapse-audit` | 审计事件契约 |
+| `synapse-file` | 文件存储抽象与本地轻量实现 |
+| `synapse-message` | 消息头、上下文传播、发送 SPI、交互追踪契约 |
 
-## 使用方式
+## 快速开始
 
-1. 将本包内容复制到你的 `synapse-framework` 仓库根目录。
-2. 先让 Codex 读取 `AGENTS.md`、`docs/00-positioning.md`、`docs/01-architecture.md`、`docs/03-package-rules.md`、`docs/08-ai-development-rules.md`。
-3. 每次开发前，按 `templates/codex-task-template.md` 填写任务。
-4. 每个模块实现前必须先补充设计说明，再写代码。
-5. 每次实现后必须输出修改文件、测试结果、风险点。
-
-## 当前推荐技术基线
-
-- Java 21
-- Spring Boot 3.5.14
-- Spring Security 6.5.x
-- OAuth2 Authorization Server + Resource Server 技术抽象归属 `synapse-oauth2`
-- JWT + JWK 技术抽象归属 `synapse-oauth2`
-- MyBatis-Plus 3.5.9
-- dynamic-datasource Spring Boot 3 starter
-- Maven 3.9.0 多模块，当前工作站使用 `/Users/sxc/Documents/tool/apache-maven-3.9.0`
-- 数据库不绑定具体厂商，通过方言适配层支持切换
-- Redis / Spring Data Redis / Lettuce
-- Redis + Lua 可重入分布式锁
-- Redis + Lua 滑动窗口限流
-- Flyway
-- H2 + Testcontainers
-- springdoc OpenAPI 2.8.x
-- Lombok + MapStruct
-- JUnit 5 + Mockito + Spring Boot Test
-
-## 第一版不要做什么
-
-- 不做完整低代码平台
-- 不做完整工作流平台
-- 不做完整微服务治理平台
-- 不做插件市场
-- 不做 AI 应用平台
-- 不复制开源项目代码
-- 不把业务系统代码混入框架核心
-
-## 模块最佳实践沉淀规则
-
-每完成一个模块并通过测试后，必须沉淀：
+### 环境要求
 
 ```text
-skills/<module-name>/SKILL.md
+Java 21
+Maven 3.9.x
 ```
 
-`SKILL.md` 只记录可复用最佳实践、边界、实现模式和测试要求，不写过程日志。
+### 构建与测试
 
-## 第一版必须做什么
+```bash
+mvn clean test
+mvn validate
+```
 
-- 固定一阶段 Maven 模块边界。
-- 提供通用技术抽象、SPI、Port、轻量默认实现和基础自动配置。
-- 保持 `synapse-security` 与 `synapse-oauth2` 的职责边界。
-- 提供 Web、Data、Cache、Audit、File、Message 等基础设施契约。
-- 维护 AI 协作规范与 Skills。
+当前工作站 Maven 路径示例：
+
+```bash
+/Users/sxc/Documents/tool/apache-maven-3.9.0/bin/mvn -q clean test
+/Users/sxc/Documents/tool/apache-maven-3.9.0/bin/mvn -q validate
+```
+
+### 业务项目引入方式
+
+业务项目应按需引入模块，而不是一次性引入所有能力。
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>com.indigo.synapse</groupId>
+            <artifactId>synapse-bom</artifactId>
+            <version>${synapse.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+示例：
+
+```xml
+<dependency>
+    <groupId>com.indigo.synapse</groupId>
+    <artifactId>synapse-web</artifactId>
+</dependency>
+```
+
+## 文档导航
+
+| 文档 | 内容 |
+| --- | --- |
+| [01-项目定位与边界](docs/01-项目定位与边界.md) | 项目定位、一阶段边界、成功标准 |
+| [02-总体架构设计](docs/02-总体架构设计.md) | 模块职责、依赖方向、设计原则 |
+| [03-核心链路设计](docs/03-核心链路设计.md) | OperationContext、Web、Security、Data、Message 等核心链路 |
+| [04-技术复杂点](docs/04-技术复杂点.md) | 模块边界、异常链路、上下文传播、并发控制等风险点 |
+| [05-待补充问题](docs/05-待补充问题.md) | 二阶段候选问题与冻结结论 |
+| [06-基座与业务域边界设计](docs/06-基座与业务域边界设计.md) | framework、platform service、business application 的职责边界 |
+| [07-工程结构与模块边界设计](docs/07-工程结构与模块边界设计.md) | 包结构、模块边界、禁止结构、测试规则 |
+| [08-开发前技术决策记录](docs/08-开发前技术决策记录.md) | 一阶段关键技术决策 |
+| [09-工程初始化实施清单](docs/09-工程初始化实施清单.md) | 开发前检查、自动配置检查、测试与验收命令 |
+
+## 不做什么
+
+一阶段明确不做：
+
+- 不做业务 Controller。
+- 不做业务 Entity / Mapper / migration。
+- 不做生产启动应用。
+- 不做后台管理端。
+- 不做前端页面。
+- 不做完整 IAM / RBAC / ABAC 平台。
+- 不做 Gateway / WebFlux。
+- 不做文件中心、消息中心、任务中心、集成中心。
+- 不做租户和数据权限模块。
+
+## 边界原则
+
+```text
+Business Application
+  -> depends on Synapse Framework
+  -> owns business model
+  -> owns API
+  -> owns database schema
+  -> owns permission codes
+
+Synapse Framework
+  -> provides reusable technical foundation
+  -> provides contracts and auto-configuration
+  -> never depends on business application
+```
+
+## 一阶段封板状态
+
+当前一阶段已完成技术封板：
+
+- 10 个 reactor 模块边界固定。
+- `synapse-web` 已移除 WebFlux / Gateway 残留。
+- `synapse-security` 不依赖 Spring Security Web / Config。
+- `synapse-message` 不包含真实 MQ / DB / 外部渠道 SDK 实现。
+- `synapse-cache` 不包含业务缓存 key 或业务规则。
+- `synapse-file` 不包含上传下载 API、附件表或文件权限业务。
+- 全量测试与 validate 已通过。
+
+## 许可证
+
+当前未声明开源许可证。正式发布前需要补充 LICENSE。
