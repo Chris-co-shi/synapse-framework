@@ -12,8 +12,11 @@ import java.util.Objects;
 /**
  * trusted-header 时间戳校验器。
  *
- * <p>时间戳只能限制重放窗口，不能单独替代签名、网络隔离或 nonce 防重放存储。
- * 本任务只校验 epoch millis 与容忍窗口，不实现 nonce 存储。</p>
+ * <p>时间戳用于限制请求重放窗口：下游服务只接受当前时间前后容忍范围内的 Header。
+ * 该校验不能单独替代 HMAC 签名、网络隔离或 nonce 防重放存储。</p>
+ *
+ * <p>一阶段只校验 epoch millis 与容忍窗口，不实现 nonce 存储。如果需要严格防重放，应由 Gateway、
+ * 平台认证服务或后续安全模块提供 nonce 存储和消费机制。</p>
  */
 public class TrustedHeaderTimestampValidator {
 
