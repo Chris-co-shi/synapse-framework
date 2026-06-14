@@ -11,8 +11,18 @@ import org.springframework.security.oauth2.jwt.JwsHeader;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+/**
+ * Synapse JWT 签发与校验服务。
+ *
+ * <p>该服务只封装 JWT 编码和解码，不负责登录认证、用户密码校验、客户端授权、refresh token、
+ * token 存储或 Resource Server FilterChain。调用方需要自行决定何时签发 token、如何校验 denylist、
+ * 以及如何把 claims 转换为业务安全上下文。</p>
+ */
 public class SynapseJwtService {
 
+    /**
+     * token 类型 claim 名称。
+     */
     public static final String TOKEN_TYPE_CLAIM = "token_type";
 
     private final JwtEncoder jwtEncoder;
@@ -34,6 +44,12 @@ public class SynapseJwtService {
         this.keyId = keyId;
     }
 
+    /**
+     * 签发 JWT。
+     *
+     * @param claims Synapse JWT claims
+     * @return token 字符串
+     */
     public String issue(JwtClaims claims) {
         JwtClaimsSet.Builder builder = JwtClaimsSet.builder()
                 .issuer(claims.issuer())
@@ -51,6 +67,15 @@ public class SynapseJwtService {
         return jwtEncoder.encode(JwtEncoderParameters.from(header, builder.build())).getTokenValue();
     }
 
+    /**
+     * 校验并解析 JWT。
+     *
+     * <p>该方法只调用 JwtDecoder 完成签名、时间等基础校验，并返回 Synapse claims 快照；
+     * 是否检查 denylist、权限或用户状态由调用方负责。</p>
+     *
+     * @param token token 字符串
+     * @return JWT claims
+     */
     public JwtClaims verify(String token) {
         if (token == null || token.isBlank()) {
             throw new IllegalArgumentException("token must not be blank");
