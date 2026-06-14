@@ -8,6 +8,13 @@
     <version>0.1.0-SNAPSHOT</version>
     <artifactId>synapse-bom</artifactId>
     <packaging>pom</packaging>
+
+    <!--
+        Synapse Framework 一阶段 BOM。
+
+        该模块只负责 dependencyManagement 版本对齐，不承载 Java 代码、自动配置、starter 能力或业务依赖。
+        业务系统应通过 import synapse-bom 统一版本，再按需显式引入具体 synapse-* 模块。
+    -->
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
@@ -20,6 +27,7 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- 第三方依赖版本。BOM 只管理版本，不表示所有消费方都会实际引入这些依赖。 -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -54,7 +62,7 @@
             </dependency>
 
 
-            <!-- Synapse 内部模块 -->
+            <!-- Synapse 一阶段内部模块版本。这里仅做版本管理，不产生传递依赖。 -->
             <dependency>
                 <groupId>com.indigo.synapse</groupId>
                 <artifactId>synapse-core</artifactId>
@@ -113,6 +121,7 @@
 
     </dependencyManagement>
 
+    <!-- GitHub Packages 发布地址。正式发布到 Maven Central 前需要单独补充发布策略。 -->
     <distributionManagement>
         <repository>
             <id>github</id>
