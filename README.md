@@ -38,7 +38,7 @@ synapse-framework
 | `synapse-cache` | 缓存、锁、限流、幂等基础设施 | [查看](docs/modules/synapse-cache.md) |
 | `synapse-security` | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 | [查看](docs/modules/synapse-security.md) |
 | `synapse-oauth2` | OAuth2 / JWT / JWK 技术能力 | [查看](docs/modules/synapse-oauth2.md) |
-| `synapse-audit` | 审计事件契约 | 待补充 |
+| `synapse-audit` | 审计事件契约 | [查看](docs/modules/synapse-audit.md) |
 | `synapse-file` | 文件存储抽象与本地轻量实现 | 待补充 |
 | `synapse-message` | 消息头、上下文传播、发送 SPI、交互追踪契约 | 待补充 |
 
