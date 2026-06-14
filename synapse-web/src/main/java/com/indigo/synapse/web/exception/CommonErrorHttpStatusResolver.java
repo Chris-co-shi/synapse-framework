@@ -7,9 +7,11 @@ import java.util.Map;
 import java.util.OptionalInt;
 
 /**
- * @author 史偕成
- * @date 2026/06/14 12:26
- **/
+ * core 通用错误码到 HTTP 状态码的默认映射。
+ *
+ * <p>该实现只处理 {@link CommonErrorCode} 中的通用错误语义，不处理 security、oauth2、message 等
+ * 模块自己的细分错误码。细分错误码可以通过额外的 {@link ErrorHttpStatusResolver} 扩展。</p>
+ */
 public final class CommonErrorHttpStatusResolver implements ErrorHttpStatusResolver {
 
     private static final Map<String, Integer> STATUS_MAPPINGS = Map.of(
