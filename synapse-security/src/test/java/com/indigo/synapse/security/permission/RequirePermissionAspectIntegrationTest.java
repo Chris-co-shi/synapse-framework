@@ -1,7 +1,7 @@
 package com.indigo.synapse.security.permission;
 
 import com.indigo.synapse.security.autoconfigure.SynapseSecurityAutoConfiguration;
-import com.indigo.synapse.security.exception.SynapseAccessDeniedException;
+import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;

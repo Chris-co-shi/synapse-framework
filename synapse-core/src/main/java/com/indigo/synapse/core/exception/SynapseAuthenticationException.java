@@ -1,6 +1,6 @@
-package com.indigo.synapse.security.exception;
+package com.indigo.synapse.core.exception;
 
-import com.indigo.synapse.core.exception.SynapseException;
+import com.indigo.synapse.security.exception.SecurityErrorCode;
 
 /**
  * 认证失败异常。

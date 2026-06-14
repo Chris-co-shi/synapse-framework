@@ -1,7 +1,7 @@
 package com.indigo.synapse.security.permission;
 
 import com.indigo.synapse.security.context.AuthenticatedUser;
-import com.indigo.synapse.security.exception.SynapseAccessDeniedException;
+import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Test;
 
