@@ -19,7 +19,7 @@
 | `synapse-oauth2` | [synapse-oauth2.md](synapse-oauth2.md) | token、JWT、JWK 基础能力 |
 | `synapse-audit` | [synapse-audit.md](synapse-audit.md) | 审计事件契约 |
 | `synapse-file` | [synapse-file.md](synapse-file.md) | 文件存储抽象与本地轻量实现 |
-| `synapse-message` | 待补充 | 消息头、上下文传播、发送 SPI、交互追踪契约 |
+| `synapse-mq` | [synapse-mq.md](synapse-mq.md) | 消息外壳、MQ 发布/消费 SPI、上下文传播契约 |
 | `synapse-bom` | 待补充 | 依赖版本管理 |
 
 ## 手册编写规则
