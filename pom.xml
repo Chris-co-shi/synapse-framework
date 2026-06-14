@@ -26,7 +26,7 @@
         <module>synapse-oauth2</module>
         <module>synapse-audit</module>
         <module>synapse-file</module>
-        <module>synapse-message</module>
+        <module>synapse-mq</module>
     </modules>
 
     <build>
