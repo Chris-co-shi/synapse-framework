@@ -22,20 +22,20 @@ class ResultTest {
 
         Result<Void> response = Result.success();
 
-        assertEquals("0", response.getCode());
-        assertEquals("success", response.getMessage());
-        assertNull(response.getData());
-        assertEquals("trace-success", response.getTraceId());
-        assertNotNull(response.getTimestamp());
+        assertEquals("0", response.code());
+        assertEquals("success", response.message());
+        assertNull(response.data());
+        assertEquals("trace-success", response.traceId());
+        assertNotNull(response.timestamp());
     }
 
     @Test
     void successShouldKeepData() {
         Result<String> response = Result.success("ok");
 
-        assertEquals("0", response.getCode());
-        assertEquals("success", response.getMessage());
-        assertEquals("ok", response.getData());
+        assertEquals("0", response.code());
+        assertEquals("success", response.message());
+        assertEquals("ok", response.data());
     }
 
     @Test
@@ -44,27 +44,27 @@ class ResultTest {
 
         Result<Void> response = Result.fail(CommonErrorCode.COMMON_NOT_FOUND);
 
-        assertEquals("COMMON_NOT_FOUND", response.getCode());
-        assertEquals("资源不存在", response.getMessage());
-        assertNull(response.getData());
-        assertEquals("trace-fail", response.getTraceId());
-        assertNotNull(response.getTimestamp());
+        assertEquals("COMMON_NOT_FOUND", response.code());
+        assertEquals("资源不存在", response.message());
+        assertNull(response.data());
+        assertEquals("trace-fail", response.traceId());
+        assertNotNull(response.timestamp());
     }
 
     @Test
     void failShouldAllowCustomMessage() {
         Result<Void> response = Result.fail(CommonErrorCode.COMMON_BAD_REQUEST, "参数 id 不能为空");
 
-        assertEquals("COMMON_BAD_REQUEST", response.getCode());
-        assertEquals("参数 id 不能为空", response.getMessage());
-        assertNull(response.getData());
+        assertEquals("COMMON_BAD_REQUEST", response.code());
+        assertEquals("参数 id 不能为空", response.message());
+        assertNull(response.data());
     }
 
     @Test
     void shouldGenerateTraceIdWhenNoTraceContextExists() {
         Result<Void> response = Result.success();
 
-        assertNotNull(response.getTraceId());
-        assertEquals(32, response.getTraceId().length());
+        assertNotNull(response.traceId());
+        assertEquals(32, response.traceId().length());
     }
 }

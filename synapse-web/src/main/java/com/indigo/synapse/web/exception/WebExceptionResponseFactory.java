@@ -18,60 +18,66 @@ public final class WebExceptionResponseFactory {
     public static final String MVC_STACK = "mvc";
     public static final String WEBFLUX_STACK = "webflux";
 
-    private WebExceptionResponseFactory() {
+    private final CompositeErrorHttpStatusResolver statusResolver;
+
+    public WebExceptionResponseFactory(CompositeErrorHttpStatusResolver statusResolver) {
+        this.statusResolver = statusResolver;
     }
 
-    public static WebErrorResponse mvc(Throwable throwable) {
+    public WebErrorResponse mvc(Throwable throwable) {
         return from(MVC_STACK, throwable);
     }
 
-    public static WebErrorResponse webflux(Throwable throwable) {
+    public WebErrorResponse webflux(Throwable throwable) {
         return from(WEBFLUX_STACK, throwable);
     }
 
-    public static WebErrorResponse from(String stack, Throwable throwable) {
+    public WebErrorResponse from(String stack, Throwable throwable) {
         if (throwable instanceof SynapseException synapseException) {
             return business(stack, synapseException);
         }
+
         if (throwable instanceof MissingServletRequestParameterException
-                || throwable instanceof MethodArgumentTypeMismatchException) {
+                || throwable instanceof MethodArgumentTypeMismatchException
+                || throwable instanceof ServerWebInputException) {
             return validation(stack);
         }
-        if (throwable instanceof ServerWebInputException) {
-            return validation(stack);
-        }
+
         if (throwable instanceof NoHandlerFoundException) {
             return error(stack, CommonErrorCode.COMMON_NOT_FOUND, CommonErrorCode.COMMON_NOT_FOUND.message());
         }
-        if (throwable instanceof HttpRequestMethodNotSupportedException) {
+
+        if (throwable instanceof HttpRequestMethodNotSupportedException
+                || throwable instanceof MethodNotAllowedException) {
             return error(stack, CommonErrorCode.COMMON_METHOD_NOT_ALLOWED,
                     CommonErrorCode.COMMON_METHOD_NOT_ALLOWED.message());
         }
-        if (throwable instanceof HttpMediaTypeNotSupportedException) {
+
+        if (throwable instanceof HttpMediaTypeNotSupportedException
+                || throwable instanceof UnsupportedMediaTypeStatusException) {
             return error(stack, CommonErrorCode.COMMON_UNSUPPORTED_MEDIA_TYPE,
                     CommonErrorCode.COMMON_UNSUPPORTED_MEDIA_TYPE.message());
         }
-        if (throwable instanceof MethodNotAllowedException) {
-            return error(stack, CommonErrorCode.COMMON_METHOD_NOT_ALLOWED,
-                    CommonErrorCode.COMMON_METHOD_NOT_ALLOWED.message());
-        }
-        if (throwable instanceof UnsupportedMediaTypeStatusException) {
-            return error(stack, CommonErrorCode.COMMON_UNSUPPORTED_MEDIA_TYPE,
-                    CommonErrorCode.COMMON_UNSUPPORTED_MEDIA_TYPE.message());
-        }
-        return error(stack, CommonErrorCode.COMMON_INTERNAL_ERROR, CommonErrorCode.COMMON_INTERNAL_ERROR.message());
+
+        return error(stack, CommonErrorCode.COMMON_INTERNAL_ERROR,
+                CommonErrorCode.COMMON_INTERNAL_ERROR.message());
     }
 
-    public static WebErrorResponse validation(String stack) {
-        return error(stack, CommonErrorCode.COMMON_BAD_REQUEST, CommonErrorCode.COMMON_BAD_REQUEST.message());
+    public WebErrorResponse validation(String stack) {
+        return error(stack, CommonErrorCode.COMMON_BAD_REQUEST,
+                CommonErrorCode.COMMON_BAD_REQUEST.message());
     }
 
-    private static WebErrorResponse business(String stack, SynapseException exception) {
+    private WebErrorResponse business(String stack, SynapseException exception) {
         ErrorCode errorCode = exception.errorCode();
         return error(stack, errorCode, exception.getMessage());
     }
 
-    private static WebErrorResponse error(String stack, ErrorCode errorCode, String message) {
-        return new WebErrorResponse(stack, errorCode.httpStatus(), Result.fail(errorCode, message));
+    private WebErrorResponse error(String stack, ErrorCode errorCode, String message) {
+        return new WebErrorResponse(
+                stack,
+                statusResolver.resolve(errorCode),
+                Result.fail(errorCode, message)
+        );
     }
 }

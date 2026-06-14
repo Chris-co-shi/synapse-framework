@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indigo.synapse.web.openapi.OpenApiProperties;
 import com.indigo.synapse.web.openapi.OpenApiVisibilityPolicy;
+import com.indigo.synapse.web.exception.SynapseExceptionBridgeFilter;
 import com.indigo.synapse.web.trace.MvcTraceFilter;
 import com.indigo.synapse.web.trace.WebFluxTraceWebFilter;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.mock.env.MockEnvironment;
 
 import java.time.LocalDateTime;
@@ -28,8 +30,7 @@ class SynapseWebAutoConfigurationTest {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(
                     SynapseWebAutoConfiguration.class,
-                    SynapseWebMvcAutoConfiguration.class,
-                    SynapseWebFluxAutoConfiguration.class
+                    SynapseWebMvcAutoConfiguration.class
             ));
 
     @Test
@@ -44,8 +45,22 @@ class SynapseWebAutoConfigurationTest {
         contextRunner.run(context -> {
             assertNotNull(context.getBean(ObjectMapper.class));
             assertNotNull(context.getBean(OpenApiProperties.class));
+            assertNotNull(context.getBean(SynapseExceptionBridgeFilter.class));
             assertNotNull(context.getBean(MvcTraceFilter.class));
             assertNotNull(context.getBean(WebFluxTraceWebFilter.class));
+        });
+    }
+
+    @Test
+    void shouldRegisterSynapseExceptionBridgeFilterBeforeSecurityFilters() {
+        contextRunner.run(context -> {
+            @SuppressWarnings("unchecked")
+            FilterRegistrationBean<SynapseExceptionBridgeFilter> registration =
+                    context.getBean("synapseExceptionBridgeFilterRegistration", FilterRegistrationBean.class);
+
+            assertEquals("synapseExceptionBridgeFilter", registration.getFilterName());
+            assertEquals(SynapseExceptionBridgeFilter.ORDER, registration.getOrder());
+            assertTrue(registration.getOrder() < -100);
         });
     }
 
@@ -97,6 +112,8 @@ class SynapseWebAutoConfigurationTest {
                 .withClassLoader(new FilteredClassLoader("jakarta.servlet"))
                 .run(context -> {
                     assertNotNull(context.getBean(OpenApiProperties.class));
+                    assertFalse(context.containsBean("synapseExceptionBridgeFilter"));
+                    assertFalse(context.containsBean("synapseExceptionBridgeFilterRegistration"));
                     assertFalse(context.containsBean("synapseMvcTraceFilter"));
                 });
     }

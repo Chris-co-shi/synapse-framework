@@ -21,14 +21,4 @@ public interface ErrorCode {
      * @return 默认错误提示
      */
     String message();
-
-    /**
-     * 返回建议映射的 HTTP 状态码。
-     *
-     * <p>该方法当前用于兼容 Web 模块的异常响应映射；后续若 core 去除 Web 语义，
-     * 应迁移到 Web 层的错误码到状态码映射表。</p>
-     *
-     * @return HTTP 状态码
-     */
-    int httpStatus();
 }
