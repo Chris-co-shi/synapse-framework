@@ -14,7 +14,7 @@
 | `synapse-core` | [synapse-core.md](synapse-core.md) | 错误码、异常、ID、OperationContext 等核心契约 |
 | `synapse-web` | [synapse-web.md](synapse-web.md) | Servlet MVC 响应、异常处理、Filter 异常桥接 |
 | `synapse-data` | [synapse-data.md](synapse-data.md) | 数据层基础能力，当前聚焦 OperationContext 自动填充 |
-| `synapse-cache` | 待补充 | 缓存、锁、限流、幂等基础设施 |
+| `synapse-cache` | [synapse-cache.md](synapse-cache.md) | 缓存、锁、限流、幂等基础设施 |
 | `synapse-security` | [synapse-security.md](synapse-security.md) | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 |
 | `synapse-oauth2` | [synapse-oauth2.md](synapse-oauth2.md) | token、JWT、JWK 基础能力 |
 | `synapse-audit` | 待补充 | 审计事件契约 |
