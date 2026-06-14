@@ -1,14 +1,13 @@
 package com.indigo.synapse.cache.redis;
 
+import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
-import org.springframework.data.redis.core.DefaultTypedTuple;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -94,7 +93,7 @@ public final class StringRedisDataStructureClient implements RedisDataStructureC
     }
 
     @Override
-    public Long listLeftPush(String key, String pivot, String value) {
+    public Long listInsertBefore(String key, String pivot, String value) {
         validateKey(key);
         validateValue(pivot, "pivot");
         validateValue(value, "value");
@@ -102,7 +101,7 @@ public final class StringRedisDataStructureClient implements RedisDataStructureC
     }
 
     @Override
-    public Long listRightPush(String key, String pivot, String value) {
+    public Long listInsertAfter(String key, String pivot, String value) {
         validateKey(key);
         validateValue(pivot, "pivot");
         validateValue(value, "value");
