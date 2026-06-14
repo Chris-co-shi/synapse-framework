@@ -52,8 +52,8 @@ class StringRedisDataStructureClientIntegrationTest {
         assertEquals(List.of("c", "a", "b"), client.listRange(listKey, 0, -1));
         client.listSet(listKey, 1, "aa");
         assertEquals("aa", client.listIndex(listKey, 1));
-        client.listRightPush(listKey, "aa", "after-aa");
-        client.listLeftPush(listKey, "aa", "before-aa");
+        client.listInsertAfter(listKey, "aa", "after-aa");
+        client.listInsertBefore(listKey, "aa", "before-aa");
         assertEquals(List.of("c", "before-aa", "aa", "after-aa", "b"), client.listRange(listKey, 0, -1));
         assertEquals("c", client.listLeftPop(listKey));
         assertEquals(4L, client.listSize(listKey));
