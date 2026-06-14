@@ -9,6 +9,8 @@ import java.util.Objects;
  *
  * <p>签名必须使用稳定字段顺序，缺失字段按空字符串处理，且不包含签名字段本身。
  * 这样 Gateway 与业务服务可以独立计算相同的 HMAC payload。</p>
+ *
+ * <p>如果未来新增参与签名的 Header，必须同时调整 Gateway 注入逻辑、下游校验逻辑和兼容策略。</p>
  */
 public class TrustedHeaderCanonicalizer {
 
