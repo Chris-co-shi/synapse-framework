@@ -2,7 +2,7 @@
 
 面向 Java 企业级业务系统的通用技术基座。
 
-Synapse Framework 不做业务系统、不做后台管理端、不做平台服务，而是沉淀可复用的框架契约、自动配置、上下文传播、安全基础、缓存并发能力、文件存储抽象、消息契约和审计事件模型。
+Synapse Framework 不做业务系统、不做后台管理端、不做平台服务，而是沉淀可复用的框架契约、自动配置、上下文传播、安全基础、缓存并发能力、文件存储抽象、MQ 消息契约和审计事件模型。
 
 ## 快速了解
 
@@ -26,7 +26,7 @@ synapse-framework
 ├── synapse-oauth2
 ├── synapse-audit
 ├── synapse-file
-└── synapse-message
+└── synapse-mq
 ```
 
 | 模块 | 定位 | 手册 |
@@ -40,7 +40,7 @@ synapse-framework
 | `synapse-oauth2` | OAuth2 / JWT / JWK 技术能力 | [查看](docs/modules/synapse-oauth2.md) |
 | `synapse-audit` | 审计事件契约 | [查看](docs/modules/synapse-audit.md) |
 | `synapse-file` | 文件存储抽象与本地轻量实现 | [查看](docs/modules/synapse-file.md) |
-| `synapse-message` | 消息头、上下文传播、发送 SPI、交互追踪契约 | 待补充 |
+| `synapse-mq` | 消息外壳、MQ 发布/消费 SPI、上下文传播契约 | [查看](docs/modules/synapse-mq.md) |
 
 模块手册索引：[docs/modules/README.md](docs/modules/README.md)
 
@@ -100,7 +100,7 @@ mvn validate
 | --- | --- |
 | [01-项目定位与边界](docs/01-项目定位与边界.md) | 项目定位、一阶段边界、成功标准 |
 | [02-总体架构设计](docs/02-总体架构设计.md) | 模块职责、依赖方向、设计原则 |
-| [03-核心链路设计](docs/03-核心链路设计.md) | OperationContext、Web、Security、Data、Message 等核心链路 |
+| [03-核心链路设计](docs/03-核心链路设计.md) | OperationContext、Web、Security、Data、MQ 等核心链路 |
 | [04-技术复杂点](docs/04-技术复杂点.md) | 模块边界、异常链路、上下文传播、并发控制等风险点 |
 | [05-待补充问题](docs/05-待补充问题.md) | 二阶段候选问题与冻结结论 |
 | [06-基座与业务域边界设计](docs/06-基座与业务域边界设计.md) | framework、platform service、business application 的职责边界 |
@@ -146,7 +146,7 @@ Synapse Framework
 - 10 个 reactor 模块边界固定。
 - `synapse-web` 已移除 WebFlux / Gateway 残留。
 - `synapse-security` 不依赖 Spring Security Web / Config。
-- `synapse-message` 不包含真实 MQ / DB / 外部渠道 SDK 实现。
+- `synapse-mq` 不包含真实 MQ / DB / 外部渠道 SDK 实现。
 - `synapse-cache` 不包含业务缓存 key 或业务规则。
 - `synapse-file` 不包含上传下载 API、附件表或文件权限业务。
 - 全量测试与 validate 已通过。
