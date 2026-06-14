@@ -13,6 +13,15 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 
+/**
+ * 基于本地文件系统的 FileStorage 实现。
+ *
+ * <p>该实现适合开发、测试、单机部署或轻量场景。它将 bucket 映射为根目录下的一级目录，将 objectKey
+ * 映射为 bucket 内的相对路径，并做基础路径穿越防护，确保最终路径不逃逸 rootDirectory。</p>
+ *
+ * <p>该实现不提供分布式共享、权限控制、访问 URL、预签名 URL、文件版本、转码、预览或对象存储能力。
+ * 生产系统如需要这些能力，应提供自定义 {@link FileStorage} 实现。</p>
+ */
 public final class LocalFileStorage implements FileStorage {
 
     private final Path rootDirectory;
@@ -24,6 +33,11 @@ public final class LocalFileStorage implements FileStorage {
         this.rootDirectory = rootDirectory.toAbsolutePath().normalize();
     }
 
+    /**
+     * 保存文件到本地文件系统。
+     *
+     * <p>如果目标文件已存在，会覆盖写入。</p>
+     */
     @Override
     public FileObject store(StoreFileCommand command) {
         Path target = resolve(command.bucket(), command.objectKey());
@@ -36,6 +50,11 @@ public final class LocalFileStorage implements FileStorage {
         }
     }
 
+    /**
+     * 从本地文件系统读取文件。
+     *
+     * <p>返回的 InputStream 需要由调用方关闭。</p>
+     */
     @Override
     public Optional<StoredFile> load(String bucket, String objectKey) {
         Path source = resolve(bucket, objectKey);
@@ -51,6 +70,9 @@ public final class LocalFileStorage implements FileStorage {
         }
     }
 
+    /**
+     * 删除本地文件。
+     */
     @Override
     public boolean delete(String bucket, String objectKey) {
         try {
