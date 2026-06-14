@@ -18,7 +18,7 @@
 | `synapse-security` | [synapse-security.md](synapse-security.md) | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 |
 | `synapse-oauth2` | [synapse-oauth2.md](synapse-oauth2.md) | token、JWT、JWK 基础能力 |
 | `synapse-audit` | [synapse-audit.md](synapse-audit.md) | 审计事件契约 |
-| `synapse-file` | 待补充 | 文件存储抽象与本地轻量实现 |
+| `synapse-file` | [synapse-file.md](synapse-file.md) | 文件存储抽象与本地轻量实现 |
 | `synapse-message` | 待补充 | 消息头、上下文传播、发送 SPI、交互追踪契约 |
 | `synapse-bom` | 待补充 | 依赖版本管理 |
 
