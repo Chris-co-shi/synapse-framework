@@ -28,8 +28,11 @@ import java.util.Map;
  * 基于 trusted-header 的轻量认证 Filter。
  *
  * <p>该 Filter 面向位于 Gateway / IAM 后方的业务服务：它只恢复可信 Header 中的
- * {@link AuthenticatedUser} 并写入 {@link SecurityContext}，不做登录、不验签认证令牌、
+ * {@link AuthenticatedUser} 并写入 {@link SecurityContext}，不做登录、不验签 OAuth2/JWT token、
  * 不创建 Spring Security 过滤链。</p>
+ *
+ * <p>Filter 会在请求结束后清理 SecurityContext，并恢复进入安全上下文前的 OperationContext。
+ * 因此它必须运行在业务 Controller 之前，并应被 synapse-web 的异常桥接 Filter 包裹。</p>
  */
 public class TrustedHeaderAuthenticationFilter implements Filter {
 
