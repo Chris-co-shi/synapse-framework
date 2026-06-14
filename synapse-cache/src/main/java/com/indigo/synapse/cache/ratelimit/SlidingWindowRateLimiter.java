@@ -11,8 +11,10 @@ import java.util.UUID;
 /**
  * Redis Lua 滑动窗口限流器。
  *
- * <p>窗口数据使用 ZSET 保存请求时间戳。该实现依赖调用方传入当前毫秒时间，
- * 多实例部署时建议使用统一时钟来源，避免节点时钟漂移影响限流精度。</p>
+ * <p>窗口数据使用 ZSET 保存请求时间戳，并通过 Lua 脚本原子完成清理、计数和写入。该实现只提供底层限流判断，
+ * 不定义业务限流维度、用户维度、接口维度或降级策略。</p>
+ *
+ * <p>多实例部署时建议使用统一时钟来源，避免节点时钟漂移影响限流精度。</p>
  */
 public final class SlidingWindowRateLimiter {
 
@@ -25,6 +27,15 @@ public final class SlidingWindowRateLimiter {
         this.scriptExecutor = scriptExecutor;
     }
 
+    /**
+     * 判断当前请求是否允许通过。
+     *
+     * @param key 限流 key，由消费方决定维度
+     * @param limit 窗口内最大允许次数
+     * @param window 滑动窗口长度
+     * @param nowMillis 当前毫秒时间
+     * @return 限流决策
+     */
     public RateLimitDecision allow(String key, long limit, Duration window, long nowMillis) {
         validate(key, limit, window, nowMillis);
         List<?> result = scriptExecutor.execute(
