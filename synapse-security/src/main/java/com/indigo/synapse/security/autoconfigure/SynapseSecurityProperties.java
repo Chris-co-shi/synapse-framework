@@ -14,9 +14,14 @@ import java.time.Duration;
 public class SynapseSecurityProperties {
 
     private final TrustedHeader trustedHeader = new TrustedHeader();
+    private final Permission permission = new Permission();
 
     public TrustedHeader getTrustedHeader() {
         return trustedHeader;
+    }
+
+    public Permission getPermission() {
+        return permission;
     }
 
     /**
@@ -87,6 +92,22 @@ public class SynapseSecurityProperties {
             if (enabled && signatureEnabled && (secret == null || secret.isBlank())) {
                 throw new IllegalStateException("synapse.security.trusted-header.secret must not be blank when signature is enabled");
             }
+        }
+    }
+
+    /**
+     * 权限检查配置。
+     */
+    public static class Permission {
+
+        private boolean annotationEnabled = true;
+
+        public boolean isAnnotationEnabled() {
+            return annotationEnabled;
+        }
+
+        public void setAnnotationEnabled(boolean annotationEnabled) {
+            this.annotationEnabled = annotationEnabled;
         }
     }
 }

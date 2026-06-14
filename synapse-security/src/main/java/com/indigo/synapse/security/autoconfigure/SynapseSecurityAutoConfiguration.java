@@ -6,8 +6,14 @@ import com.indigo.synapse.security.header.TrustedHeaderTimestampValidator;
 import com.indigo.synapse.security.password.SynapsePasswordEncoderFactory;
 import com.indigo.synapse.security.permission.DefaultPermissionChecker;
 import com.indigo.synapse.security.permission.PermissionChecker;
+import com.indigo.synapse.security.permission.RequirePermissionAspect;
 import com.indigo.synapse.security.web.TrustedHeaderAuthenticationFilter;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -36,6 +42,33 @@ public class SynapseSecurityAutoConfiguration {
     @ConditionalOnMissingBean(PermissionChecker.class)
     public PermissionChecker permissionChecker() {
         return new DefaultPermissionChecker();
+    }
+
+    @Bean
+    @ConditionalOnClass(MethodInterceptor.class)
+    @ConditionalOnBean(PermissionChecker.class)
+    @ConditionalOnMissingBean(RequirePermissionAspect.class)
+    @ConditionalOnProperty(
+            prefix = "synapse.security.permission",
+            name = "annotation-enabled",
+            havingValue = "true",
+            matchIfMissing = true
+    )
+    public RequirePermissionAspect requirePermissionAspect(PermissionChecker permissionChecker) {
+        return new RequirePermissionAspect(permissionChecker);
+    }
+
+    @Bean
+    @ConditionalOnClass(DefaultAdvisorAutoProxyCreator.class)
+    @ConditionalOnMissingBean(AbstractAutoProxyCreator.class)
+    @ConditionalOnProperty(
+            prefix = "synapse.security.permission",
+            name = "annotation-enabled",
+            havingValue = "true",
+            matchIfMissing = true
+    )
+    public static DefaultAdvisorAutoProxyCreator requirePermissionAdvisorAutoProxyCreator() {
+        return new DefaultAdvisorAutoProxyCreator();
     }
 
     @Bean
