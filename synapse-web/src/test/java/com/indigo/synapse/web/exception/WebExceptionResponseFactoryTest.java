@@ -35,32 +35,23 @@ class WebExceptionResponseFactoryTest {
     }
 
     @Test
-    void shouldCreateSameBusinessResponseForMvcAndWebFlux() {
+    void shouldCreateBusinessResponseForMvc() {
         TraceContext.setTraceId("trace-same");
         SynapseException exception = new SynapseException(CommonErrorCode.COMMON_CONFLICT, "版本冲突");
 
         WebErrorResponse mvc = responseFactory.mvc(exception);
-//        WebErrorResponse webflux = responseFactory.webflux(exception);
 
         assertEquals(409, mvc.status());
-//        assertEquals(409, webflux.status());
         assertEquals("mvc", mvc.stack());
-//        assertEquals("webflux", webflux.stack());
-//        assertEquals(mvc.body().code(), webflux.body().code());
-//        assertEquals(mvc.body().message(), webflux.body().message());
         assertEquals("trace-same", mvc.body().traceId());
-//        assertEquals("trace-same", webflux.body().traceId());
     }
 
     @Test
-    void shouldCreateValidationResponseForBothStacks() {
+    void shouldCreateValidationResponseForMvc() {
         WebErrorResponse mvc = responseFactory.validation(WebExceptionResponseFactory.MVC_STACK);
-//        WebErrorResponse webflux = responseFactory.validation(WebExceptionResponseFactory.WEBFLUX_STACK);
 
         assertEquals(400, mvc.status());
-//        assertEquals(400, webflux.status());
         assertEquals("COMMON_BAD_REQUEST", mvc.body().code());
-//        assertEquals("COMMON_BAD_REQUEST", webflux.body().code());
     }
 
     @Test

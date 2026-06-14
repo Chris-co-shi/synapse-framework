@@ -15,14 +15,14 @@ class MessageBrokerTest {
                 "broker-a",
                 MessageBrokerType.KAFKA,
                 "self-hosted",
-                "orders-broker",
+                "sample-broker",
                 Map.of("region", "ap-east")
         );
 
         assertEquals("broker-a", broker.brokerCode());
         assertEquals(MessageBrokerType.KAFKA, broker.brokerType());
         assertEquals("self-hosted", broker.provider());
-        assertEquals("orders-broker", broker.name());
+        assertEquals("sample-broker", broker.name());
         assertEquals("ap-east", broker.attributes().get("region"));
         assertThrows(UnsupportedOperationException.class, () -> broker.attributes().put("x", "y"));
     }

@@ -11,9 +11,6 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.server.MethodNotAllowedException;
-import org.springframework.web.server.ServerWebInputException;
-import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -37,22 +34,19 @@ public final class WebExceptionResponseFactory {
         }
         if (throwable instanceof MissingServletRequestParameterException
                 || throwable instanceof MethodArgumentTypeMismatchException
-                || throwable instanceof HttpMessageNotReadableException
-                || throwable instanceof ServerWebInputException) {
+                || throwable instanceof HttpMessageNotReadableException) {
             return validation(stack);
         }
 
         if (throwable instanceof NoHandlerFoundException) {
             return error(stack, CommonErrorCode.COMMON_NOT_FOUND, CommonErrorCode.COMMON_NOT_FOUND.message());
         }
-        if (throwable instanceof HttpRequestMethodNotSupportedException
-                || throwable instanceof MethodNotAllowedException) {
+        if (throwable instanceof HttpRequestMethodNotSupportedException) {
             return error(stack, CommonErrorCode.COMMON_METHOD_NOT_ALLOWED,
                     CommonErrorCode.COMMON_METHOD_NOT_ALLOWED.message());
         }
 
-        if (throwable instanceof HttpMediaTypeNotSupportedException
-                || throwable instanceof UnsupportedMediaTypeStatusException) {
+        if (throwable instanceof HttpMediaTypeNotSupportedException) {
             return error(stack, CommonErrorCode.COMMON_UNSUPPORTED_MEDIA_TYPE,
                     CommonErrorCode.COMMON_UNSUPPORTED_MEDIA_TYPE.message());
         }

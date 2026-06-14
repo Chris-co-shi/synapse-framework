@@ -47,7 +47,6 @@ class SynapseWebAutoConfigurationTest {
             assertNotNull(context.getBean(OpenApiProperties.class));
             assertNotNull(context.getBean(SynapseExceptionBridgeFilter.class));
             assertNotNull(context.getBean(MvcTraceFilter.class));
-//            assertNotNull(context.getBean(WebFluxTraceWebFilter.class));
         });
     }
 
@@ -115,16 +114,6 @@ class SynapseWebAutoConfigurationTest {
                     assertFalse(context.containsBean("synapseExceptionBridgeFilter"));
                     assertFalse(context.containsBean("synapseExceptionBridgeFilterRegistration"));
                     assertFalse(context.containsBean("synapseMvcTraceFilter"));
-                });
-    }
-
-    @Test
-    void shouldNotLoadWebFluxTraceWhenReactiveStackIsMissing() {
-        contextRunner
-                .withClassLoader(new FilteredClassLoader("org.springframework.web.reactive", "org.springframework.web.server"))
-                .run(context -> {
-                    assertNotNull(context.getBean(OpenApiProperties.class));
-                    assertFalse(context.containsBean("synapseWebFluxTraceWebFilter"));
                 });
     }
 

@@ -10,7 +10,7 @@ class IdempotencyKeyResolverTest {
 
     @Test
     void shouldResolveSafeIdempotencyKey() {
-        assertEquals("order:create-1", IdempotencyKeyResolver.resolve(" order:create-1 ").orElseThrow());
+        assertEquals("operation:create-1", IdempotencyKeyResolver.resolve(" operation:create-1 ").orElseThrow());
     }
 
     @Test
