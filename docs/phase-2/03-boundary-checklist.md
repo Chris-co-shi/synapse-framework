@@ -16,6 +16,8 @@
 8. 是否会新增业务 Entity / Mapper / Repository / Service？如果是，立即停止。
 9. 是否会新增数据库 migration？如果是业务表，立即停止。
 10. 是否会把 Platform 能力放进 Framework？如果是，立即停止。
+11. 是否会新增 starter？如果是，立即停止。
+12. 是否会新增 demo / example / sample application？如果是，立即停止。
 
 ## 2. 执行后检查
 
@@ -30,6 +32,8 @@
 - 没有把 mq 做成 message-service。
 - 没有把 oauth2 做成 IAM。
 - 没有把 webflux 做成 gateway。
+- 没有新增 starter module。
+- 没有新增 demo / example / sample application。
 - 没有在 Framework 中引入 Platform 业务概念。
 - 没有引入不必要的强依赖。
 - 文档中的“当前事实”和“后续规划”表述清晰。
@@ -84,7 +88,20 @@ rg -n "file-service|message-service|config-service|audit-service|task-service|ia
 - 文档中用于说明“这些属于 Platform”是合理命中。
 - 如果代码或模块描述把这些写成 framework 已实现能力，则违规。
 
-### 3.5 WebMVC / WebFlux 依赖检查
+### 3.5 Starter / Demo 检查
+
+```bash
+rg -n "starter|demo|example|sample" README.md AGENTS.md docs pom.xml synapse-bom/pom.xml
+```
+
+判断规则：
+
+- 命中只能出现在“禁止项 / 不做项 / 历史说明 / 检查命令”中。
+- 不允许出现“后续新增 starter”或“后续新增 demo”的正向规划。
+- 不允许新增 `synapse-starter-*` module。
+- 不允许新增 demo / example / sample application。
+
+### 3.6 WebMVC / WebFlux 依赖检查
 
 ```bash
 rg -n "spring-webmvc|DispatcherServlet|jakarta.servlet|ServerWebExchange|WebFilter|reactor.core" .
@@ -104,7 +121,7 @@ rg -n "spring-webmvc|jakarta.servlet|DispatcherServlet" synapse-webflux
 rg -n "spring-webflux|ServerWebExchange|WebFilter|reactor.core" synapse-webmvc
 ```
 
-### 3.6 OAuth2 / IAM 边界检查
+### 3.7 OAuth2 / IAM 边界检查
 
 ```bash
 rg -n "AuthorizationServer|RegisteredClient|OAuth2AuthorizationService|login|client management|用户|角色|菜单|授权后台" synapse-oauth2 synapse-security docs AGENTS.md README.md
@@ -116,7 +133,7 @@ rg -n "AuthorizationServer|RegisteredClient|OAuth2AuthorizationService|login|cli
 - Authorization Server 实现、登录、客户端管理、用户认证、授权后台属于 Platform `synapse-iam`。
 - 文档中描述禁止事项属于合理命中。
 
-### 3.7 Config 边界检查
+### 3.8 Config 边界检查
 
 ```bash
 rg -n "ConfigController|配置发布|配置审批|配置中心|config-service|CREATE TABLE.*config|config_item" .
@@ -128,7 +145,7 @@ rg -n "ConfigController|配置发布|配置审批|配置中心|config-service|CR
 - `ConfigController`、配置发布、审批、配置中心后台属于 Platform。
 - 文档中说明边界属于合理命中。
 
-### 3.8 File 边界检查
+### 3.9 File 边界检查
 
 ```bash
 rg -n "FileController|Attachment|附件表|文件中心|file-service|preview|watermark|OCR" .
@@ -139,7 +156,7 @@ rg -n "FileController|Attachment|附件表|文件中心|file-service|preview|wat
 - `FileStorageClient`、文件存储 SPI、URL 签名抽象属于 framework。
 - 文件管理 API、附件业务表、预览、转码、水印、OCR 属于 Platform 或业务应用。
 
-### 3.9 MQ / Message 边界检查
+### 3.10 MQ / Message 边界检查
 
 ```bash
 rg -n "站内信|短信|邮件|消息模板|message-service|MessageTemplate|Notification|Inbox" .
@@ -150,7 +167,7 @@ rg -n "站内信|短信|邮件|消息模板|message-service|MessageTemplate|Noti
 - MQ envelope、publisher、consumer、header、idempotency key 属于 framework。
 - 站内信、短信、邮件、消息模板、消息中心属于 Platform。
 
-### 3.10 Audit 边界检查
+### 3.11 Audit 边界检查
 
 ```bash
 rg -n "AuditController|审计报表|审计中心|audit-service|AuditReport|AuditQuery" .
@@ -161,7 +178,7 @@ rg -n "AuditController|审计报表|审计中心|audit-service|AuditReport|Audit
 - `AuditEvent`、`AuditLogPort`、审计事件发布扩展点属于 framework。
 - 审计查询、审计报表、审计中心后台属于 Platform。
 
-### 3.11 Cloud / Feign 边界检查
+### 3.12 Cloud / Feign 边界检查
 
 ```bash
 rg -n "spring-cloud-starter-gateway|RouteLocator|GatewayFilter|GlobalFilter|nacos|seata|rocketmq" .
@@ -193,6 +210,7 @@ rg -n "IAM|登录认证|业务鉴权|注册中心|配置中心|服务治理后�
 | Platform 关键词 | 不一定 | 文档中说明“属于 Platform”合理，代码中实现则需警惕 |
 | `CREATE TABLE` | 不一定 | 技术测试表可能合理，业务表不允许 |
 | Cloud 禁止关键词 | 不一定 | 文档中说明禁止项合理，`synapse-cloud` 生产代码中实现或依赖通常违规 |
+| `starter` / `demo` / `example` / `sample` | 不一定 | 只允许作为禁止项、历史说明或检查命令出现，不允许作为正向规划出现 |
 
 ## 5. 任务级必检项
 
@@ -203,12 +221,14 @@ rg -n "IAM|登录认证|业务鉴权|注册中心|配置中心|服务治理后�
 - 不修改 Java。
 - 不新增 module。
 - 不重命名 module。
+- 不创建 starter 或 demo。
 
 ### TASK-202
 
 - 可以处理 WebMVC / WebFlux 拆分。
 - 必须确认 WebFlux 不引入 `spring-webmvc`。
 - 必须确认 `synapse-webflux` 不是 gateway 服务。
+- 不创建 demo / example / sample application。
 
 ### TASK-203
 
@@ -223,12 +243,14 @@ rg -n "IAM|登录认证|业务鉴权|注册中心|配置中心|服务治理后�
 - 服务间 Header 不得传播 roles / permissions / menu / raw token。
 - RequestInterceptor 优先于 ErrorDecoder。
 - 服务间签名只作为扩展点，不得做完整认证体系。
+- 不创建 starter 或 demo。
 
 ### TASK-204
 
 - 可以增强 OperationContext。
 - 必须处理 ThreadLocal 清理和上下文恢复。
 - 不得默认把缺失上下文伪装成不可追溯的 system actor。
+- 不创建 task-service、starter 或 demo。
 
 ### TASK-205
 
@@ -236,16 +258,23 @@ rg -n "IAM|登录认证|业务鉴权|注册中心|配置中心|服务治理后�
 - `synapse-time` 独立模块，不并入 core。
 - `synapse-config` 不得做 config-service。
 - `synapse-i18n` 不得做 resource center。
+- 不创建 starter 或 demo。
 
 ### TASK-206
 
 - 复查 `synapse-mq`、`synapse-file`、`synapse-audit`、`synapse-oauth2`。
 - 不得为了闭环写入平台业务实现。
+- 不创建 starter 或 demo。
 
 ### TASK-207
 
-- starter 后置。
-- examples 不得变成生产启动服务。
+- 只做 Docs / Skills / Boundary 收口。
+- 不新增 starter module。
+- 不新增 demo。
+- 不新增 example application。
+- 不新增 sample application。
+- 不新增生产启动类。
+- 不新增可启动平台服务。
 - 文档必须区分当前事实和后续规划。
 
 ## 6. 最小验收命令
@@ -257,11 +286,13 @@ rg -n "@TableName\b|BaseMapper\b|IService\b|ServiceImpl\b|CREATE TABLE|create ta
 rg -n "file-service|message-service|config-service|audit-service|task-service|用户中心|配置中心|文件中心|消息中心|审计中心" README.md AGENTS.md docs
 rg -n "spring-cloud-starter-gateway|nacos|seata|rocketmq" .
 rg -n "synapse-webmvc|synapse-webflux" synapse-cloud || true
+rg -n "starter|demo|example|sample" README.md AGENTS.md docs pom.xml synapse-bom/pom.xml
 git diff --check
 ```
 
 说明：
 
 - 命中后必须人工判断是否为合理命中。
+- `starter/demo/example/sample` 命中只能出现在禁止项、历史说明或检查命令中。
 - `git diff --check` 必须通过。
 - 文档变更任务不要求执行 `mvn test`，但代码变更任务必须执行对应测试。
