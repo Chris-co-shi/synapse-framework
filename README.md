@@ -12,6 +12,7 @@ Synapse Framework 不做业务系统、不做后台管理端、不做平台服�
 - **主栈**：Spring Boot 3.x / Maven 多模块。
 - **Web 边界**：`synapse-webmvc` 支撑 Servlet MVC；`synapse-webflux` 支撑 WebFlux，不是 Gateway 服务。
 - **核心原则**：framework 只做技术能力，业务语义由消费方或 Synapse Platform 拥有。
+- **交付约定**：不提供 starter 聚合包，不提供 demo / example / sample application。
 
 ## 边界声明
 
@@ -28,7 +29,8 @@ Framework 最多只能提供：
 - 上下文传播。
 - 编码规范。
 - 工具能力。
-- starter 组合能力。
+- 测试与文档沉淀。
+- Skill 最佳实践。
 
 Framework 禁止提供：
 
@@ -36,6 +38,8 @@ Framework 禁止提供：
 - 业务 Controller。
 - 业务 Service / Entity / Mapper / Repository。
 - 业务数据库 migration。
+- starter 聚合包。
+- demo / example / sample application。
 - 用户、角色、菜单、组织、配置中心、文件中心、消息中心、任务中心等平台业务实现。
 - Gateway / IAM / Message / File / Config / Task 等可启动服务。
 
@@ -92,9 +96,10 @@ synapse-framework
 
 注意：
 
-- `synapse-webmvc` 和 `synapse-webflux` 是当前已实现模块。
-- `synapse-cloud` 是当前已实现模块，只做服务间调用技术支撑，不是 Gateway / 注册中心 / 配置中心。
-- `synapse-config`、`synapse-i18n`、`synapse-time`、`synapse-starter-*` 仍是二阶段规划模块。
+- `synapse-webmvc`、`synapse-webflux` 和 `synapse-cloud` 是当前已实现模块。
+- `synapse-config`、`synapse-i18n`、`synapse-time` 仍是二阶段规划模块。
+- 本项目不规划、不创建 `synapse-starter-*`。
+- 本项目不规划、不创建 demo / example / sample application。
 - 未进入 root `pom.xml` reactor 前，不能把规划模块描述成已实现能力。
 - `synapse-config` 在 Framework 中只能做配置抽象、配置客户端、运行时配置读取、解析、缓存、刷新扩展点；可启动配置服务属于 Platform。
 
@@ -123,7 +128,7 @@ mvn validate
 
 ### 业务项目引入方式
 
-业务项目应按需引入模块，而不是一次性引入所有能力。
+业务项目应按需直接引入具体 module，而不是通过 starter 或 demo 应用间接引入。
 
 ```xml
 <dependencyManagement>
@@ -189,6 +194,8 @@ Framework 明确不做：
 - 不做业务 Controller。
 - 不做业务 Entity / Mapper / migration。
 - 不做生产启动应用。
+- 不做 starter 聚合包。
+- 不做 demo / example / sample application。
 - 不做后台管理端。
 - 不做前端页面。
 - 不做完整 IAM / RBAC / ABAC 平台。
@@ -216,6 +223,7 @@ Synapse Framework
   -> provides contracts and auto-configuration
   -> never depends on business application
   -> never becomes a runnable platform service
+  -> never provides starter/demo/example/sample application
 ```
 
 ## 当前状态
@@ -228,6 +236,7 @@ Synapse Framework
 - `synapse-mq` 不包含真实 MQ / Redis 幂等 / DB / Outbox / 外部渠道 SDK 实现。
 - `synapse-cache` 不包含业务缓存 key 或业务规则。
 - `synapse-file` 不包含上传下载 API、附件表或文件权限业务。
+- Framework 不提供 starter，也不提供 demo / example / sample application。
 
 ## 许可证
 
