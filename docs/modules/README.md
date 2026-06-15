@@ -13,7 +13,6 @@
 
 二阶段文档中的以下模块属于规划能力，未进入 reactor 前不能当成当前可用能力：
 
-- `synapse-cloud`
 - `synapse-config`
 - `synapse-i18n`
 - `synapse-time`
@@ -35,6 +34,7 @@
 | `synapse-core` | [synapse-core.md](synapse-core.md) | 错误码、异常、ID、OperationContext 等核心契约 |
 | `synapse-webmvc` | [synapse-webmvc.md](synapse-webmvc.md) | Servlet MVC 响应、异常处理、Filter 异常桥接 |
 | `synapse-webflux` | [synapse-webflux.md](synapse-webflux.md) | WebFlux Trace、异常响应、Reactor Context / OperationContext 恢复 |
+| `synapse-cloud` | [synapse-cloud.md](synapse-cloud.md) | Spring Cloud / OpenFeign 服务间调用上下文传播，不是 Gateway |
 | `synapse-data` | [synapse-data.md](synapse-data.md) | 数据层基础能力，当前聚焦 OperationContext 自动填充 |
 | `synapse-cache` | [synapse-cache.md](synapse-cache.md) | 缓存、锁、限流、幂等基础设施 |
 | `synapse-security` | [synapse-security.md](synapse-security.md) | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 |
@@ -52,6 +52,7 @@
 - [Module Boundary](../phase-2/01-module-boundary.md)
 - [Phase 2 Roadmap](../phase-2/02-phase-2-roadmap.md)
 - [Boundary Checklist](../phase-2/03-boundary-checklist.md)
+- [Cloud Context Propagation](../phase-2/04-cloud-context-propagation.md)
 
 ## 手册编写规则
 

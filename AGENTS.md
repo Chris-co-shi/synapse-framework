@@ -26,6 +26,7 @@ Synapse Framework 是面向 Java 企业应用的通用技术底座。
 - `synapse-core`
 - `synapse-webmvc`
 - `synapse-webflux`
+- `synapse-cloud`
 - `synapse-data`
 - `synapse-cache`
 - `synapse-security`
@@ -39,7 +40,7 @@ Synapse Framework 是面向 Java 企业应用的通用技术底座。
 - `synapse-message` 已更名为 `synapse-mq`，后续不得继续使用旧名称描述正式模块。
 - `synapse-task` 当前不属于正式 reactor，不得恢复到当前阶段 reactor。
 - `synapse-tenant`、`synapse-data-permission` 若目录存在，也只视为暂存目录或历史残留，不得当作当前已实现模块。
-- `synapse-cloud`、`synapse-config`、`synapse-i18n`、`synapse-time` 属于二阶段规划模块，未进入 reactor 前不得描述成已实现能力。
+- `synapse-config`、`synapse-i18n`、`synapse-time` 属于二阶段规划模块，未进入 reactor 前不得描述成已实现能力。
 - `synapse-web` 已在 TASK-202 中拆分为 `synapse-webmvc` 和 `synapse-webflux`，不得继续作为正式模块使用。
 - 当前不做 starter，业务项目按 module 引入。
 - 不实现业务模块。
@@ -57,6 +58,7 @@ Synapse Framework 是面向 Java 企业应用的通用技术底座。
 - `docs/phase-2/01-module-boundary.md`
 - `docs/phase-2/02-phase-2-roadmap.md`
 - `docs/phase-2/03-boundary-checklist.md`
+- `docs/phase-2/04-cloud-context-propagation.md`
 
 任何后续 Agent 执行前，必须至少先阅读：
 
@@ -93,6 +95,18 @@ Framework 禁止提供：
 - 配置中心、文件中心、消息中心、审计中心、任务中心、IAM 等平台业务实现。
 - Gateway / IAM / Message / File / Config / Task 等可启动服务。
 
+涉及 `synapse-cloud`、Spring Cloud、OpenFeign、Feign `RequestInterceptor` 或 Feign `ErrorDecoder` 的任务，必须先阅读：
+
+- `docs/phase-2/04-cloud-context-propagation.md`
+
+Cloud 边界原则：
+
+- `synapse-cloud` 只能做 Spring Cloud / OpenFeign / 服务间调用技术适配。
+- `synapse-cloud` 不得做 Gateway、注册中心、配置中心、服务治理后台或 IAM。
+- `synapse-cloud` 不得依赖 `synapse-webmvc` 或 `synapse-webflux` 来复用 `Result`、trace 或 error response。
+- 服务间 Header 禁止传播 roles、permissions、menu codes、organization tree、raw token、password、credential 和 business data。
+- 服务间签名只允许作为技术扩展点，不能实现登录认证、业务鉴权或 IAM。
+
 ## 4. 技术基线
 
 | 组件 | 推荐版本 | 说明 |
@@ -100,7 +114,7 @@ Framework 禁止提供：
 | Java | 21 | 当前主线运行时基线。 |
 | Maven | 3.9.0 | 当前工作站使用 `/Users/sxc/Documents/tool/apache-maven-3.9.0`。 |
 | Spring Boot | 3.5.15 | 3.5.x 稳定线；本框架暂不切到 Spring Boot 4.x。 |
-| Spring Cloud | 2025.0.2 | 二阶段 cloud 预留版本；当前未实现 `synapse-cloud`。 |
+| Spring Cloud | 2025.0.2 | 当前用于 `synapse-cloud` OpenFeign 技术适配。 |
 | Spring Cloud Alibaba | 2025.0.0.0 | 二阶段 cloud 预留版本；当前未实现 `synapse-cloud`。 |
 | Spring Security | Boot 管理，6.5.x | 不单独覆盖 Boot 管理版本。 |
 | OAuth2 | JWT / JWK / Token / Resource Server 辅助能力 | 二阶段 framework 不做 Authorization Server 实现。 |
@@ -139,6 +153,8 @@ Framework 禁止提供：
 - `skills/synapse-security/SKILL.md`
 
 涉及 OAuth2、JWT、JWK、Resource Server 时，必须遵守 `docs/phase-2/00-framework-boundary.md` 中 `synapse-oauth2` 的归属边界。二阶段 `synapse-oauth2` 不允许实现 Authorization Server、登录、客户端管理、用户认证或 IAM 后台。
+
+涉及 `synapse-cloud`、OpenFeign 或服务间上下文传播时，必须遵守 `docs/phase-2/04-cloud-context-propagation.md`。不得把 `synapse-cloud` 做成 Gateway、注册中心、配置中心、服务治理后台、IAM、登录认证或业务鉴权模块。
 
 涉及测试必须读取对应模块 Skill；若存在测试工程 Skill，也必须读取。
 
@@ -192,6 +208,7 @@ Config / I18n / Time runtime abstraction after corresponding phase-2 tasks
 - `synapse-config` 未来只做配置抽象，不是配置中心服务。
 - `synapse-webmvc` 只做 Servlet MVC 技术支撑，不包含 WebFlux / Gateway。
 - `synapse-webflux` 只做 WebFlux 技术支撑，不是 gateway 服务。
+- `synapse-cloud` 只做服务间调用上下文传播和 Feign 技术适配，不是 Gateway、注册中心、配置中心、服务治理后台或 IAM。
 
 ### 6.3 分层规则只约束消费方和可选 adapter
 

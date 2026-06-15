@@ -7,7 +7,7 @@ Synapse Framework 不做业务系统、不做后台管理端、不做平台服�
 ## 快速了解
 
 - **定位**：Java 企业应用技术支持框架。
-- **阶段**：二阶段已完成 WebMVC / WebFlux 技术栈拆分。
+- **阶段**：二阶段已完成 WebMVC / WebFlux 技术栈拆分，并新增 Cloud / Feign 上下文传播技术支撑。
 - **JDK**：Java 21。
 - **主栈**：Spring Boot 3.x / Maven 多模块。
 - **Web 边界**：`synapse-webmvc` 支撑 Servlet MVC；`synapse-webflux` 支撑 WebFlux，不是 Gateway 服务。
@@ -51,6 +51,7 @@ synapse-framework
 ├── synapse-core
 ├── synapse-webmvc
 ├── synapse-webflux
+├── synapse-cloud
 ├── synapse-data
 ├── synapse-cache
 ├── synapse-security
@@ -66,6 +67,7 @@ synapse-framework
 | `synapse-core` | 错误码、异常、ID、OperationContext 等核心契约 | [查看](docs/modules/synapse-core.md) |
 | `synapse-webmvc` | Servlet MVC 响应、异常处理、Filter 异常桥接 | [查看](docs/modules/synapse-webmvc.md) |
 | `synapse-webflux` | WebFlux Trace、异常响应、Reactor Context / OperationContext 恢复 | [查看](docs/modules/synapse-webflux.md) |
+| `synapse-cloud` | Spring Cloud / OpenFeign 服务间调用上下文传播 | [查看](docs/modules/synapse-cloud.md) |
 | `synapse-data` | 数据层基础能力，当前聚焦 OperationContext 自动填充 | [查看](docs/modules/synapse-data.md) |
 | `synapse-cache` | 缓存、锁、限流、幂等基础设施 | [查看](docs/modules/synapse-cache.md) |
 | `synapse-security` | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 | [查看](docs/modules/synapse-security.md) |
@@ -86,11 +88,13 @@ synapse-framework
 | [01-Module Boundary](docs/phase-2/01-module-boundary.md) | 当前模块事实、二阶段目标模块形态、模块允许/禁止内容 |
 | [02-Phase 2 Roadmap](docs/phase-2/02-phase-2-roadmap.md) | TASK-201 到 TASK-207 的任务拆分 |
 | [03-Boundary Checklist](docs/phase-2/03-boundary-checklist.md) | 每个 TASK 执行前后的边界检查清单 |
+| [04-Cloud Context Propagation](docs/phase-2/04-cloud-context-propagation.md) | `synapse-cloud` 服务间调用 Header 契约与 Feign 适配边界 |
 
 注意：
 
 - `synapse-webmvc` 和 `synapse-webflux` 是当前已实现模块。
-- `synapse-cloud`、`synapse-config`、`synapse-i18n`、`synapse-time`、`synapse-starter-*` 仍是二阶段规划模块。
+- `synapse-cloud` 是当前已实现模块，只做服务间调用技术支撑，不是 Gateway / 注册中心 / 配置中心。
+- `synapse-config`、`synapse-i18n`、`synapse-time`、`synapse-starter-*` 仍是二阶段规划模块。
 - 未进入 root `pom.xml` reactor 前，不能把规划模块描述成已实现能力。
 - `synapse-config` 在 Framework 中只能做配置抽象、配置客户端、运行时配置读取、解析、缓存、刷新扩展点；可启动配置服务属于 Platform。
 
@@ -155,6 +159,17 @@ WebFlux 服务引入：
 
 说明：Gateway 可启动服务属于 Synapse Platform。Platform Gateway 可以引用 `synapse-webflux` 的技术支撑能力，但 Gateway 路由、鉴权业务和启动服务不进入 Framework。
 
+OpenFeign 服务间调用引入：
+
+```xml
+<dependency>
+    <groupId>com.indigo.synapse</groupId>
+    <artifactId>synapse-cloud</artifactId>
+</dependency>
+```
+
+说明：`synapse-cloud` 只提供 Feign 上下文传播、远程错误解码和条件自动配置，不提供 Gateway、注册中心、配置中心、服务治理后台或 IAM。
+
 ## 文档导航
 
 | 文档 | 内容 |
@@ -207,6 +222,7 @@ Synapse Framework
 
 - `synapse-webmvc` 承接原 Servlet MVC Web 能力。
 - `synapse-webflux` 提供 WebFlux 最小技术闭环，不包含 Gateway 服务。
+- `synapse-cloud` 提供 OpenFeign 出站 OperationContext Header 编码、RequestInterceptor、ErrorDecoder 和自动配置，不包含 Gateway、Nacos、Seata、RocketMQ、IAM 或业务鉴权。
 - `synapse-web` 不再作为正式 reactor module 保留。
 - `synapse-security` 不依赖 Spring Security Web / Config。
 - `synapse-mq` 不包含真实 MQ / Redis 幂等 / DB / Outbox / 外部渠道 SDK 实现。

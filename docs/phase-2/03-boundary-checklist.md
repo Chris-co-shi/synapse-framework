@@ -161,6 +161,24 @@ rg -n "AuditController|审计报表|审计中心|audit-service|AuditReport|Audit
 - `AuditEvent`、`AuditLogPort`、审计事件发布扩展点属于 framework。
 - 审计查询、审计报表、审计中心后台属于 Platform。
 
+### 3.11 Cloud / Feign 边界检查
+
+```bash
+rg -n "spring-cloud-starter-gateway|RouteLocator|GatewayFilter|GlobalFilter|nacos|seata|rocketmq" .
+rg -n "synapse-webmvc|synapse-webflux|synapse-security|synapse-mq" synapse-cloud || true
+rg -n "roles|permissions|menu|organization|raw token|password|credential|Authorization" synapse-cloud docs/phase-2/04-cloud-context-propagation.md || true
+rg -n "IAM|登录认证|业务鉴权|注册中心|配置中心|服务治理后台" synapse-cloud docs/phase-2/04-cloud-context-propagation.md || true
+```
+
+判断规则：
+
+- `synapse-cloud` 只能做 Spring Cloud / OpenFeign / 服务间调用技术适配。
+- `synapse-cloud` 不得依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-mq`。
+- `synapse-cloud` 不得引入 Gateway、Nacos、Seata、RocketMQ。
+- `synapse-cloud` 不得实现 IAM、登录认证、业务鉴权、注册中心、配置中心或服务治理后台。
+- 服务间 Header 禁止传播 roles、permissions、menu codes、organization tree、raw token、password、credential 和 business data。
+- 文档中说明这些能力“禁止进入 framework”属于合理命中。
+
 ## 4. 合理命中说明
 
 以下命中不一定违规，需要结合位置和语义判断：
@@ -174,6 +192,7 @@ rg -n "AuditController|审计报表|审计中心|audit-service|AuditReport|Audit
 | `Service` 字样 | 不一定 | 业务 Service 禁止，技术型 service/helper/template 需要结合语义判断 |
 | Platform 关键词 | 不一定 | 文档中说明“属于 Platform”合理，代码中实现则需警惕 |
 | `CREATE TABLE` | 不一定 | 技术测试表可能合理，业务表不允许 |
+| Cloud 禁止关键词 | 不一定 | 文档中说明禁止项合理，`synapse-cloud` 生产代码中实现或依赖通常违规 |
 
 ## 5. 任务级必检项
 
@@ -196,6 +215,14 @@ rg -n "AuditController|审计报表|审计中心|audit-service|AuditReport|Audit
 - 可以新增 `synapse-cloud`。
 - 不得引入注册中心服务或配置中心服务。
 - Feign / LoadBalancer 只作为技术调用能力。
+- TASK-203-A 只允许文档冻结，不新增 module、不修改 POM、不新增 Java。
+- TASK-203-B 才允许新增 `synapse-cloud` module 和修改 root POM / BOM。
+- `synapse-cloud` 不得依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-mq`。
+- `synapse-cloud` 不得引入 Gateway、Nacos、Seata、RocketMQ。
+- `synapse-cloud` 不得实现 IAM、登录认证或业务鉴权。
+- 服务间 Header 不得传播 roles / permissions / menu / raw token。
+- RequestInterceptor 优先于 ErrorDecoder。
+- 服务间签名只作为扩展点，不得做完整认证体系。
 
 ### TASK-204
 
@@ -228,6 +255,8 @@ rg -n "@SpringBootApplication|SpringApplication\.run" .
 rg -n "@RestController\b|@Controller\b|@RequestMapping\b|@GetMapping\b|@PostMapping\b" '*/src/main/java'
 rg -n "@TableName\b|BaseMapper\b|IService\b|ServiceImpl\b|CREATE TABLE|create table" '*/src/main'
 rg -n "file-service|message-service|config-service|audit-service|task-service|用户中心|配置中心|文件中心|消息中心|审计中心" README.md AGENTS.md docs
+rg -n "spring-cloud-starter-gateway|nacos|seata|rocketmq" .
+rg -n "synapse-webmvc|synapse-webflux" synapse-cloud || true
 git diff --check
 ```
 

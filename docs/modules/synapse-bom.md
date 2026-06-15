@@ -82,6 +82,7 @@
 synapse-core
 synapse-webmvc
 synapse-webflux
+synapse-cloud
 synapse-data
 synapse-cache
 synapse-security

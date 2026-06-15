@@ -1,0 +1,2 @@
+com.indigo.synapse.cloud.autoconfigure.SynapseCloudAutoConfiguration
+com.indigo.synapse.cloud.autoconfigure.SynapseFeignAutoConfiguration

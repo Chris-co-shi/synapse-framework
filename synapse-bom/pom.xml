@@ -99,6 +99,12 @@
 
             <dependency>
                 <groupId>com.indigo.synapse</groupId>
+                <artifactId>synapse-cloud</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.indigo.synapse</groupId>
                 <artifactId>synapse-data</artifactId>
                 <version>${project.version}</version>
             </dependency>

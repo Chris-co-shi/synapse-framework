@@ -24,7 +24,7 @@
 | --- | --- | --- | --- | --- |
 | TASK-201 | Framework Boundary 固化 | P0 | 文档 | 固化 framework 不可启动、不含业务代码的边界 |
 | TASK-202 | WebMVC / WebFlux 拆分 | P0 | 结构 | 已拆分为 `synapse-webmvc` / `synapse-webflux` |
-| TASK-203 | Cloud Context Propagation | P1 | 新模块 | Feign / 服务间调用上下文传播 |
+| TASK-203 | Cloud Context Propagation | P1 | 新模块 | 已新增 `synapse-cloud`，提供 Feign / 服务间调用上下文传播 |
 | TASK-204 | OperationContext 全场景恢复 | P1 | 核心增强 | HTTP / MQ / Async / Job 上下文一致性 |
 | TASK-205 | Time / Config / I18n 基础抽象 | P1 | 新模块 | 补齐平台运行时基础抽象 |
 | TASK-206 | MQ / File / Audit / OAuth2 边界复查 | P2 | 收敛 | 防止技术模块滑向平台服务 |
@@ -137,16 +137,19 @@
 
 目标：
 
-- 新增 `synapse-cloud`，提供 Spring Cloud 微服务调用链路技术支撑。
+- 新增 `synapse-cloud`，提供 Spring Cloud / OpenFeign 微服务调用链路技术支撑。
 - 解决 Feign 调用中的 traceId、requestId、OperationContext 透传。
+- 冻结服务间调用 Header 契约，避免 WebMVC / WebFlux / MQ / Security 各自扩散。
 
 修改范围：
 
-- 新增 `synapse-cloud` module。
-- 根 POM 和 BOM。
-- Feign 相关自动配置。
-- OperationContext Header codec。
-- 模块文档和测试。
+- TASK-203-A 已通过文档冻结 Cloud 方案和 Header 契约。
+- TASK-203-B 已新增 `synapse-cloud` module，修改根 POM 和 BOM。
+- TASK-203-C 已实现 OperationContext HTTP Header codec。
+- TASK-203-D 已实现 Feign RequestInterceptor。
+- TASK-203-E 已实现 Feign ErrorDecoder。
+- TASK-203-F 已完成自动配置和测试。
+- TASK-203-G 已补齐模块文档和 Skill。
 
 不做内容：
 
@@ -155,13 +158,20 @@
 - 不做服务治理后台。
 - 不做 Gateway 服务。
 - 不绑定业务系统注册流程。
+- 不做 IAM。
+- 不做登录认证。
+- 不做业务鉴权。
+- 不绑定 Nacos / Seata / RocketMQ。
+- 不依赖 `synapse-webmvc` 或 `synapse-webflux` 复用 Result / trace / error response。
+- 不传播 roles / permissions / menu / raw token 等敏感或业务字段。
 
 交付物：
 
+- `docs/phase-2/04-cloud-context-propagation.md`。
 - `SynapseFeignRequestInterceptor`。
 - `SynapseFeignErrorDecoder`。
-- `ServiceCallHeaders`。
-- `InternalCallProperties`。
+- `SynapseCloudHeaders`。
+- `InternalCallSigner` / `InternalCallVerifier` 扩展点。
 - `OperationContextHeaderCodec`。
 - 测试用例和模块文档。
 
@@ -170,12 +180,34 @@
 - HTTP -> Service A -> Feign -> Service B 链路可透传 traceId / requestId / actor / initiator。
 - 消费方可以覆盖默认 Header 编码策略。
 - Feign 错误解码不绑定业务错误码。
+- 服务间签名只作为扩展点，不形成 IAM 或登录认证体系。
+- `synapse-cloud` 不依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-mq`。
 
 风险点：
 
 - `synapse-cloud` 过早引入 Nacos、Gateway、配置中心等平台能力。
 - Header 契约与 security trusted-header 产生冲突。
 - OperationContext 信息泄露敏感内容。
+- 为了复用 Result 反向依赖 WebMVC / WebFlux。
+- 将服务间签名误实现为 IAM 或业务鉴权。
+
+子任务拆分：
+
+| 子任务 | 目标 | 修改范围 | 不做内容 | 验收标准 |
+| --- | --- | --- | --- | --- |
+| TASK-203-A | Cloud 方案确认与 Header 契约冻结 | 只改文档 | 不新增 module、不改 POM、不新增 Java | Header 契约、依赖边界、Feign 规划已固化 |
+| TASK-203-B | 新增 `synapse-cloud` module 骨架与 POM | root POM、BOM、`synapse-cloud/pom.xml` | 不实现 Gateway / 注册中心 / IAM | reactor 和 BOM 包含 `synapse-cloud`，`mvn validate` 通过 |
+| TASK-203-C | OperationContext HTTP Header Codec | `synapse-cloud`，必要时 core 纯 Java 抽象 | 不让 core 依赖 HTTP / Feign / Spring | Header 编解码覆盖上下文字段，缺少 actor 不伪造 system |
+| TASK-203-D | Feign RequestInterceptor 最小闭环 | `synapse-cloud` | 不做 ErrorDecoder，不做完整签名认证 | Feign 出站透传上下文，已有 Header 默认不覆盖 |
+| TASK-203-E | Feign ErrorDecoder 最小闭环 | `synapse-cloud` | 不依赖 WebMVC / WebFlux Result，不绑定业务错误码 | 标准错误可解析，非标准响应可降级 |
+| TASK-203-F | 自动配置与测试 | `synapse-cloud` 生产和测试代码 | 不新增启动服务或 Controller | 条件装配、自定义 Bean 覆盖、配置关闭均通过测试 |
+| TASK-203-G | 文档与 Skill 收口 | README、docs/modules、skills | 不把规划写成当前事实 | 模块手册和 Skill 与实现一致 |
+
+执行顺序说明：
+
+- RequestInterceptor 优先于 ErrorDecoder，因为上下文出站传播是 TASK-203 的最小闭环。
+- ErrorDecoder 后置，避免第一轮引入远程响应模型争议。
+- 服务间签名先规划 `InternalCallSigner` / `InternalCallVerifier` 扩展点，不实现 IAM、登录认证或业务鉴权。
 
 ## 6. TASK-204：OperationContext 全场景恢复
 

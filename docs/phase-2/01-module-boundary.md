@@ -12,6 +12,7 @@ synapse-framework
 ├── synapse-core
 ├── synapse-webmvc
 ├── synapse-webflux
+├── synapse-cloud
 ├── synapse-data
 ├── synapse-cache
 ├── synapse-security
@@ -61,7 +62,7 @@ synapse-framework
 | 已拆分 | `synapse-web` | TASK-202 后不再作为正式模块 |
 | 新增 | `synapse-webmvc` | Servlet MVC 技术支撑 |
 | 新增 | `synapse-webflux` | WebFlux 技术支撑，不是 gateway |
-| 新增规划 | `synapse-cloud` | Spring Cloud / Feign / 服务调用上下文传播 |
+| 新增 | `synapse-cloud` | Spring Cloud / Feign / 服务调用上下文传播 |
 | 保持 | `synapse-data` | 数据层技术支撑 |
 | 保持 | `synapse-cache` | 缓存、锁、限流、幂等技术支撑 |
 | 保持 | `synapse-security` | 安全上下文、权限注解、trusted-header 技术支撑 |
@@ -475,9 +476,11 @@ Platform 边界：
 
 ### 4.3 synapse-cloud
 
-规划定位：
+当前定位：
 
-- Spring Cloud 微服务调用技术支撑模块。
+- Spring Cloud / OpenFeign / 服务间调用技术支撑模块。
+- 当前已进入 reactor。
+- 只提供 Feign 出站上下文传播、远程错误解码和条件自动配置。
 
 允许内容：
 
@@ -485,8 +488,20 @@ Platform 边界：
 - Feign ErrorDecoder。
 - 服务间调用 Header 规范。
 - OperationContext 透传。
+- OperationContext 到 HTTP Header 的编码。
+- HTTP Header 到 OperationContext 的轻量恢复辅助。
+- TraceId / RequestId 透传。
+- internal-call marker。
 - 内部调用签名扩展点。
+- Cloud properties。
+- 条件自动配置。
 - LoadBalancer 扩展点。
+
+当前未实现内容：
+
+- LoadBalancer 扩展点。
+- Resilience4j 扩展点。
+- 完整内部调用签名认证体系。
 
 禁止内容：
 
@@ -494,6 +509,39 @@ Platform 边界：
 - 配置中心服务。
 - 服务治理后台。
 - Gateway 服务。
+- Gateway RouteLocator。
+- Gateway Filter 业务逻辑。
+- IAM。
+- 登录认证。
+- 用户、角色、菜单。
+- 业务权限判断。
+- Nacos 配置管理。
+- Seata 事务协调。
+- RocketMQ adapter。
+- 业务服务 SDK。
+- 传播 roles / permissions / menu codes / organization tree / raw token / password / credential / business data。
+
+依赖边界：
+
+- 可以依赖 `synapse-core`。
+- 可以依赖 `spring-boot-autoconfigure`。
+- 可以依赖 `spring-cloud-openfeign-core` 或 `feign-core`。
+- 可以使用 Jackson 解析远程错误响应。
+- 禁止依赖 `synapse-webmvc`。
+- 禁止依赖 `synapse-webflux`。
+- 禁止依赖 `synapse-security`。
+- 禁止依赖 `synapse-mq`。
+- 禁止依赖 `spring-cloud-starter-gateway`、Nacos、Seata、RocketMQ 或业务模块。
+
+Header 契约：
+
+- TASK-203-A 冻结第一版服务间 HTTP Header 契约，详见 `docs/phase-2/04-cloud-context-propagation.md`。
+- 第一轮必须支持 `X-Trace-Id`、`X-Request-Id`、`X-Synapse-Tenant-Id`、`X-Synapse-Actor-*`、`X-Synapse-Initiator-*`、`X-Synapse-Source-Type`、`X-Synapse-Source-Name`。
+- `X-Synapse-Locale`、`X-Synapse-Time-Zone`、`X-Synapse-Context-Version` 第一轮可选。
+- `X-Synapse-Internal-Call`、`X-Synapse-Internal-Caller`、`X-Synapse-Timestamp`、`X-Synapse-Nonce`、`X-Synapse-Signature` 只规划，不在第一轮强制实现。
+- Header codec 第一阶段先放 `synapse-cloud`。
+- 后续如果 MQ / Cloud / WebFlux 复用需求稳定，再单独评估是否抽纯 Java codec 到 `synapse-core`。
+- `synapse-core` 不允许出现 HTTP、Feign、Spring、Servlet、Reactor 依赖。
 
 ### 4.4 synapse-config
 
