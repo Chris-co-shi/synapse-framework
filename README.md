@@ -7,10 +7,10 @@ Synapse Framework 不做业务系统、不做后台管理端、不做平台服�
 ## 快速了解
 
 - **定位**：Java 企业应用技术支持框架。
-- **阶段**：一阶段技术封板，二阶段进入边界固化与微服务技术基座规划。
+- **阶段**：二阶段已完成 WebMVC / WebFlux 技术栈拆分。
 - **JDK**：Java 21。
 - **主栈**：Spring Boot 3.x / Maven 多模块。
-- **Web 边界**：当前 `synapse-web` 仅 Servlet MVC，不包含 WebFlux / Gateway。
+- **Web 边界**：`synapse-webmvc` 支撑 Servlet MVC；`synapse-webflux` 支撑 WebFlux，不是 Gateway 服务。
 - **核心原则**：framework 只做技术能力，业务语义由消费方或 Synapse Platform 拥有。
 
 ## 边界声明
@@ -41,7 +41,7 @@ Framework 禁止提供：
 
 可启动平台服务统一属于 Synapse Platform，例如 `synapse-gateway`、`synapse-iam`、`synapse-message-service`、`synapse-file-service`、`synapse-config-service`、`synapse-task-service`。
 
-## 一阶段模块
+## 当前模块
 
 当前已进入 root `pom.xml` reactor 的模块如下：
 
@@ -49,7 +49,8 @@ Framework 禁止提供：
 synapse-framework
 ├── synapse-bom
 ├── synapse-core
-├── synapse-web
+├── synapse-webmvc
+├── synapse-webflux
 ├── synapse-data
 ├── synapse-cache
 ├── synapse-security
@@ -63,7 +64,8 @@ synapse-framework
 | --- | --- | --- |
 | `synapse-bom` | 统一依赖版本管理 | [查看](docs/modules/synapse-bom.md) |
 | `synapse-core` | 错误码、异常、ID、OperationContext 等核心契约 | [查看](docs/modules/synapse-core.md) |
-| `synapse-web` | Servlet MVC 响应、异常处理、Filter 异常桥接 | [查看](docs/modules/synapse-web.md) |
+| `synapse-webmvc` | Servlet MVC 响应、异常处理、Filter 异常桥接 | [查看](docs/modules/synapse-webmvc.md) |
+| `synapse-webflux` | WebFlux Trace、异常响应、Reactor Context / OperationContext 恢复 | [查看](docs/modules/synapse-webflux.md) |
 | `synapse-data` | 数据层基础能力，当前聚焦 OperationContext 自动填充 | [查看](docs/modules/synapse-data.md) |
 | `synapse-cache` | 缓存、锁、限流、幂等基础设施 | [查看](docs/modules/synapse-cache.md) |
 | `synapse-security` | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 | [查看](docs/modules/synapse-security.md) |
@@ -87,7 +89,8 @@ synapse-framework
 
 注意：
 
-- `synapse-webmvc`、`synapse-webflux`、`synapse-cloud`、`synapse-config`、`synapse-i18n`、`synapse-time`、`synapse-starter-*` 目前是二阶段规划模块。
+- `synapse-webmvc` 和 `synapse-webflux` 是当前已实现模块。
+- `synapse-cloud`、`synapse-config`、`synapse-i18n`、`synapse-time`、`synapse-starter-*` 仍是二阶段规划模块。
 - 未进入 root `pom.xml` reactor 前，不能把规划模块描述成已实现能力。
 - `synapse-config` 在 Framework 中只能做配置抽象、配置客户端、运行时配置读取、解析、缓存、刷新扩展点；可启动配置服务属于 Platform。
 
@@ -132,16 +135,25 @@ mvn validate
 </dependencyManagement>
 ```
 
-示例：
+Servlet MVC 服务引入：
 
 ```xml
 <dependency>
     <groupId>com.indigo.synapse</groupId>
-    <artifactId>synapse-web</artifactId>
+    <artifactId>synapse-webmvc</artifactId>
 </dependency>
 ```
 
-说明：当前 `synapse-web` 偏 Servlet MVC。Gateway / WebFlux 服务后续应使用二阶段规划中的 `synapse-webflux`，而不是依赖 `synapse-web`。
+WebFlux 服务引入：
+
+```xml
+<dependency>
+    <groupId>com.indigo.synapse</groupId>
+    <artifactId>synapse-webflux</artifactId>
+</dependency>
+```
+
+说明：Gateway 可启动服务属于 Synapse Platform。Platform Gateway 可以引用 `synapse-webflux` 的技术支撑能力，但 Gateway 路由、鉴权业务和启动服务不进入 Framework。
 
 ## 文档导航
 
@@ -151,11 +163,7 @@ mvn validate
 | [02-总体架构设计](docs/02-总体架构设计.md) | 模块职责、依赖方向、设计原则 |
 | [03-核心链路设计](docs/03-核心链路设计.md) | OperationContext、Web、Security、Data、MQ 等核心链路 |
 | [04-技术复杂点](docs/04-技术复杂点.md) | 模块边界、异常链路、上下文传播、并发控制等风险点 |
-| [05-待补充问题](docs/05-待补充问题.md) | 二阶段候选问题与冻结结论 |
-| [06-基座与业务域边界设计](docs/06-基座与业务域边界设计.md) | framework、platform service、business application 的职责边界 |
-| [07-工程结构与模块边界设计](docs/07-工程结构与模块边界设计.md) | 包结构、模块边界、禁止结构、测试规则 |
-| [08-开发前技术决策记录](docs/08-开发前技术决策记录.md) | 一阶段关键技术决策 |
-| [09-工程初始化实施清单](docs/09-工程初始化实施清单.md) | 开发前检查、自动配置检查、测试与验收命令 |
+| [06-待补充问题](docs/06-待补充问题.md) | 二阶段候选问题与冻结结论 |
 | [二阶段规划](docs/phase-2/02-phase-2-roadmap.md) | 二阶段任务拆分与执行顺序 |
 | [模块使用手册](docs/modules/README.md) | 各模块接入方式、扩展点和边界说明 |
 
@@ -195,17 +203,15 @@ Synapse Framework
   -> never becomes a runnable platform service
 ```
 
-## 一阶段封板状态
+## 当前状态
 
-当前一阶段已完成技术封板：
-
-- 10 个 reactor 模块边界固定。
-- `synapse-web` 已移除 WebFlux / Gateway 残留。
+- `synapse-webmvc` 承接原 Servlet MVC Web 能力。
+- `synapse-webflux` 提供 WebFlux 最小技术闭环，不包含 Gateway 服务。
+- `synapse-web` 不再作为正式 reactor module 保留。
 - `synapse-security` 不依赖 Spring Security Web / Config。
 - `synapse-mq` 不包含真实 MQ / Redis 幂等 / DB / Outbox / 外部渠道 SDK 实现。
 - `synapse-cache` 不包含业务缓存 key 或业务规则。
 - `synapse-file` 不包含上传下载 API、附件表或文件权限业务。
-- 本次模块重命名后需要重新执行全量测试与 validate。
 
 ## 许可证
 

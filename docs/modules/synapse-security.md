@@ -78,11 +78,11 @@ OAuth2 / JWT / JWK 技术能力属于 `synapse-oauth2`。完整 IAM / RBAC / ABA
 ```xml
 <dependency>
     <groupId>com.indigo.synapse</groupId>
-    <artifactId>synapse-web</artifactId>
+    <artifactId>synapse-webmvc</artifactId>
 </dependency>
 ```
 
-原因是 Filter 阶段异常需要 `synapse-web` 的 `SynapseExceptionBridgeFilter` 统一桥接。
+原因是 Filter 阶段异常需要 `synapse-webmvc` 的 `SynapseExceptionBridgeFilter` 统一桥接。
 
 ## 5. 核心能力
 

@@ -23,7 +23,7 @@
 | Task | 名称 | 优先级 | 类型 | 说明 |
 | --- | --- | --- | --- | --- |
 | TASK-201 | Framework Boundary 固化 | P0 | 文档 | 固化 framework 不可启动、不含业务代码的边界 |
-| TASK-202 | WebMVC / WebFlux 拆分 | P0 | 结构 | 解决 gateway 不能引用 MVC 的问题 |
+| TASK-202 | WebMVC / WebFlux 拆分 | P0 | 结构 | 已拆分为 `synapse-webmvc` / `synapse-webflux` |
 | TASK-203 | Cloud Context Propagation | P1 | 新模块 | Feign / 服务间调用上下文传播 |
 | TASK-204 | OperationContext 全场景恢复 | P1 | 核心增强 | HTTP / MQ / Async / Job 上下文一致性 |
 | TASK-205 | Time / Config / I18n 基础抽象 | P1 | 新模块 | 补齐平台运行时基础抽象 |
@@ -85,15 +85,15 @@
 
 目标：
 
-- 解决当前 `synapse-web` 偏 Servlet MVC，Gateway/WebFlux 服务不能引用的问题。
+- 解决原 `synapse-web` 偏 Servlet MVC，Gateway/WebFlux 服务不能引用的问题。
 - 建立 `synapse-webmvc` 和 `synapse-webflux` 的清晰边界。
 
 修改范围：
 
 - 根 `pom.xml`。
 - `synapse-bom/pom.xml`。
-- 当前 `synapse-web` 模块。
-- 新增或迁移 `synapse-webmvc`。
+- 原 `synapse-web` 模块已替换。
+- 新增并迁移 `synapse-webmvc`。
 - 新增 `synapse-webflux`。
 - AutoConfiguration imports。
 - 相关测试。
@@ -122,9 +122,14 @@
 - Gateway 类服务可以只依赖 `synapse-webflux` 的技术能力。
 - `synapse-webflux` 不包含 Gateway 路由或启动服务。
 
+完成说明：
+
+- `synapse-web` 不保留兼容层。
+- `synapse-webmvc` 承接 Servlet MVC 响应、异常、Trace、Filter 异常桥接。
+- `synapse-webflux` 只提供 WebFlux Trace、异常响应、Reactor Context / OperationContext 恢复，不做 Gateway。
+
 风险点：
 
-- 迁移时破坏现有 `synapse-web` 消费方兼容性。
 - WebFlux 模块误引入 Servlet / MVC 依赖。
 - WebFlux 异常处理写成 gateway 业务能力。
 

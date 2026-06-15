@@ -1,0 +1,3 @@
+com.indigo.synapse.webmvc.autoconfigure.SynapseWebAutoConfiguration
+com.indigo.synapse.webmvc.autoconfigure.SynapseWebErrorAutoConfiguration
+com.indigo.synapse.webmvc.autoconfigure.SynapseWebMvcAutoConfiguration

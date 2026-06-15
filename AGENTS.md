@@ -24,7 +24,8 @@ Synapse Framework 是面向 Java 企业应用的通用技术底座。
 
 - `synapse-bom`
 - `synapse-core`
-- `synapse-web`
+- `synapse-webmvc`
+- `synapse-webflux`
 - `synapse-data`
 - `synapse-cache`
 - `synapse-security`
@@ -39,6 +40,7 @@ Synapse Framework 是面向 Java 企业应用的通用技术底座。
 - `synapse-task` 当前不属于正式 reactor，不得恢复到当前阶段 reactor。
 - `synapse-tenant`、`synapse-data-permission` 若目录存在，也只视为暂存目录或历史残留，不得当作当前已实现模块。
 - `synapse-cloud`、`synapse-config`、`synapse-i18n`、`synapse-time` 属于二阶段规划模块，未进入 reactor 前不得描述成已实现能力。
+- `synapse-web` 已在 TASK-202 中拆分为 `synapse-webmvc` 和 `synapse-webflux`，不得继续作为正式模块使用。
 - 当前不做 starter，业务项目按 module 引入。
 - 不实现业务模块。
 - 不提供启动应用。
@@ -188,7 +190,8 @@ Config / I18n / Time runtime abstraction after corresponding phase-2 tasks
 - `synapse-file` 是文件存储抽象，不是文件中心。
 - `synapse-mq` 是 MQ 基础设施契约，不是消息中心。
 - `synapse-config` 未来只做配置抽象，不是配置中心服务。
-- `synapse-webflux` 未来只做 WebFlux 技术支撑，不是 gateway 服务。
+- `synapse-webmvc` 只做 Servlet MVC 技术支撑，不包含 WebFlux / Gateway。
+- `synapse-webflux` 只做 WebFlux 技术支撑，不是 gateway 服务。
 
 ### 6.3 分层规则只约束消费方和可选 adapter
 

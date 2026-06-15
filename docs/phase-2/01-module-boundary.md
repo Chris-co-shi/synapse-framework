@@ -10,7 +10,8 @@
 synapse-framework
 ├── synapse-bom
 ├── synapse-core
-├── synapse-web
+├── synapse-webmvc
+├── synapse-webflux
 ├── synapse-data
 ├── synapse-cache
 ├── synapse-security
@@ -24,6 +25,7 @@ synapse-framework
 
 - 未进入根 `pom.xml` reactor 的目录，不视为当前已实现模块。
 - `synapse-task`、`synapse-tenant`、`synapse-data-permission` 若目录存在，也只能视为暂存目录或历史残留，不能按正式 module 使用。
+- `synapse-web` 已在 TASK-202 中拆分为 `synapse-webmvc` 和 `synapse-webflux`，不再作为正式 reactor module。
 - 二阶段规划模块在真正加入 reactor 前，只能作为路线图，不代表已实现能力。
 
 ## 2. 二阶段目标模块形态
@@ -56,9 +58,9 @@ synapse-framework
 | --- | --- | --- |
 | 保持 | `synapse-bom` | 继续做版本管理 |
 | 保持 | `synapse-core` | 继续做核心契约 |
-| 拆分 | `synapse-web` | 当前偏 WebMVC，TASK-202 评估拆分为 `synapse-webmvc` / `synapse-webflux` |
-| 新增规划 | `synapse-webmvc` | Servlet MVC 技术支撑 |
-| 新增规划 | `synapse-webflux` | WebFlux 技术支撑，不是 gateway |
+| 已拆分 | `synapse-web` | TASK-202 后不再作为正式模块 |
+| 新增 | `synapse-webmvc` | Servlet MVC 技术支撑 |
+| 新增 | `synapse-webflux` | WebFlux 技术支撑，不是 gateway |
 | 新增规划 | `synapse-cloud` | Spring Cloud / Feign / 服务调用上下文传播 |
 | 保持 | `synapse-data` | 数据层技术支撑 |
 | 保持 | `synapse-cache` | 缓存、锁、限流、幂等技术支撑 |
@@ -139,18 +141,17 @@ Platform 边界：
 
 - Platform 可以复用 core 的通用上下文，但用户、角色、菜单、组织等平台模型不进入 core。
 
-### 3.3 synapse-web
+### 3.3 synapse-webmvc
 
 当前状态：
 
 - 正式 reactor module。
-- 当前偏 Servlet MVC。
-- 一阶段只保留 MVC，不包含 WebFlux / Gateway。
+- 由原 `synapse-web` 的 Servlet MVC 能力迁移而来。
+- 不包含 WebFlux / Gateway。
 
 二阶段定位：
 
-- TASK-202 中处理拆分或迁移。
-- 当前文档阶段不改代码、不重命名、不新增模块。
+- Servlet MVC 技术支撑模块。
 
 允许内容：
 
@@ -172,8 +173,8 @@ Platform 边界：
 Platform 边界：
 
 - `synapse-gateway` 属于 Platform。
-- Gateway 不能依赖偏 WebMVC 的 `synapse-web`。
-- 后续应由 `synapse-webflux` 提供 WebFlux 技术支撑。
+- Gateway 不能依赖 `synapse-webmvc`。
+- Gateway 如需 Framework WebFlux 技术能力，应引用 `synapse-webflux`。
 
 ### 3.4 synapse-data
 
@@ -431,10 +432,10 @@ Platform 边界：
 
 ### 4.1 synapse-webmvc
 
-规划定位：
+当前定位：
 
 - Servlet MVC 技术支撑模块。
-- 由当前 `synapse-web` 拆分或迁移而来。
+- 已由原 `synapse-web` 的 MVC 能力迁移而来。
 
 允许内容：
 
@@ -453,7 +454,7 @@ Platform 边界：
 
 ### 4.2 synapse-webflux
 
-规划定位：
+当前定位：
 
 - WebFlux 技术支撑模块，不是 Gateway 服务。
 

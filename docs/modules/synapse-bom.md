@@ -55,7 +55,7 @@
 ```xml
 <dependency>
     <groupId>com.indigo.synapse</groupId>
-    <artifactId>synapse-web</artifactId>
+    <artifactId>synapse-webmvc</artifactId>
 </dependency>
 ```
 
@@ -80,7 +80,8 @@
 
 ```text
 synapse-core
-synapse-web
+synapse-webmvc
+synapse-webflux
 synapse-data
 synapse-cache
 synapse-security
@@ -103,7 +104,7 @@ synapse-mq
 ```xml
 <dependency>
     <groupId>com.indigo.synapse</groupId>
-    <artifactId>synapse-web</artifactId>
+    <artifactId>synapse-webmvc</artifactId>
 </dependency>
 ```
 
@@ -112,7 +113,7 @@ synapse-mq
 ```xml
 <dependency>
     <groupId>com.indigo.synapse</groupId>
-    <artifactId>synapse-web</artifactId>
+    <artifactId>synapse-webmvc</artifactId>
 </dependency>
 
 <dependency>
@@ -198,7 +199,8 @@ synapse-mq
 
 ```text
 导入 synapse-bom = 统一版本
-显式引入 synapse-web = 使用 web 能力
+显式引入 synapse-webmvc = 使用 web 能力
+显式引入 synapse-webflux = 使用 WebFlux 技术支撑能力
 显式引入 synapse-security = 使用 security 能力
 ```
 
@@ -223,7 +225,7 @@ synapse-mq
 ```xml
 <dependency>
     <groupId>com.indigo.synapse</groupId>
-    <artifactId>synapse-web</artifactId>
+    <artifactId>synapse-webmvc</artifactId>
 </dependency>
 ```
 

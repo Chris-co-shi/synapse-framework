@@ -355,7 +355,7 @@ security 可以把 `AuthenticatedUser` 适配成 `OperationActor` 放入 `Operat
 
 ### Q4：为什么 ErrorCode 不包含 HTTP status？
 
-core 不应该绑定 Web。HTTP 状态码由 `synapse-web` 的状态解析器处理。
+core 不应该绑定 Web。HTTP 状态码由 `synapse-webmvc` 的状态解析器处理。
 
 ### Q5：业务系统能不能直接使用 OperationContextHolder？
 

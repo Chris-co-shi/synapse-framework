@@ -13,8 +13,6 @@
 
 二阶段文档中的以下模块属于规划能力，未进入 reactor 前不能当成当前可用能力：
 
-- `synapse-webmvc`
-- `synapse-webflux`
 - `synapse-cloud`
 - `synapse-config`
 - `synapse-i18n`
@@ -35,7 +33,8 @@
 | 模块 | 手册 | 说明 |
 | --- | --- | --- |
 | `synapse-core` | [synapse-core.md](synapse-core.md) | 错误码、异常、ID、OperationContext 等核心契约 |
-| `synapse-web` | [synapse-web.md](synapse-web.md) | 当前偏 Servlet MVC，提供响应、异常处理、Filter 异常桥接 |
+| `synapse-webmvc` | [synapse-webmvc.md](synapse-webmvc.md) | Servlet MVC 响应、异常处理、Filter 异常桥接 |
+| `synapse-webflux` | [synapse-webflux.md](synapse-webflux.md) | WebFlux Trace、异常响应、Reactor Context / OperationContext 恢复 |
 | `synapse-data` | [synapse-data.md](synapse-data.md) | 数据层基础能力，当前聚焦 OperationContext 自动填充 |
 | `synapse-cache` | [synapse-cache.md](synapse-cache.md) | 缓存、锁、限流、幂等基础设施 |
 | `synapse-security` | [synapse-security.md](synapse-security.md) | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 |

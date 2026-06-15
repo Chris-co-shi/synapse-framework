@@ -95,7 +95,14 @@ rg -n "spring-webmvc|DispatcherServlet|jakarta.servlet|ServerWebExchange|WebFilt
 - WebMVC 模块可以依赖 Servlet / `spring-webmvc`。
 - WebFlux 模块不得依赖 `spring-webmvc`。
 - Gateway 不应依赖 WebMVC 模块。
-- TASK-201 不处理代码拆分；TASK-202 才允许执行 WebMVC / WebFlux 拆分。
+- TASK-202 后正式模块为 `synapse-webmvc` 和 `synapse-webflux`，不再保留 `synapse-web`。
+
+TASK-202 后建议补充执行：
+
+```bash
+rg -n "spring-webmvc|jakarta.servlet|DispatcherServlet" synapse-webflux
+rg -n "spring-webflux|ServerWebExchange|WebFilter|reactor.core" synapse-webmvc
+```
 
 ### 3.6 OAuth2 / IAM 边界检查
 

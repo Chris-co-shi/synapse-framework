@@ -193,7 +193,7 @@ com.indigo.synapse.mq.autoconfigure.SynapseMqAutoConfiguration
 ## 10. 边界与注意事项
 
 - `synapse-mq` 只依赖 `synapse-core`。
-- 不直接依赖 `synapse-web`、`synapse-security`、`synapse-data`、`synapse-audit`、`synapse-cache`、`synapse-file`。
+- 不直接依赖 `synapse-webmvc`、`synapse-security`、`synapse-data`、`synapse-audit`、`synapse-cache`、`synapse-file`。
 - 不传播角色、权限和业务字段。
 - 发布端读取当前上下文应通过 `OperationContextProvider`，不要直接散落调用 `OperationContextHolder.snapshot()`。
 - 没有上下文的 MQ / Task / Async 场景应由调用方显式建立上下文。

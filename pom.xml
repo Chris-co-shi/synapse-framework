@@ -19,7 +19,8 @@
     <modules>
         <module>synapse-bom</module>
         <module>synapse-core</module>
-        <module>synapse-web</module>
+        <module>synapse-webmvc</module>
+        <module>synapse-webflux</module>
         <module>synapse-data</module>
         <module>synapse-cache</module>
         <module>synapse-security</module>

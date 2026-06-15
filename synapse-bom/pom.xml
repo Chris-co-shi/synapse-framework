@@ -71,7 +71,13 @@
 
             <dependency>
                 <groupId>com.indigo.synapse</groupId>
-                <artifactId>synapse-web</artifactId>
+                <artifactId>synapse-webmvc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.indigo.synapse</groupId>
+                <artifactId>synapse-webflux</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
