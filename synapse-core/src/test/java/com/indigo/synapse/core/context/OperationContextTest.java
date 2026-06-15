@@ -7,6 +7,10 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -77,6 +81,21 @@ class OperationContextTest {
     }
 
     @Test
+    void scopeCloseShouldRestorePreviousContextAfterException() {
+        OperationContext previous = context(actor("previous"), null, Map.of());
+        OperationContext current = context(actor("current"), null, Map.of());
+        OperationContextHolder.set(previous);
+
+        assertThrows(IllegalStateException.class, () -> {
+            try (OperationContextScope ignored = OperationContextHolder.scope(current)) {
+                throw new IllegalStateException("boom");
+            }
+        });
+
+        assertEquals(previous, OperationContextHolder.requireCurrent());
+    }
+
+    @Test
     void nestedScopeShouldRestoreInOrder() {
         OperationContext first = context(actor("first"), null, Map.of());
         OperationContext second = context(actor("second"), null, Map.of());
@@ -104,6 +123,90 @@ class OperationContextTest {
         }
 
         assertTrue(OperationContextHolder.current().isEmpty());
+    }
+
+    @Test
+    void snapshotCodecShouldEncodeAndDecodeContext() {
+        OperationContext context = context(actor("actor"), actor("initiator"), Map.of());
+        OperationContextSnapshotCodec codec = new OperationContextSnapshotCodec();
+
+        OperationContextSnapshotCarrier carrier = codec.encode(new OperationContextSnapshot(context));
+        OperationContext restored = codec.decode(carrier).orElseThrow().context();
+
+        assertEquals("trace-1", carrier.values().get(OperationContextPropagationKeys.TRACE_ID));
+        assertEquals("request-1", restored.requestId());
+        assertEquals("tenant-1", restored.tenantId());
+        assertEquals("actor", restored.actor().id());
+        assertEquals("initiator", restored.initiator().id());
+        assertEquals("test", restored.source().type());
+    }
+
+    @Test
+    void snapshotCodecShouldNotCreateActorWhenActorHeadersAreMissing() {
+        OperationContextSnapshotCodec codec = new OperationContextSnapshotCodec();
+        OperationContextSnapshotCarrier carrier = new OperationContextSnapshotCarrier(Map.of(
+                OperationContextPropagationKeys.TRACE_ID, "trace-only",
+                OperationContextPropagationKeys.TENANT_ID, "tenant-1"
+        ));
+
+        assertTrue(codec.decode(carrier).isEmpty());
+    }
+
+    @Test
+    void explicitSystemActorFactoryShouldCreateSystemActor() {
+        OperationActor system = SystemOperationActorFactory.system("system-job", "System Job");
+
+        assertEquals(OperationActorType.SYSTEM, system.type());
+        assertEquals("system-job", system.id());
+        assertThrows(IllegalArgumentException.class, () -> SystemOperationActorFactory.system(" ", "bad"));
+    }
+
+    @Test
+    void contextAwareRunnableShouldPropagateAndRestoreContext() {
+        OperationContext captured = context(actor("captured"), null, Map.of());
+        OperationContext previous = context(actor("previous"), null, Map.of());
+        OperationContextHolder.set(captured);
+
+        Runnable runnable = OperationContextExecutor.wrap(() ->
+                assertEquals("captured", OperationContextHolder.requireCurrent().actor().id()));
+
+        OperationContextHolder.set(previous);
+        runnable.run();
+
+        assertEquals(previous, OperationContextHolder.requireCurrent());
+    }
+
+    @Test
+    void contextAwareCallableShouldPropagateContext() throws Exception {
+        OperationContext captured = context(actor("callable"), null, Map.of());
+        OperationContextHolder.set(captured);
+        Callable<String> callable = OperationContextExecutor.wrap(() ->
+                OperationContextHolder.requireCurrent().actor().id());
+        OperationContextHolder.clear();
+
+        assertEquals("callable", callable.call());
+        assertTrue(OperationContextHolder.current().isEmpty());
+    }
+
+    @Test
+    void contextAwareCallableShouldNotPolluteExecutorThread() throws Exception {
+        OperationContext captured = context(actor("async"), null, Map.of());
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            OperationContextHolder.set(captured);
+            Callable<String> callable = OperationContextExecutor.wrap(() ->
+                    OperationContextHolder.requireCurrent().actor().id());
+            OperationContextHolder.clear();
+
+            Future<String> result = executor.submit(callable);
+            Future<Boolean> emptyAfterRun = executor.submit(() -> OperationContextHolder.current().isEmpty());
+
+            assertEquals("async", result.get());
+            assertTrue(emptyAfterRun.get());
+            assertTrue(OperationContextHolder.current().isEmpty());
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     @Test

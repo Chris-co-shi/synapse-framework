@@ -62,4 +62,19 @@ class SynapseWebFluxContextFilterTest {
 
         StepVerifier.create(result).verifyComplete();
     }
+
+    @Test
+    void shouldNotDefaultActorTypeWhenActorTypeHeaderMissing() {
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/items")
+                .header(OperationContextHeaders.ACTOR_ID, "service-a")
+                .header(OperationContextHeaders.TENANT_ID, "tenant-a")
+                .build());
+
+        Mono<Void> result = filter.filter(exchange, currentExchange -> Mono.deferContextual(contextView -> {
+            assertFalse(ReactiveRequestContext.operationContextSnapshot(contextView).isPresent());
+            return Mono.empty();
+        }));
+
+        StepVerifier.create(result).verifyComplete();
+    }
 }

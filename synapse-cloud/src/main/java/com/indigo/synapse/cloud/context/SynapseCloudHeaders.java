@@ -1,5 +1,7 @@
 package com.indigo.synapse.cloud.context;
 
+import com.indigo.synapse.core.context.OperationContextPropagationKeys;
+
 /**
  * Synapse 服务间 HTTP Header 契约。
  *
@@ -8,20 +10,20 @@ package com.indigo.synapse.cloud.context;
  */
 public final class SynapseCloudHeaders {
 
-    public static final String TRACE_ID = "X-Trace-Id";
-    public static final String REQUEST_ID = "X-Request-Id";
+    public static final String TRACE_ID = OperationContextPropagationKeys.TRACE_ID;
+    public static final String REQUEST_ID = OperationContextPropagationKeys.REQUEST_ID;
     public static final String CONTEXT_VERSION = "X-Synapse-Context-Version";
-    public static final String TENANT_ID = "X-Synapse-Tenant-Id";
-    public static final String ACTOR_TYPE = "X-Synapse-Actor-Type";
-    public static final String ACTOR_ID = "X-Synapse-Actor-Id";
-    public static final String ACTOR_NAME = "X-Synapse-Actor-Name";
-    public static final String INITIATOR_TYPE = "X-Synapse-Initiator-Type";
-    public static final String INITIATOR_ID = "X-Synapse-Initiator-Id";
-    public static final String INITIATOR_NAME = "X-Synapse-Initiator-Name";
-    public static final String SOURCE_TYPE = "X-Synapse-Source-Type";
-    public static final String SOURCE_NAME = "X-Synapse-Source-Name";
-    public static final String SOURCE_INSTANCE_ID = "X-Synapse-Source-Instance-Id";
-    public static final String SOURCE_ENTRYPOINT = "X-Synapse-Source-Entrypoint";
+    public static final String TENANT_ID = OperationContextPropagationKeys.TENANT_ID;
+    public static final String ACTOR_TYPE = OperationContextPropagationKeys.ACTOR_TYPE;
+    public static final String ACTOR_ID = OperationContextPropagationKeys.ACTOR_ID;
+    public static final String ACTOR_NAME = OperationContextPropagationKeys.ACTOR_NAME;
+    public static final String INITIATOR_TYPE = OperationContextPropagationKeys.INITIATOR_TYPE;
+    public static final String INITIATOR_ID = OperationContextPropagationKeys.INITIATOR_ID;
+    public static final String INITIATOR_NAME = OperationContextPropagationKeys.INITIATOR_NAME;
+    public static final String SOURCE_TYPE = OperationContextPropagationKeys.SOURCE_TYPE;
+    public static final String SOURCE_NAME = OperationContextPropagationKeys.SOURCE_NAME;
+    public static final String SOURCE_INSTANCE_ID = OperationContextPropagationKeys.SOURCE_INSTANCE_ID;
+    public static final String SOURCE_ENTRYPOINT = OperationContextPropagationKeys.SOURCE_ENTRYPOINT;
     public static final String LOCALE = "X-Synapse-Locale";
     public static final String TIME_ZONE = "X-Synapse-Time-Zone";
     public static final String INTERNAL_CALL = "X-Synapse-Internal-Call";

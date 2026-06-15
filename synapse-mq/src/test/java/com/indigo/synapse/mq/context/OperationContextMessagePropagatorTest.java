@@ -95,6 +95,17 @@ class OperationContextMessagePropagatorTest {
     }
 
     @Test
+    void shouldNotRestoreContextWhenActorTypeIsMissing() {
+        OperationContextMessageCodec codec = new OperationContextMessageCodec();
+        Map<String, String> headers = Map.of(
+                MessageContextHeaders.ACTOR_ID, "actor-1",
+                MessageContextHeaders.TRACE_ID, "trace-1"
+        );
+
+        assertTrue(codec.decode(headers).isEmpty());
+    }
+
+    @Test
     void shouldValidateConstructorArguments() {
         OperationContextMessageCodec codec = new OperationContextMessageCodec();
         OperationContextProvider provider = Optional::empty;

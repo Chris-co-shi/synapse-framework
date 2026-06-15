@@ -1,5 +1,7 @@
 package com.indigo.synapse.webflux.context;
 
+import com.indigo.synapse.core.context.OperationContextPropagationKeys;
+
 /**
  * WebFlux OperationContext 传播请求头。
  *
@@ -7,15 +9,17 @@ package com.indigo.synapse.webflux.context;
  */
 public final class OperationContextHeaders {
 
-    public static final String ACTOR_TYPE = "X-Synapse-Actor-Type";
-    public static final String ACTOR_ID = "X-Synapse-Actor-Id";
-    public static final String ACTOR_NAME = "X-Synapse-Actor-Name";
-    public static final String INITIATOR_TYPE = "X-Synapse-Initiator-Type";
-    public static final String INITIATOR_ID = "X-Synapse-Initiator-Id";
-    public static final String INITIATOR_NAME = "X-Synapse-Initiator-Name";
-    public static final String TENANT_ID = "X-Synapse-Tenant-Id";
-    public static final String SOURCE_NAME = "X-Synapse-Source-Name";
-    public static final String SOURCE_INSTANCE_ID = "X-Synapse-Source-Instance-Id";
+    public static final String ACTOR_TYPE = OperationContextPropagationKeys.ACTOR_TYPE;
+    public static final String ACTOR_ID = OperationContextPropagationKeys.ACTOR_ID;
+    public static final String ACTOR_NAME = OperationContextPropagationKeys.ACTOR_NAME;
+    public static final String INITIATOR_TYPE = OperationContextPropagationKeys.INITIATOR_TYPE;
+    public static final String INITIATOR_ID = OperationContextPropagationKeys.INITIATOR_ID;
+    public static final String INITIATOR_NAME = OperationContextPropagationKeys.INITIATOR_NAME;
+    public static final String TENANT_ID = OperationContextPropagationKeys.TENANT_ID;
+    public static final String SOURCE_TYPE = OperationContextPropagationKeys.SOURCE_TYPE;
+    public static final String SOURCE_NAME = OperationContextPropagationKeys.SOURCE_NAME;
+    public static final String SOURCE_INSTANCE_ID = OperationContextPropagationKeys.SOURCE_INSTANCE_ID;
+    public static final String SOURCE_ENTRYPOINT = OperationContextPropagationKeys.SOURCE_ENTRYPOINT;
 
     private OperationContextHeaders() {
     }

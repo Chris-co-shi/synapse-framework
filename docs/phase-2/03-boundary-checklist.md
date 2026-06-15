@@ -250,6 +250,10 @@ rg -n "IAM|登录认证|业务鉴权|注册中心|配置中心|服务治理后�
 - 可以增强 OperationContext。
 - 必须处理 ThreadLocal 清理和上下文恢复。
 - 不得默认把缺失上下文伪装成不可追溯的 system actor。
+- `synapse-core` 不得引入 Spring、HTTP、Feign、Servlet、Reactor 或 MQ SDK。
+- WebMVC / WebFlux / Cloud / MQ 的协议适配应复用 core carrier 规则。
+- 缺少 actor type 或 actor id 时不得恢复出默认 USER、UNKNOWN 或 SYSTEM。
+- system actor 必须由入口方显式创建。
 - 不创建 task-service、starter 或 demo。
 
 ### TASK-205

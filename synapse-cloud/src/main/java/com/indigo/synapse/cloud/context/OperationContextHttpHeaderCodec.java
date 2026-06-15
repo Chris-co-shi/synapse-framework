@@ -1,10 +1,9 @@
 package com.indigo.synapse.cloud.context;
 
-import com.indigo.synapse.core.context.OperationActor;
-import com.indigo.synapse.core.context.OperationActorType;
 import com.indigo.synapse.core.context.OperationContext;
 import com.indigo.synapse.core.context.OperationContextSnapshot;
-import com.indigo.synapse.core.context.OperationSource;
+import com.indigo.synapse.core.context.OperationContextSnapshotCarrier;
+import com.indigo.synapse.core.context.OperationContextSnapshotCodec;
 
 import java.time.Clock;
 import java.util.LinkedHashMap;
@@ -19,14 +18,14 @@ import java.util.Optional;
  */
 public final class OperationContextHttpHeaderCodec {
 
-    private final Clock clock;
+    private final OperationContextSnapshotCodec codec;
 
     public OperationContextHttpHeaderCodec() {
         this(Clock.systemUTC());
     }
 
     public OperationContextHttpHeaderCodec(Clock clock) {
-        this.clock = clock == null ? Clock.systemUTC() : clock;
+        this.codec = new OperationContextSnapshotCodec(clock);
     }
 
     /**
@@ -36,19 +35,12 @@ public final class OperationContextHttpHeaderCodec {
      * @return 编码后的 Header；没有可传播内容时返回空 Map
      */
     public Map<String, String> encode(OperationContext context) {
-        if (context == null) {
-            return Map.of();
+        Map<String, String> headers = new LinkedHashMap<>(
+                codec.encode(new OperationContextSnapshot(context)).values()
+        );
+        if (!headers.isEmpty()) {
+            putIfPresent(headers, SynapseCloudHeaders.CONTEXT_VERSION, SynapseCloudHeaders.CONTEXT_VERSION_VALUE);
         }
-        Map<String, String> headers = new LinkedHashMap<>();
-        putIfPresent(headers, SynapseCloudHeaders.CONTEXT_VERSION, SynapseCloudHeaders.CONTEXT_VERSION_VALUE);
-        putIfPresent(headers, SynapseCloudHeaders.TRACE_ID, context.traceId());
-        putIfPresent(headers, SynapseCloudHeaders.REQUEST_ID, context.requestId());
-        putIfPresent(headers, SynapseCloudHeaders.TENANT_ID, context.tenantId());
-        putActor(headers, SynapseCloudHeaders.ACTOR_TYPE, SynapseCloudHeaders.ACTOR_ID,
-                SynapseCloudHeaders.ACTOR_NAME, context.actor());
-        putActor(headers, SynapseCloudHeaders.INITIATOR_TYPE, SynapseCloudHeaders.INITIATOR_ID,
-                SynapseCloudHeaders.INITIATOR_NAME, context.initiator());
-        putSource(headers, context.source());
         putIfPresent(headers, SynapseCloudHeaders.LOCALE, attribute(context, SynapseCloudHeaders.ATTRIBUTE_LOCALE));
         putIfPresent(headers, SynapseCloudHeaders.TIME_ZONE, attribute(context, SynapseCloudHeaders.ATTRIBUTE_TIME_ZONE));
         return headers;
@@ -87,23 +79,28 @@ public final class OperationContextHttpHeaderCodec {
         if (headers == null || headers.isEmpty()) {
             return Optional.empty();
         }
-        OperationActor actor = readActor(headers, SynapseCloudHeaders.ACTOR_TYPE,
-                SynapseCloudHeaders.ACTOR_ID, SynapseCloudHeaders.ACTOR_NAME);
-        if (actor == null) {
-            return Optional.empty();
+        return codec.decode(new OperationContextSnapshotCarrier(headers))
+                .map(snapshot -> withCloudAttributes(snapshot, headers));
+    }
+
+    private OperationContextSnapshot withCloudAttributes(OperationContextSnapshot snapshot, Map<String, String> headers) {
+        Map<String, String> attributes = new LinkedHashMap<>(snapshot.context().attributes());
+        putIfPresent(attributes, SynapseCloudHeaders.ATTRIBUTE_LOCALE, value(headers, SynapseCloudHeaders.LOCALE));
+        putIfPresent(attributes, SynapseCloudHeaders.ATTRIBUTE_TIME_ZONE, value(headers, SynapseCloudHeaders.TIME_ZONE));
+        if (attributes.equals(snapshot.context().attributes())) {
+            return snapshot;
         }
-        OperationContext context = new OperationContext(
-                actor,
-                Optional.ofNullable(readActor(headers, SynapseCloudHeaders.INITIATOR_TYPE,
-                        SynapseCloudHeaders.INITIATOR_ID, SynapseCloudHeaders.INITIATOR_NAME)).orElse(actor),
-                readSource(headers),
-                value(headers, SynapseCloudHeaders.TRACE_ID),
-                value(headers, SynapseCloudHeaders.TENANT_ID),
-                value(headers, SynapseCloudHeaders.REQUEST_ID),
-                clock.instant(),
-                readAttributes(headers)
-        );
-        return Optional.of(new OperationContextSnapshot(context));
+        OperationContext context = snapshot.context();
+        return new OperationContextSnapshot(new OperationContext(
+                context.actor(),
+                context.initiator(),
+                context.source(),
+                context.traceId(),
+                context.tenantId(),
+                context.requestId(),
+                context.occurredAt(),
+                attributes
+        ));
     }
 
     private void writeIfAllowed(
@@ -119,65 +116,8 @@ public final class OperationContextHttpHeaderCodec {
         writer.write(name, value);
     }
 
-    private void putActor(Map<String, String> headers, String typeKey, String idKey, String nameKey, OperationActor actor) {
-        if (actor == null) {
-            return;
-        }
-        putIfPresent(headers, typeKey, actor.type() == null ? null : actor.type().name());
-        putIfPresent(headers, idKey, actor.id());
-        putIfPresent(headers, nameKey, actor.name());
-    }
-
-    private void putSource(Map<String, String> headers, OperationSource source) {
-        if (source == null) {
-            return;
-        }
-        putIfPresent(headers, SynapseCloudHeaders.SOURCE_TYPE, source.type());
-        putIfPresent(headers, SynapseCloudHeaders.SOURCE_NAME, source.name());
-        putIfPresent(headers, SynapseCloudHeaders.SOURCE_INSTANCE_ID, source.instanceId());
-        putIfPresent(headers, SynapseCloudHeaders.SOURCE_ENTRYPOINT, source.entrypoint());
-    }
-
-    private OperationActor readActor(Map<String, String> headers, String typeKey, String idKey, String nameKey) {
-        OperationActorType type = actorType(value(headers, typeKey));
-        String id = value(headers, idKey);
-        if (type == null || id == null) {
-            return null;
-        }
-        return new OperationActor(type, id, value(headers, nameKey), value(headers, SynapseCloudHeaders.TENANT_ID), Map.of());
-    }
-
-    private OperationSource readSource(Map<String, String> headers) {
-        String type = value(headers, SynapseCloudHeaders.SOURCE_TYPE);
-        String name = value(headers, SynapseCloudHeaders.SOURCE_NAME);
-        String instanceId = value(headers, SynapseCloudHeaders.SOURCE_INSTANCE_ID);
-        String entrypoint = value(headers, SynapseCloudHeaders.SOURCE_ENTRYPOINT);
-        if (type == null && name == null && instanceId == null && entrypoint == null) {
-            return null;
-        }
-        return new OperationSource(type, name, instanceId, entrypoint, Map.of());
-    }
-
-    private Map<String, String> readAttributes(Map<String, String> headers) {
-        Map<String, String> attributes = new LinkedHashMap<>();
-        putIfPresent(attributes, SynapseCloudHeaders.ATTRIBUTE_LOCALE, value(headers, SynapseCloudHeaders.LOCALE));
-        putIfPresent(attributes, SynapseCloudHeaders.ATTRIBUTE_TIME_ZONE, value(headers, SynapseCloudHeaders.TIME_ZONE));
-        return attributes;
-    }
-
-    private OperationActorType actorType(String value) {
-        if (value == null) {
-            return null;
-        }
-        try {
-            return OperationActorType.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException exception) {
-            return null;
-        }
-    }
-
     private String attribute(OperationContext context, String key) {
-        return context.attributes() == null ? null : context.attributes().get(key);
+        return context == null || context.attributes() == null ? null : context.attributes().get(key);
     }
 
     private String value(Map<String, String> headers, String key) {

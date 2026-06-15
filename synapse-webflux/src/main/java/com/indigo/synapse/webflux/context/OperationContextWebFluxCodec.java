@@ -1,13 +1,12 @@
 package com.indigo.synapse.webflux.context;
 
-import com.indigo.synapse.core.context.OperationActor;
-import com.indigo.synapse.core.context.OperationActorType;
-import com.indigo.synapse.core.context.OperationContext;
+import com.indigo.synapse.core.context.OperationContextPropagationKeys;
 import com.indigo.synapse.core.context.OperationContextSnapshot;
-import com.indigo.synapse.core.context.OperationSource;
+import com.indigo.synapse.core.context.OperationContextSnapshotCarrier;
+import com.indigo.synapse.core.context.OperationContextSnapshotCodec;
 import org.springframework.http.HttpHeaders;
 
-import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,6 +18,16 @@ import java.util.Optional;
  */
 public final class OperationContextWebFluxCodec {
 
+    private final OperationContextSnapshotCodec codec;
+
+    public OperationContextWebFluxCodec() {
+        this(new OperationContextSnapshotCodec());
+    }
+
+    public OperationContextWebFluxCodec(OperationContextSnapshotCodec codec) {
+        this.codec = codec == null ? new OperationContextSnapshotCodec() : codec;
+    }
+
     public Optional<OperationContextSnapshot> decode(
             HttpHeaders headers,
             String traceId,
@@ -29,68 +38,41 @@ public final class OperationContextWebFluxCodec {
         if (headers == null) {
             return Optional.empty();
         }
-        String actorId = trim(headers.getFirst(OperationContextHeaders.ACTOR_ID));
-        if (actorId == null) {
-            return Optional.empty();
-        }
-        String tenantId = trim(headers.getFirst(OperationContextHeaders.TENANT_ID));
-        OperationActor actor = new OperationActor(
-                actorType(headers.getFirst(OperationContextHeaders.ACTOR_TYPE)),
-                actorId,
-                fallback(headers.getFirst(OperationContextHeaders.ACTOR_NAME), actorId),
-                tenantId,
-                Map.of()
-        );
-        OperationActor initiator = initiator(headers, actor, tenantId);
-        OperationSource source = new OperationSource(
-                "HTTP",
-                fallback(headers.getFirst(OperationContextHeaders.SOURCE_NAME), "webflux"),
-                trim(headers.getFirst(OperationContextHeaders.SOURCE_INSTANCE_ID)),
-                method + " " + path,
-                Map.of()
-        );
-        OperationContext context = new OperationContext(
-                actor,
-                initiator,
-                source,
-                traceId,
-                tenantId,
-                requestId,
-                Instant.now(),
-                Map.of()
-        );
-        return Optional.of(new OperationContextSnapshot(context));
-    }
-
-    private static OperationActor initiator(HttpHeaders headers, OperationActor actor, String tenantId) {
-        String initiatorId = trim(headers.getFirst(OperationContextHeaders.INITIATOR_ID));
-        if (initiatorId == null) {
-            return actor;
-        }
-        return new OperationActor(
-                actorType(headers.getFirst(OperationContextHeaders.INITIATOR_TYPE)),
-                initiatorId,
-                fallback(headers.getFirst(OperationContextHeaders.INITIATOR_NAME), initiatorId),
-                tenantId,
-                Map.of()
-        );
-    }
-
-    private static OperationActorType actorType(String value) {
-        String type = trim(value);
-        if (type == null) {
-            return OperationActorType.USER;
-        }
-        try {
-            return OperationActorType.valueOf(type.toUpperCase());
-        } catch (IllegalArgumentException exception) {
-            return OperationActorType.USER;
-        }
+        Map<String, String> values = new LinkedHashMap<>();
+        put(values, OperationContextPropagationKeys.TRACE_ID, traceId);
+        put(values, OperationContextPropagationKeys.REQUEST_ID, requestId);
+        put(values, OperationContextPropagationKeys.TENANT_ID, headers.getFirst(OperationContextHeaders.TENANT_ID));
+        put(values, OperationContextPropagationKeys.ACTOR_TYPE, headers.getFirst(OperationContextHeaders.ACTOR_TYPE));
+        put(values, OperationContextPropagationKeys.ACTOR_ID, headers.getFirst(OperationContextHeaders.ACTOR_ID));
+        put(values, OperationContextPropagationKeys.ACTOR_NAME, headers.getFirst(OperationContextHeaders.ACTOR_NAME));
+        put(values, OperationContextPropagationKeys.INITIATOR_TYPE,
+                headers.getFirst(OperationContextHeaders.INITIATOR_TYPE));
+        put(values, OperationContextPropagationKeys.INITIATOR_ID,
+                headers.getFirst(OperationContextHeaders.INITIATOR_ID));
+        put(values, OperationContextPropagationKeys.INITIATOR_NAME,
+                headers.getFirst(OperationContextHeaders.INITIATOR_NAME));
+        put(values, OperationContextPropagationKeys.SOURCE_TYPE,
+                fallback(headers.getFirst(OperationContextHeaders.SOURCE_TYPE), "HTTP"));
+        put(values, OperationContextPropagationKeys.SOURCE_NAME,
+                fallback(headers.getFirst(OperationContextHeaders.SOURCE_NAME), "webflux"));
+        put(values, OperationContextPropagationKeys.SOURCE_INSTANCE_ID,
+                headers.getFirst(OperationContextHeaders.SOURCE_INSTANCE_ID));
+        put(values, OperationContextPropagationKeys.SOURCE_ENTRYPOINT,
+                fallback(headers.getFirst(OperationContextHeaders.SOURCE_ENTRYPOINT), method + " " + path));
+        return codec.decode(new OperationContextSnapshotCarrier(values));
     }
 
     private static String fallback(String value, String fallback) {
         String trimmed = trim(value);
         return trimmed == null ? fallback : trimmed;
+    }
+
+    private static void put(Map<String, String> values, String key, String value) {
+        String trimmed = trim(value);
+        if (trimmed == null) {
+            return;
+        }
+        values.put(key, trimmed);
     }
 
     private static String trim(String value) {

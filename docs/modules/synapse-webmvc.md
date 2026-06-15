@@ -360,6 +360,7 @@ SynapseExceptionBridgeFilter synapseExceptionBridgeFilter(
 - `ObjectMapper`：用户提供则不覆盖。
 - `SynapseExceptionBridgeFilter`：用户提供则不覆盖。
 - `MvcTraceFilter`：用户提供则不覆盖。
+- `MvcOperationContextFilter`：用户提供则不覆盖。
 
 ## 9. 边界与注意事项
 
@@ -386,6 +387,11 @@ trusted-header 失败这类异常通常发生在 Filter 阶段，不能只依赖
 ### 9.4 Result 是统一响应模型，不是业务 DTO
 
 业务系统可以直接返回 `Result<T>`，也可以在自己的 Controller 层转换。但不要把业务字段直接塞进 `Result` 结构本身。
+
+### 9.5 OperationContext 恢复只做技术上下文
+
+`MvcOperationContextFilter` 使用 `synapse-core` 的 `OperationContextSnapshotCodec` 从标准 Header 恢复上下文。
+缺少 actor type 或 actor id 时不会恢复上下文，也不会默认创建 system actor。Header 是否可信、是否由 Gateway 注入，不在 `synapse-webmvc` 内判断。
 
 ## 10. 常见问题
 

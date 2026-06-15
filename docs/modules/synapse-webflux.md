@@ -92,13 +92,17 @@ X-Synapse-Initiator-Type
 X-Synapse-Initiator-Id
 X-Synapse-Initiator-Name
 X-Synapse-Tenant-Id
+X-Synapse-Source-Type
 X-Synapse-Source-Name
 X-Synapse-Source-Instance-Id
+X-Synapse-Source-Entrypoint
 ```
 
 说明：
 
 - Header 恢复只做技术上下文恢复。
+- Header 解码复用 `synapse-core` 的 `OperationContextSnapshotCodec` 规则。
+- 缺少 actor type 或 actor id 时不恢复上下文，不默认创建 system actor。
 - Header 是否可信、是否签名、是否来自 Gateway 不在本模块内判定。
 - `synapse-webflux` 不做认证和授权。
 

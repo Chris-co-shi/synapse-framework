@@ -63,6 +63,9 @@
 - `OperationContextMessageCodec`：`OperationContextSnapshot` 与 header 的编解码。
 - `OperationContextMessagePropagator`：生产和消费两端的上下文传播入口。
 
+`OperationContextMessageCodec` 保持 MQ 小写 header 名称契约，但内部复用 `synapse-core` 的
+`OperationContextSnapshotCodec` 规则。缺少 actor type 或 actor id 时不恢复上下文，也不会默认创建 system actor。
+
 ## 6. 快速使用示例
 
 生产端推荐通过 `MessagePublishTemplate` 发布。模板会通过 `OperationContextProvider` 读取当前上下文，

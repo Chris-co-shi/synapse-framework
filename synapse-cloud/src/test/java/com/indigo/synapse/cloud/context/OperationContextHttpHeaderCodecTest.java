@@ -113,11 +113,24 @@ class OperationContextHttpHeaderCodecTest {
         assertThat(snapshot.context().initiator().id()).isEqualTo("gateway");
         assertThat(snapshot.context().source().name()).isEqualTo("order-service");
         assertThat(snapshot.context().traceId()).isEqualTo("trace-1");
+        assertThat(snapshot.context().attributes())
+                .containsEntry(SynapseCloudHeaders.ATTRIBUTE_LOCALE, "zh-CN")
+                .containsEntry(SynapseCloudHeaders.ATTRIBUTE_TIME_ZONE, "Asia/Shanghai");
     }
 
     @Test
     void shouldNotDecodeWhenActorIsMissing() {
         Map<String, String> headers = Map.of(SynapseCloudHeaders.TRACE_ID, "trace-1");
+
+        assertThat(codec.decode(headers)).isEmpty();
+    }
+
+    @Test
+    void shouldNotDecodeWhenActorTypeIsMissing() {
+        Map<String, String> headers = Map.of(
+                SynapseCloudHeaders.TRACE_ID, "trace-1",
+                SynapseCloudHeaders.ACTOR_ID, "user-1"
+        );
 
         assertThat(codec.decode(headers)).isEmpty();
     }

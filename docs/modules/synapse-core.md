@@ -16,6 +16,10 @@
 - OperationSource 操作来源。
 - OperationContextHolder / Scope / Snapshot。
 - OperationContextProvider 读取端口。
+- OperationContextSnapshotCarrier / Codec。
+- OperationContextPropagator。
+- ContextAwareRunnable / ContextAwareCallable / OperationContextExecutor。
+- SystemOperationActorFactory 显式 system actor 工厂。
 - ID 生成抽象与 UUID 默认实现。
 
 ## 2. 适用场景
@@ -242,6 +246,35 @@ try (OperationContextScope ignored = OperationContextHolder.restore(snapshot)) {
 
 快照只保存上下文对象，不负责序列化为 HTTP Header 或 MQ Header。
 
+### 6.5 纯 Java Carrier 编解码
+
+`OperationContextSnapshotCodec` 用于在 core 内完成纯字符串 carrier 编解码：
+
+```java
+OperationContextSnapshotCarrier carrier = codec.encode(OperationContextHolder.snapshot());
+Optional<OperationContextSnapshot> snapshot = codec.decode(carrier);
+```
+
+规则：
+
+- 只使用 `Map<String, String>`，不依赖 HTTP、Feign、Servlet、Reactor 或 MQ SDK。
+- key 使用 `OperationContextPropagationKeys`。
+- 缺少 actor type 或 actor id 时不恢复上下文。
+- 不自动创建 system actor。
+- WebMVC、WebFlux、Cloud、MQ 只能做协议 key 映射或载体适配，不应各自实现不同的身份兜底规则。
+
+### 6.6 异步执行传播
+
+线程池或异步执行可以在提交任务前包装：
+
+```java
+Runnable task = OperationContextExecutor.wrap(() -> {
+    // 在这里读取 OperationContextHolder.current()
+});
+```
+
+`ContextAwareRunnable` 和 `ContextAwareCallable` 会在执行前恢复快照，并在执行结束后恢复旧上下文，避免线程池复用导致上下文污染。
+
 ## 7. 扩展方式
 
 ### 7.1 替换 OperationContextProvider
@@ -320,6 +353,8 @@ throw new SynapseException(CustomErrorCode.CUSTOM_ERROR);
 - MQ：由 message 消费入口恢复。
 - Task：由任务调度入口显式指定 actor。
 - Async：由调用方传递 snapshot。
+
+如果确实需要表达系统任务，必须通过 `SystemOperationActorFactory.system(id, name)` 显式创建，禁止在缺失上下文时自动兜底。
 
 ### 9.3 不要在 core 绑定具体基础设施
 

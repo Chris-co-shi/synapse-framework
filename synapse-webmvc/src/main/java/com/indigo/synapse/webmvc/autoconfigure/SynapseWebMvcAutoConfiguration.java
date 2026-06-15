@@ -1,6 +1,7 @@
 package com.indigo.synapse.webmvc.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.indigo.synapse.webmvc.context.MvcOperationContextFilter;
 import com.indigo.synapse.webmvc.exception.SynapseExceptionBridgeFilter;
 import com.indigo.synapse.webmvc.exception.WebExceptionResponseFactory;
 import com.indigo.synapse.webmvc.trace.MvcTraceFilter;
@@ -60,5 +61,14 @@ public class SynapseWebMvcAutoConfiguration {
     @ConditionalOnMissingBean
     public MvcTraceFilter synapseMvcTraceFilter() {
         return new MvcTraceFilter();
+    }
+
+    /**
+     * 创建 MVC OperationContext 恢复 filter。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public MvcOperationContextFilter synapseMvcOperationContextFilter() {
+        return new MvcOperationContextFilter();
     }
 }

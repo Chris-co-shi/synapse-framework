@@ -157,6 +157,7 @@ HttpHeaderWriter
 
 编码规则：
 
+- HTTP Header codec 内部复用 `synapse-core` 的 `OperationContextSnapshotCodec`。
 - 有值才写 Header。
 - null / blank 不写。
 - 缺少 actor 时不伪造 actor。

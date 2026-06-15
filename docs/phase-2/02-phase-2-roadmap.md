@@ -33,10 +33,10 @@
 | TASK-201 | Framework Boundary 固化 | P0 | 文档 | 固化 framework 不可启动、不含业务代码的边界 |
 | TASK-202 | WebMVC / WebFlux 拆分 | P0 | 结构 | 已拆分为 `synapse-webmvc` / `synapse-webflux` |
 | TASK-203 | Cloud Context Propagation | P1 | 新模块 | 已新增 `synapse-cloud`，提供 Feign / 服务间调用上下文传播 |
-| TASK-204 | OperationContext 全场景恢复 | P1 | 核心增强 | HTTP / MQ / Async / Job 上下文一致性 |
-| TASK-205 | Time / Config / I18n 基础抽象 | P1 | 新模块 | 补齐平台运行时基础抽象 |
-| TASK-206 | MQ / File / Audit / OAuth2 边界复查 | P2 | 收敛 | 防止技术模块滑向平台服务 |
-| TASK-207 | Docs / Skills / Boundary 收口 | P2 | 收尾 | 只做文档、Skill、边界检查和模块状态校准 |
+| TASK-204 | OperationContext 全场景恢复 | P1 | 核心增强 | 已统一 HTTP / MQ / Async 基础上下文传播规则，Job 入口显式 actor 策略已固化 |
+| TASK-205 | Time / Config / I18n 基础抽象 | P1 | 新模块 | 已新增 `synapse-time`、`synapse-config`、`synapse-i18n` 基础抽象 |
+| TASK-206 | MQ / File / Audit / OAuth2 边界复查 | P2 | 收敛 | 已复查风险模块边界并补齐 Skill |
+| TASK-207 | Docs / Skills / Boundary 收口 | P2 | 收尾 | 已完成文档、Skill、边界检查和模块状态校准 |
 
 ## 3. TASK-201：Framework Boundary 固化
 
@@ -136,6 +136,16 @@
 
 修改范围：`synapse-core`、`synapse-security`、`synapse-mq`、`synapse-webmvc`、`synapse-webflux`、`synapse-cloud`、测试和文档。
 
+完成说明：
+
+- `synapse-core` 已新增纯 Java `OperationContextSnapshotCarrier`、`OperationContextSnapshotCodec`、`OperationContextPropagator`。
+- `synapse-core` 已新增 `ContextAwareRunnable`、`ContextAwareCallable`、`OperationContextExecutor`，用于同步包装异步任务。
+- `synapse-core` 已新增 `SystemOperationActorFactory`，system actor 必须显式创建。
+- `synapse-webmvc` 已新增 `MvcOperationContextFilter`，从标准 Header 恢复 OperationContext。
+- `synapse-webflux` 已对齐 core codec 规则，通过 Reactor Context 保存 `OperationContextSnapshot`。
+- `synapse-cloud` HTTP Header codec 已复用 core codec，并保留 Feign 覆盖策略。
+- `synapse-mq` 消息 header codec 已复用 core codec，并保持 MQ 小写 header 契约。
+
 不做内容：
 
 - 不做任务调度平台。
@@ -144,7 +154,7 @@
 - 不做业务审计查询。
 - 不做 demo / example / sample application。
 
-交付物：OperationContext codec / propagator、Async 上下文传播、MQ Header codec 对齐、Job Actor 策略、SystemActor 显式化规则。
+交付物：OperationContext codec / propagator、Async 上下文传播包装器、MQ Header codec 对齐、WebMVC / WebFlux 入站恢复、Job Actor 显式化规则、SystemActor 显式化规则。
 
 验收标准：没有上下文时不能悄悄伪装成 system；actor、initiator、source 可以区分；异步执行后能恢复旧上下文并清理 ThreadLocal；MQ 消费可以从 Header 恢复 OperationContext。
 
@@ -157,6 +167,13 @@
 
 修改范围：新增三个 module、根 POM、BOM、自动配置、测试、文档、Skill。
 
+完成说明：
+
+- `synapse-time` 已提供 `TimeZoneResolver`、`TimeRangeConverter`、UTC 查询范围转换和自动配置。
+- `synapse-config` 已提供 `ConfigClient`、`ConfigParser`、`ConfigResolver`、轻量内存配置客户端和自动配置。
+- `synapse-i18n` 已提供 `LocaleResolver`、`I18nResourceLoader`、`I18nMessageResolver`、轻量内存资源加载和自动配置。
+- 三个模块均已进入 root reactor 和 BOM。
+
 不做内容：
 
 - 不做 config-service。
@@ -167,7 +184,7 @@
 - 不做配置发布 / 审批。
 - 不做 demo / example / sample application。
 
-交付物：`TimeZoneResolver`、`TimeRangeConverter`、`ConfigClient`、`ConfigResolver`、`ConfigParser`、`I18nMessageResolver`、`I18nResourceLoader`、默认轻量实现和测试。
+交付物：`TimeZoneResolver`、`TimeRangeConverter`、`ConfigClient`、`ConfigResolver`、`ConfigParser`、`I18nMessageResolver`、`I18nResourceLoader`、默认轻量实现、自动配置、测试、模块文档和 Skill。
 
 验收标准：LocalDate + ZoneId 可以转换成 UTC Instant 查询范围；Config key 可以解析为配置值；I18n key 可以解析为指定语言文案；三个模块均不可启动，且无 Controller / 业务 Entity / 业务 Mapper。
 
@@ -176,6 +193,14 @@
 目标：复查已有风险模块，防止它们从技术抽象滑向平台服务。
 
 修改范围：`synapse-mq`、`synapse-file`、`synapse-audit`、`synapse-oauth2`、对应文档、测试和 Skill。
+
+完成说明：
+
+- `synapse-mq` 边界复查通过：当前只提供消息外壳、SPI、模板、上下文传播和异常分类，不做 message-service。
+- `synapse-file` 边界复查通过：当前只提供文件存储抽象和本地轻量实现，不做 file-service。
+- `synapse-audit` 边界复查通过：当前只提供审计事件、上下文补齐和输出端口，不做 audit-service。
+- `synapse-oauth2` 边界复查通过：当前只提供 JWT / JWK / Token denylist 技术辅助，不做 IAM 或 Authorization Server。
+- 已新增 `skills/synapse-mq`、`skills/synapse-file`、`skills/synapse-audit`、`skills/synapse-oauth2`。
 
 不做内容：
 
@@ -187,7 +212,7 @@
 - 不做登录认证。
 - 不做 demo / example / sample application。
 
-交付物：模块 README 边界补齐、SPI / Port 命名统一、默认实现边界检查、边界测试。
+交付物：模块 README 边界复查、Skill 补齐、默认实现边界检查、边界扫描命令记录。
 
 验收标准：`synapse-mq` 无站内信、短信、邮件、消息模板管理；`synapse-file` 无上传下载 Controller、附件表、文件权限业务；`synapse-audit` 无审计查询 API、报表、中心后台；`synapse-oauth2` 无登录、客户端管理、Authorization Server 实现。
 
@@ -204,6 +229,14 @@
 - 模块事实与规划状态校准。
 
 修改范围：README、AGENTS、docs/modules、docs/phase-2、skills。
+
+完成说明：
+
+- README 已加入当前模块事实和 Skill 索引入口。
+- AGENTS 已校准当前 reactor modules 和 TASK-205 后的模块状态。
+- docs/modules 已校准当前模块事实。
+- skills 已补齐当前已实现模块索引和缺失模块 Skill。
+- no starter / no demo / no example / no sample application 约定已作为长期约束保留。
 
 不做内容：
 
