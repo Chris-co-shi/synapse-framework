@@ -16,7 +16,15 @@
 - Spring Cloud 调用链路适配。
 - UTC 时间存储和用户时区查询转换。
 - 配置抽象、国际化抽象、MQ/File/Audit/OAuth2 边界收紧。
-- starter 与 examples 后置收口。
+- Docs / Skills / Boundary 收口。
+
+固定约定：
+
+- 不创建 `synapse-starter-*`。
+- 不创建 starter 聚合包。
+- 不创建 demo / example / sample application。
+- 不创建任何可启动示例工程。
+- 业务系统按需直接引用具体 module。
 
 ## 2. 任务总览
 
@@ -28,7 +36,7 @@
 | TASK-204 | OperationContext 全场景恢复 | P1 | 核心增强 | HTTP / MQ / Async / Job 上下文一致性 |
 | TASK-205 | Time / Config / I18n 基础抽象 | P1 | 新模块 | 补齐平台运行时基础抽象 |
 | TASK-206 | MQ / File / Audit / OAuth2 边界复查 | P2 | 收敛 | 防止技术模块滑向平台服务 |
-| TASK-207 | Starter / Examples / Docs 收口 | P2 | 收尾 | 在边界稳定后提供组合接入体验 |
+| TASK-207 | Docs / Skills / Boundary 收口 | P2 | 收尾 | 只做文档、Skill、边界检查和模块状态校准 |
 
 ## 3. TASK-201：Framework Boundary 固化
 
@@ -45,10 +53,7 @@
 - `docs/phase-2/01-module-boundary.md`。
 - `docs/phase-2/02-phase-2-roadmap.md`。
 - `docs/phase-2/03-boundary-checklist.md`。
-- `README.md`。
-- `AGENTS.md`。
-- `docs/modules/README.md`。
-- `docs/06-待补充问题.md`。
+- README、AGENTS、docs/modules、待补充问题文档。
 
 不做内容：
 
@@ -58,28 +63,11 @@
 - 不重命名 module。
 - 不新增依赖。
 - 不创建 starter。
+- 不创建 demo / example / sample application。
 
-交付物：
+交付物：二阶段边界文档、模块边界文档、roadmap、边界检查清单、README 和 AGENTS 入口更新。
 
-- 二阶段边界文档。
-- 模块边界文档。
-- 二阶段 roadmap。
-- 边界检查清单。
-- README 和 AGENTS 入口更新。
-
-验收标准：
-
-- 文档明确 framework 只做技术支持能力。
-- 文档明确 platform 才做可启动服务。
-- 文档明确 `synapse-config`、`synapse-file`、`synapse-mq`、`synapse-oauth2`、`synapse-audit` 的禁止事项。
-- 文档明确 TASK-202 才处理 WebMVC / WebFlux 拆分。
-- `git diff --check` 无格式错误。
-
-风险点：
-
-- 文档描述过度承诺未实现模块。
-- 把规划能力写成当前事实。
-- 忘记收紧 `synapse-oauth2`，导致后续滑向 IAM。
+验收标准：文档明确 framework 只做技术支持能力，platform 才做可启动服务，并且明确 `synapse-config`、`synapse-file`、`synapse-mq`、`synapse-oauth2`、`synapse-audit` 的禁止事项。
 
 ## 4. TASK-202：WebMVC / WebFlux 拆分
 
@@ -88,16 +76,11 @@
 - 解决原 `synapse-web` 偏 Servlet MVC，Gateway/WebFlux 服务不能引用的问题。
 - 建立 `synapse-webmvc` 和 `synapse-webflux` 的清晰边界。
 
-修改范围：
+完成说明：
 
-- 根 `pom.xml`。
-- `synapse-bom/pom.xml`。
-- 原 `synapse-web` 模块已替换。
-- 新增并迁移 `synapse-webmvc`。
-- 新增 `synapse-webflux`。
-- AutoConfiguration imports。
-- 相关测试。
-- 模块文档和 Skill。
+- `synapse-web` 不保留兼容层。
+- `synapse-webmvc` 承接 Servlet MVC 响应、异常、Trace、Filter 异常桥接。
+- `synapse-webflux` 只提供 WebFlux Trace、异常响应、Reactor Context / OperationContext 恢复，不做 Gateway。
 
 不做内容：
 
@@ -106,32 +89,7 @@
 - 不做网关鉴权业务。
 - 不做平台路由管理。
 
-交付物：
-
-- `synapse-webmvc`。
-- `synapse-webflux`。
-- 清晰的 Maven 依赖边界。
-- WebMVC 和 WebFlux 自动配置。
-- 最小测试用例。
-- 模块文档。
-
-验收标准：
-
-- WebMVC 服务引用 `synapse-webmvc` 可以正常使用 Result、异常处理、Trace。
-- WebFlux 服务引用 `synapse-webflux` 不引入 `spring-webmvc`。
-- Gateway 类服务可以只依赖 `synapse-webflux` 的技术能力。
-- `synapse-webflux` 不包含 Gateway 路由或启动服务。
-
-完成说明：
-
-- `synapse-web` 不保留兼容层。
-- `synapse-webmvc` 承接 Servlet MVC 响应、异常、Trace、Filter 异常桥接。
-- `synapse-webflux` 只提供 WebFlux Trace、异常响应、Reactor Context / OperationContext 恢复，不做 Gateway。
-
-风险点：
-
-- WebFlux 模块误引入 Servlet / MVC 依赖。
-- WebFlux 异常处理写成 gateway 业务能力。
+风险点：WebFlux 模块误引入 Servlet / MVC 依赖，或 WebFlux 异常处理写成 gateway 业务能力。
 
 ## 5. TASK-203：Cloud Context Propagation
 
@@ -141,7 +99,7 @@
 - 解决 Feign 调用中的 traceId、requestId、OperationContext 透传。
 - 冻结服务间调用 Header 契约，避免 WebMVC / WebFlux / MQ / Security 各自扩散。
 
-修改范围：
+完成说明：
 
 - TASK-203-A 已通过文档冻结 Cloud 方案和 Header 契约。
 - TASK-203-B 已新增 `synapse-cloud` module，修改根 POM 和 BOM。
@@ -165,49 +123,9 @@
 - 不依赖 `synapse-webmvc` 或 `synapse-webflux` 复用 Result / trace / error response。
 - 不传播 roles / permissions / menu / raw token 等敏感或业务字段。
 
-交付物：
+交付物：`docs/phase-2/04-cloud-context-propagation.md`、`SynapseFeignRequestInterceptor`、`SynapseFeignErrorDecoder`、`SynapseCloudHeaders`、`InternalCallSigner` / `InternalCallVerifier` 扩展点、OperationContext HTTP Header codec、测试用例、模块文档和 Skill。
 
-- `docs/phase-2/04-cloud-context-propagation.md`。
-- `SynapseFeignRequestInterceptor`。
-- `SynapseFeignErrorDecoder`。
-- `SynapseCloudHeaders`。
-- `InternalCallSigner` / `InternalCallVerifier` 扩展点。
-- `OperationContextHeaderCodec`。
-- 测试用例和模块文档。
-
-验收标准：
-
-- HTTP -> Service A -> Feign -> Service B 链路可透传 traceId / requestId / actor / initiator。
-- 消费方可以覆盖默认 Header 编码策略。
-- Feign 错误解码不绑定业务错误码。
-- 服务间签名只作为扩展点，不形成 IAM 或登录认证体系。
-- `synapse-cloud` 不依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-mq`。
-
-风险点：
-
-- `synapse-cloud` 过早引入 Nacos、Gateway、配置中心等平台能力。
-- Header 契约与 security trusted-header 产生冲突。
-- OperationContext 信息泄露敏感内容。
-- 为了复用 Result 反向依赖 WebMVC / WebFlux。
-- 将服务间签名误实现为 IAM 或业务鉴权。
-
-子任务拆分：
-
-| 子任务 | 目标 | 修改范围 | 不做内容 | 验收标准 |
-| --- | --- | --- | --- | --- |
-| TASK-203-A | Cloud 方案确认与 Header 契约冻结 | 只改文档 | 不新增 module、不改 POM、不新增 Java | Header 契约、依赖边界、Feign 规划已固化 |
-| TASK-203-B | 新增 `synapse-cloud` module 骨架与 POM | root POM、BOM、`synapse-cloud/pom.xml` | 不实现 Gateway / 注册中心 / IAM | reactor 和 BOM 包含 `synapse-cloud`，`mvn validate` 通过 |
-| TASK-203-C | OperationContext HTTP Header Codec | `synapse-cloud`，必要时 core 纯 Java 抽象 | 不让 core 依赖 HTTP / Feign / Spring | Header 编解码覆盖上下文字段，缺少 actor 不伪造 system |
-| TASK-203-D | Feign RequestInterceptor 最小闭环 | `synapse-cloud` | 不做 ErrorDecoder，不做完整签名认证 | Feign 出站透传上下文，已有 Header 默认不覆盖 |
-| TASK-203-E | Feign ErrorDecoder 最小闭环 | `synapse-cloud` | 不依赖 WebMVC / WebFlux Result，不绑定业务错误码 | 标准错误可解析，非标准响应可降级 |
-| TASK-203-F | 自动配置与测试 | `synapse-cloud` 生产和测试代码 | 不新增启动服务或 Controller | 条件装配、自定义 Bean 覆盖、配置关闭均通过测试 |
-| TASK-203-G | 文档与 Skill 收口 | README、docs/modules、skills | 不把规划写成当前事实 | 模块手册和 Skill 与实现一致 |
-
-执行顺序说明：
-
-- RequestInterceptor 优先于 ErrorDecoder，因为上下文出站传播是 TASK-203 的最小闭环。
-- ErrorDecoder 后置，避免第一轮引入远程响应模型争议。
-- 服务间签名先规划 `InternalCallSigner` / `InternalCallVerifier` 扩展点，不实现 IAM、登录认证或业务鉴权。
+验收标准：HTTP -> Service A -> Feign -> Service B 链路可透传 traceId / requestId / actor / initiator；Feign 错误解码不绑定业务错误码；服务间签名只作为扩展点；`synapse-cloud` 不依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-mq`。
 
 ## 6. TASK-204：OperationContext 全场景恢复
 
@@ -216,14 +134,7 @@
 - 统一 HTTP / Feign / MQ / Async / Job 场景下的 OperationContext 创建、快照、恢复和清理。
 - 避免异步、线程池、MQ 消费、定时任务场景下默认使用不可追溯的 system actor。
 
-修改范围：
-
-- `synapse-core`。
-- `synapse-security`。
-- `synapse-mq`。
-- `synapse-webmvc` / `synapse-webflux`。
-- 可能涉及 `synapse-cloud`。
-- 测试和文档。
+修改范围：`synapse-core`、`synapse-security`、`synapse-mq`、`synapse-webmvc`、`synapse-webflux`、`synapse-cloud`、测试和文档。
 
 不做内容：
 
@@ -231,28 +142,11 @@
 - 不做 MQ Broker adapter。
 - 不做用户中心。
 - 不做业务审计查询。
+- 不做 demo / example / sample application。
 
-交付物：
+交付物：OperationContext codec / propagator、Async 上下文传播、MQ Header codec 对齐、Job Actor 策略、SystemActor 显式化规则。
 
-- OperationContext codec。
-- OperationContext propagator。
-- Async TaskDecorator。
-- MQ Header codec 对齐。
-- Job Actor 策略。
-- SystemActor 显式化规则。
-
-验收标准：
-
-- 没有上下文时不能悄悄伪装成 system。
-- actor、initiator、source 可以区分。
-- 异步执行后能恢复旧上下文并清理 ThreadLocal。
-- MQ 消费可以从 Header 恢复 OperationContext。
-
-风险点：
-
-- ThreadLocal 泄漏。
-- Reactor Context 与 ThreadLocal 混用不当。
-- Actor 语义不清，导致审计不可追溯。
+验收标准：没有上下文时不能悄悄伪装成 system；actor、initiator、source 可以区分；异步执行后能恢复旧上下文并清理 ThreadLocal；MQ 消费可以从 Header 恢复 OperationContext。
 
 ## 7. TASK-205：Time / Config / I18n 基础抽象
 
@@ -261,13 +155,7 @@
 - 新增 `synapse-time`、`synapse-config`、`synapse-i18n` 三个技术抽象模块。
 - 解决跨时区查询、运行时配置读取、国际化消息解析的 framework 基础能力。
 
-修改范围：
-
-- 新增 `synapse-time`。
-- 新增 `synapse-config`。
-- 新增 `synapse-i18n`。
-- 根 POM 和 BOM。
-- 自动配置、测试、文档。
+修改范围：新增三个 module、根 POM、BOM、自动配置、测试、文档、Skill。
 
 不做内容：
 
@@ -276,44 +164,18 @@
 - 不做时区配置后台。
 - 不做组织 / 工厂 / 用户资料管理。
 - 不做配置数据库表。
+- 不做配置发布 / 审批。
+- 不做 demo / example / sample application。
 
-交付物：
+交付物：`TimeZoneResolver`、`TimeRangeConverter`、`ConfigClient`、`ConfigResolver`、`ConfigParser`、`I18nMessageResolver`、`I18nResourceLoader`、默认轻量实现和测试。
 
-- `TimeZoneResolver`。
-- `TimeRangeConverter`。
-- `ConfigClient`。
-- `ConfigResolver`。
-- `ConfigParser`。
-- `I18nMessageResolver`。
-- `I18nResourceLoader`。
-- 默认轻量实现和测试。
-
-验收标准：
-
-- LocalDate + ZoneId 可以转换成 UTC Instant 查询范围。
-- Config key 可以解析为配置值。
-- I18n key 可以解析为指定语言文案。
-- 三个模块均不可启动，且无 Controller / 业务 Entity / 业务 Mapper。
-
-风险点：
-
-- `synapse-config` 滑向配置中心。
-- `synapse-i18n` 滑向国际化资源管理后台。
-- `synapse-time` 引入组织、工厂、用户等业务模型。
+验收标准：LocalDate + ZoneId 可以转换成 UTC Instant 查询范围；Config key 可以解析为配置值；I18n key 可以解析为指定语言文案；三个模块均不可启动，且无 Controller / 业务 Entity / 业务 Mapper。
 
 ## 8. TASK-206：MQ / File / Audit / OAuth2 边界复查
 
-目标：
+目标：复查已有风险模块，防止它们从技术抽象滑向平台服务。
 
-- 复查已有风险模块，防止它们从技术抽象滑向平台服务。
-
-修改范围：
-
-- `synapse-mq`。
-- `synapse-file`。
-- `synapse-audit`。
-- `synapse-oauth2`。
-- 对应文档、测试和 Skill。
+修改范围：`synapse-mq`、`synapse-file`、`synapse-audit`、`synapse-oauth2`、对应文档、测试和 Skill。
 
 不做内容：
 
@@ -322,66 +184,47 @@
 - 不做 audit-service。
 - 不做 iam-service。
 - 不做 Authorization Server 实现。
+- 不做登录认证。
+- 不做 demo / example / sample application。
 
-交付物：
+交付物：模块 README 边界补齐、SPI / Port 命名统一、默认实现边界检查、边界测试。
 
-- 模块 README 边界补齐。
-- SPI / Port 命名统一。
-- 默认实现边界检查。
-- 边界测试。
+验收标准：`synapse-mq` 无站内信、短信、邮件、消息模板管理；`synapse-file` 无上传下载 Controller、附件表、文件权限业务；`synapse-audit` 无审计查询 API、报表、中心后台；`synapse-oauth2` 无登录、客户端管理、Authorization Server 实现。
 
-验收标准：
-
-- `synapse-mq` 无站内信、短信、邮件、消息模板管理。
-- `synapse-file` 无上传下载 Controller、附件表、文件权限业务。
-- `synapse-audit` 无审计查询 API、报表、中心后台。
-- `synapse-oauth2` 无登录、客户端管理、Authorization Server 实现。
-
-风险点：
-
-- 为了“闭环”写入平台业务。
-- 为了 demo 新增启动类或 Controller。
-- 默认实现过重，绑定外部系统。
-
-## 9. TASK-207：Starter / Examples / Docs 收口
+## 9. TASK-207：Docs / Skills / Boundary 收口
 
 目标：
 
-- 在二阶段模块边界稳定后，整理 starter、examples 和文档入口。
+- README 收口。
+- docs/modules 收口。
+- phase-2 roadmap 状态收口。
+- AGENTS 边界补强。
+- Skill 索引补齐。
+- 边界检查命令补齐。
+- 模块事实与规划状态校准。
 
-修改范围：
-
-- 可选新增 `synapse-starter-*`。
-- examples 或 test fixture。
-- README。
-- docs/modules。
-- skills。
+修改范围：README、AGENTS、docs/modules、docs/phase-2、skills。
 
 不做内容：
 
-- 不做生产启动服务。
-- 不做 Admin UI。
-- 不做平台业务服务。
-- 不把 examples 当成平台应用。
+- 不新增 starter module。
+- 不新增 demo。
+- 不新增 example application。
+- 不新增 sample application。
+- 不新增生产启动类。
+- 不新增可启动平台服务。
+- 不新增业务 Controller / Entity / Mapper / Service。
 
-交付物：
-
-- starter 组合模块。
-- 最小 examples 或测试 fixture。
-- README 和模块文档收口。
-- Skill 更新。
+交付物：文档状态校准、Skill 索引补齐、边界检查命令补齐、规划能力与当前事实校准。
 
 验收标准：
 
-- starter 只聚合技术能力。
-- examples 不进入生产模块。
 - 文档清楚区分当前事实和后续规划。
+- 所有已实现模块都有模块手册和 Skill。
+- starter / demo / example / sample 仅作为禁止项或历史说明出现。
+- 不存在“后续新增 starter”或“后续新增 demo”的正向规划。
 
-风险点：
-
-- starter 过早聚合未稳定模块。
-- examples 被误用为可启动平台服务。
-- 文档和实际代码不一致。
+风险点：文档和实际代码不一致，或把平台服务写成 framework 能力。
 
 ## 10. 推荐执行顺序
 
@@ -399,14 +242,13 @@ TASK-201 -> TASK-202 -> TASK-203 -> TASK-204 -> TASK-205 -> TASK-206 -> TASK-207
 4. 再统一 OperationContext 全场景恢复，支撑 HTTP / Feign / MQ / Async / Job。
 5. 再补 Time / Config / I18n，作为 Platform 后续 runtime 基础。
 6. 再复查 MQ / File / Audit / OAuth2，防止已有模块膨胀。
-7. 最后收口 starter、examples 和文档。
+7. 最后只做 Docs / Skills / Boundary 收口，不做 starter 或 demo。
 
 ## 11. 当前结论
 
-TASK-201 可以作为二阶段第一个执行任务。
+二阶段后续继续推进时，必须遵守：
 
-原因：
-
-- 它只做文档和边界固化，不触碰代码结构。
-- 它为 TASK-202 之后的所有重构提供约束。
-- 它可以防止 `synapse-config`、`synapse-file`、`synapse-mq`、`synapse-oauth2` 等模块滑向平台服务。
+- Framework 只交付 module、抽象、自动配置、测试、文档和 Skill。
+- 业务系统按需直接引用具体 module。
+- 不创建 starter。
+- 不创建 demo / example / sample application。
