@@ -39,6 +39,9 @@ synapse-core
 synapse-webmvc
 synapse-webflux
 synapse-cloud
+synapse-time
+synapse-config
+synapse-i18n
 synapse-data
 synapse-cache
 synapse-security
@@ -52,7 +55,7 @@ synapse-mq
 
 - `synapse-web` 已拆分为 `synapse-webmvc` 和 `synapse-webflux`，不得恢复为正式模块。
 - `synapse-message` 已更名为 `synapse-mq`，不得继续使用旧名称描述正式模块。
-- `synapse-config`、`synapse-i18n`、`synapse-time` 当前仍是规划模块，进入 reactor 前不得描述成已实现能力。
+- `synapse-config`、`synapse-i18n`、`synapse-time` 已在 TASK-205 进入 reactor，必须按当前已实现技术模块描述。
 - `synapse-task`、`synapse-tenant`、`synapse-data-permission` 若存在目录，也只视为暂存或历史残留，不得擅自加入 reactor。
 - 本项目不创建 `synapse-starter-*`，不创建 starter 聚合包，不创建 demo / example / sample application。
 
@@ -126,6 +129,9 @@ skills/<module-name>/SKILL.md
 | `synapse-webmvc` | Servlet MVC 技术支撑 | WebFlux / Gateway / 业务 Controller |
 | `synapse-webflux` | WebFlux 技术支撑 | Gateway 服务 / 路由管理 / 网关鉴权业务 |
 | `synapse-cloud` | OpenFeign 服务间调用技术适配 | Gateway / 注册中心 / 配置中心 / IAM |
+| `synapse-time` | 时间和时区技术支撑 | 时区后台 / 用户资料管理 |
+| `synapse-config` | 配置抽象、运行时读取和类型解析 | config-service / 配置中心后台 |
+| `synapse-i18n` | 国际化消息解析抽象 | i18n-resource-center / 翻译后台 |
 | `synapse-data` | 数据层技术支撑 | 业务 Entity / Mapper / Repository / Service |
 | `synapse-cache` | 缓存、锁、限流、幂等基础设施 | 业务缓存规则 / 缓存管理后台 |
 | `synapse-security` | 安全上下文、trusted-header、权限检查抽象 | IAM / 登录认证 / 用户角色菜单管理 |

@@ -238,9 +238,9 @@ synapse-mq
 
 不会。只有显式声明 `synapse-mq` 依赖时才会引入。
 
-### Q4：BOM 可以管理 starter 吗？
+### Q4：BOM 会管理 starter 吗？
 
-可以在未来管理，但一阶段没有 starter。当前 BOM 只管理一阶段模块和必要第三方依赖版本。
+不会。本项目不创建 `synapse-starter-*`，BOM 只管理当前 framework module 和必要第三方依赖版本。
 
 ### Q5：为什么 BOM 中有第三方依赖版本？
 
