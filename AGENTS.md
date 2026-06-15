@@ -10,15 +10,13 @@ Synapse Framework 是面向 Java 企业应用的通用技术底座。
 
 核心目标：
 
-1. 提供 Core、Web、Data、Cache、Security、OAuth2、Audit、File、MQ 等可复用技术能力。
+1. 提供 Core、WebMVC、WebFlux、Cloud、Data、Cache、Security、OAuth2、Audit、File、MQ 等可复用技术能力。
 2. 提供统一异常、响应、追踪、数据访问、缓存、安全上下文、权限抽象、OAuth2 技术抽象、审计事件、幂等、限流、消息与文件抽象等基础设施。
 3. 提供标准化 Java 后端开发包结构、接口规范、数据库规范和测试规范，作为消费方项目的工程约束。
 4. 提供可被 AI Agent 长期协作的文档和 Skill 约束，避免不同 Agent 生成风格冲突的代码。
 5. 为未来业务项目、Synapse Platform、IAM 项目或行业应用提供技术支撑，但这些业务实现不进入本仓库。
 
 ## 2. 当前阶段
-
-当前处于一阶段封板后、二阶段规划启动阶段。
 
 当前 Maven reactor 以根 `pom.xml` 为准：
 
@@ -38,16 +36,18 @@ Synapse Framework 是面向 Java 企业应用的通用技术底座。
 当前阶段约束：
 
 - `synapse-message` 已更名为 `synapse-mq`，后续不得继续使用旧名称描述正式模块。
+- `synapse-web` 已在 TASK-202 中拆分为 `synapse-webmvc` 和 `synapse-webflux`，不得继续作为正式模块使用。
 - `synapse-task` 当前不属于正式 reactor，不得恢复到当前阶段 reactor。
 - `synapse-tenant`、`synapse-data-permission` 若目录存在，也只视为暂存目录或历史残留，不得当作当前已实现模块。
 - `synapse-config`、`synapse-i18n`、`synapse-time` 属于二阶段规划模块，未进入 reactor 前不得描述成已实现能力。
-- `synapse-web` 已在 TASK-202 中拆分为 `synapse-webmvc` 和 `synapse-webflux`，不得继续作为正式模块使用。
-- 当前不做 starter，业务项目按 module 引入。
+- 本项目不创建 `synapse-starter-*`。
+- 本项目不创建 starter 聚合包。
+- 本项目不创建 demo / example / sample application。
+- 业务项目按需直接引用具体 module。
 - 不实现业务模块。
 - 不提供启动应用。
 - 不提供后台管理前端。
 - 不把 IAM/Auth/RBAC、用户、角色、菜单、字典、组织等业务模型作为本仓库交付物。
-- 优先保证模块边界、测试闭环和可维护性。
 - 每次只执行一个 Task，禁止一次性大范围重构。
 
 ## 3. 二阶段边界原则
@@ -73,7 +73,7 @@ Synapse Framework 是面向 Java 企业应用的通用技术底座。
 - Platform 才承载可启动服务。
 - Business Application 才承载具体业务模型、业务 API 和业务流程。
 
-Framework 最多只能提供：
+Framework 可以提供：
 
 - 技术约束。
 - 通用抽象。
@@ -84,7 +84,8 @@ Framework 最多只能提供：
 - 上下文传播。
 - 编码规范。
 - 工具能力。
-- starter 组合能力。
+- 测试与文档沉淀。
+- Skill 最佳实践。
 
 Framework 禁止提供：
 
@@ -92,6 +93,8 @@ Framework 禁止提供：
 - 业务 Controller。
 - 业务 Service / Entity / Mapper / Repository。
 - 业务数据库 migration。
+- starter 聚合包。
+- demo / example / sample application。
 - 配置中心、文件中心、消息中心、审计中心、任务中心、IAM 等平台业务实现。
 - Gateway / IAM / Message / File / Config / Task 等可启动服务。
 
@@ -115,7 +118,7 @@ Cloud 边界原则：
 | Maven | 3.9.0 | 当前工作站使用 `/Users/sxc/Documents/tool/apache-maven-3.9.0`。 |
 | Spring Boot | 3.5.15 | 3.5.x 稳定线；本框架暂不切到 Spring Boot 4.x。 |
 | Spring Cloud | 2025.0.2 | 当前用于 `synapse-cloud` OpenFeign 技术适配。 |
-| Spring Cloud Alibaba | 2025.0.0.0 | 二阶段 cloud 预留版本；当前未实现 `synapse-cloud`。 |
+| Spring Cloud Alibaba | 2025.0.0.0 | 后续如使用，必须保持在 framework 技术边界内。 |
 | Spring Security | Boot 管理，6.5.x | 不单独覆盖 Boot 管理版本。 |
 | OAuth2 | JWT / JWK / Token / Resource Server 辅助能力 | 二阶段 framework 不做 Authorization Server 实现。 |
 | MyBatis-Plus | 3.5.16 | 使用 `mybatis-plus-spring-boot3-starter`。 |
@@ -169,6 +172,8 @@ Cloud 边界原则：
 - 业务 Domain Model。
 - 业务 Entity / Mapper / Repository / migration。
 - 业务启动类，如 `XxxApplication`。
+- starter 聚合包。
+- demo / example / sample application。
 - Admin UI、业务页面或前端应用。
 - 可启动平台服务。
 
@@ -209,6 +214,7 @@ Config / I18n / Time runtime abstraction after corresponding phase-2 tasks
 - `synapse-webmvc` 只做 Servlet MVC 技术支撑，不包含 WebFlux / Gateway。
 - `synapse-webflux` 只做 WebFlux 技术支撑，不是 gateway 服务。
 - `synapse-cloud` 只做服务间调用上下文传播和 Feign 技术适配，不是 Gateway、注册中心、配置中心、服务治理后台或 IAM。
+- 本项目不提供 starter，也不提供 demo / example / sample application。
 
 ### 6.3 分层规则只约束消费方和可选 adapter
 
@@ -268,17 +274,18 @@ Framework 禁止业务 Entity，例如：
 4. 明确不会修改哪些内容？
 5. 是否新增生产依赖？
 6. 是否新增启动类或示例应用？
-7. 是否引入业务概念、业务表或业务接口？
-8. 是否新增数据库 migration？
-9. 是否会新增 Controller？
-10. 是否会新增业务 Entity / Mapper / Repository / Service？
-11. 是否触碰 `synapse-task`、`synapse-tenant`、`synapse-data-permission`，或将其加入 reactor？
-12. 是否新增 starter？
-13. 是否在 `synapse-oauth2` 中实现 Authorization Server？
-14. 是否把 `synapse-audit`、`synapse-file`、`synapse-mq`、`synapse-config` 做成中心化平台服务？
-15. 是否把 `synapse-webflux` 做成 gateway 服务？
-16. 是否一次性处理多个 Task 或扩大任务范围？
-17. 需要执行哪些验证命令？
+7. 是否新增 starter？
+8. 是否新增 demo / example / sample application？
+9. 是否引入业务概念、业务表或业务接口？
+10. 是否新增数据库 migration？
+11. 是否会新增 Controller？
+12. 是否会新增业务 Entity / Mapper / Repository / Service？
+13. 是否触碰 `synapse-task`、`synapse-tenant`、`synapse-data-permission`，或将其加入 reactor？
+14. 是否在 `synapse-oauth2` 中实现 Authorization Server？
+15. 是否把 `synapse-audit`、`synapse-file`、`synapse-mq`、`synapse-config` 做成中心化平台服务？
+16. 是否把 `synapse-webflux` 做成 gateway 服务？
+17. 是否一次性处理多个 Task 或扩大任务范围？
+18. 需要执行哪些验证命令？
 
 ## 8. 模块完成后的 Skill 交付规则
 
@@ -337,8 +344,9 @@ skills/<module-name>/SKILL.md
 - 禁止把业务模块代码放进框架基础模块。
 - 禁止把临时实验代码提交到主模块。
 - 禁止新增生产启动应用、示例应用或 Admin UI。
+- 禁止新增 starter。
+- 禁止新增 demo / example / sample application。
 - 禁止使用宽泛的 `catch (Exception e)` 后只打印日志不处理。
-- 禁止当前阶段新增 starter。
 - 禁止恢复 `synapse-task` 或将其加入 reactor。
 - 禁止将 `synapse-tenant`、`synapse-data-permission` 加入当前 reactor。
 - 禁止在 `synapse-oauth2` 中实现 Authorization Server。
