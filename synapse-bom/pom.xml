@@ -105,6 +105,24 @@
 
             <dependency>
                 <groupId>com.indigo.synapse</groupId>
+                <artifactId>synapse-time</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.indigo.synapse</groupId>
+                <artifactId>synapse-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.indigo.synapse</groupId>
+                <artifactId>synapse-i18n</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.indigo.synapse</groupId>
                 <artifactId>synapse-data</artifactId>
                 <version>${project.version}</version>
             </dependency>

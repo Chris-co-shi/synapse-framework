@@ -22,6 +22,9 @@
         <module>synapse-webmvc</module>
         <module>synapse-webflux</module>
         <module>synapse-cloud</module>
+        <module>synapse-time</module>
+        <module>synapse-config</module>
+        <module>synapse-i18n</module>
         <module>synapse-data</module>
         <module>synapse-cache</module>
         <module>synapse-security</module>

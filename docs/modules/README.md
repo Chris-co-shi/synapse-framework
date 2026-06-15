@@ -2,6 +2,8 @@
 
 本目录用于记录 Synapse Framework 各模块的使用方式、扩展点和边界说明。
 
+对应 Agent Skill 索引见：[../../skills/README.md](../../skills/README.md)。
+
 手册面向两类读者：
 
 - 业务系统开发者：判断是否需要引入某个模块，以及如何正确使用。
@@ -11,11 +13,8 @@
 
 当前正式 modules 以 root `pom.xml` reactor 为准。未进入 root `pom.xml` 的目录或文档规划，不视为已实现模块。
 
-二阶段文档中的以下模块属于规划能力，未进入 reactor 前不能当成当前可用能力：
-
-- `synapse-config`
-- `synapse-i18n`
-- `synapse-time`
+二阶段 TASK-205 已将 `synapse-time`、`synapse-config`、`synapse-i18n` 加入 reactor。
+后续若文档出现新的规划模块，未进入 reactor 前不能当成当前可用能力。
 
 固定约定：
 
@@ -41,6 +40,9 @@
 | `synapse-webmvc` | [synapse-webmvc.md](synapse-webmvc.md) | Servlet MVC 响应、异常处理、Filter 异常桥接 |
 | `synapse-webflux` | [synapse-webflux.md](synapse-webflux.md) | WebFlux Trace、异常响应、Reactor Context / OperationContext 恢复 |
 | `synapse-cloud` | [synapse-cloud.md](synapse-cloud.md) | Spring Cloud / OpenFeign 服务间调用上下文传播，不是 Gateway |
+| `synapse-time` | [synapse-time.md](synapse-time.md) | 时间和时区技术支撑，不做时区后台 |
+| `synapse-config` | [synapse-config.md](synapse-config.md) | 配置抽象、运行时读取和类型解析，不是配置中心 |
+| `synapse-i18n` | [synapse-i18n.md](synapse-i18n.md) | 国际化消息解析抽象，不是资源中心 |
 | `synapse-data` | [synapse-data.md](synapse-data.md) | 数据层基础能力，当前聚焦 OperationContext 自动填充 |
 | `synapse-cache` | [synapse-cache.md](synapse-cache.md) | 缓存、锁、限流、幂等基础设施 |
 | `synapse-security` | [synapse-security.md](synapse-security.md) | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 |

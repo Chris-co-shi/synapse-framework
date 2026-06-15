@@ -13,6 +13,9 @@ synapse-framework
 ├── synapse-webmvc
 ├── synapse-webflux
 ├── synapse-cloud
+├── synapse-time
+├── synapse-config
+├── synapse-i18n
 ├── synapse-data
 ├── synapse-cache
 ├── synapse-security
@@ -27,7 +30,7 @@ synapse-framework
 - 未进入根 `pom.xml` reactor 的目录，不视为当前已实现模块。
 - `synapse-task`、`synapse-tenant`、`synapse-data-permission` 若目录存在，也只能视为暂存目录或历史残留，不能按正式 module 使用。
 - `synapse-web` 已在 TASK-202 中拆分为 `synapse-webmvc` 和 `synapse-webflux`，不再作为正式 reactor module。
-- 二阶段规划模块在真正加入 reactor 前，只能作为路线图，不代表已实现能力。
+- 新规划模块在真正加入 reactor 前，只能作为路线图，不代表已实现能力。
 - 本项目固定不创建 `synapse-starter-*`，不创建 demo / example / sample application。
 
 ## 2. 二阶段目标模块形态
@@ -79,9 +82,9 @@ sample applications    不创建
 | 保持 | `synapse-audit` | 审计事件和记录端口 |
 | 保持 | `synapse-file` | 文件存储抽象，不做 file-service |
 | 保持 | `synapse-mq` | MQ 技术抽象，不做 message-service |
-| 新增规划 | `synapse-config` | 配置抽象，不做 config-service |
-| 新增规划 | `synapse-i18n` | 国际化运行时抽象，不做资源中心 |
-| 新增规划 | `synapse-time` | 时间和时区技术支撑，独立模块，不并入 core |
+| 已新增 | `synapse-config` | 配置抽象，不做 config-service |
+| 已新增 | `synapse-i18n` | 国际化运行时抽象，不做资源中心 |
+| 已新增 | `synapse-time` | 时间和时区技术支撑，独立模块，不并入 core |
 
 ## 3. 当前模块边界
 
@@ -193,29 +196,29 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 禁止内容：站内信、短信、邮件、消息模板管理、消息记录查询 API、消息中心后台、可启动 message-service。
 
-## 4. 二阶段规划模块边界
+## 4. TASK-205 已新增模块边界
 
 ### 4.1 synapse-config
 
-规划定位：统一配置抽象和运行时客户端能力。
+当前状态：正式 reactor module，提供统一配置抽象、运行时读取和类型解析能力。
 
-允许内容：ConfigClient、ConfigResolver、ConfigParser、ConfigCache、ConfigChangeEvent、ConfigRefreshListener、JSON 配置解析。
+允许内容：ConfigClient、ConfigResolver、ConfigParser、轻量本地配置客户端、运行时配置读取和解析扩展点。
 
 禁止内容：Config Controller、配置数据库表、配置发布流程、配置审批、配置中心后台、可启动 config-service。
 
 ### 4.2 synapse-i18n
 
-规划定位：国际化运行时解析抽象。
+当前状态：正式 reactor module，提供国际化运行时解析抽象。
 
-允许内容：LocaleResolver、I18nMessageResolver、I18nResourceLoader、I18nResourceCache、FallbackPolicy、错误码国际化扩展点。
+允许内容：LocaleResolver、I18nMessageResolver、I18nResourceLoader、轻量本地资源加载、错误码国际化扩展点。
 
 禁止内容：国际化资源中心、翻译审批、语言维护后台、可启动 i18n-resource-center。
 
 ### 4.3 synapse-time
 
-规划定位：时间和时区技术支撑模块，独立模块，不并入 `synapse-core`。
+当前状态：正式 reactor module，提供时间和时区技术支撑，独立模块，不并入 `synapse-core`。
 
-允许内容：TimeZoneResolver、UserTimeZoneProvider、TimeRangeConverter、DateRangeQuery、UTC 存储规范、Jackson 时间序列化扩展。
+允许内容：TimeZoneResolver、TimeRangeConverter、UTC 查询范围转换、时间存储和查询规范。
 
 禁止内容：组织架构、工厂管理、用户资料管理、时区配置后台。
 

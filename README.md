@@ -56,6 +56,9 @@ synapse-framework
 ├── synapse-webmvc
 ├── synapse-webflux
 ├── synapse-cloud
+├── synapse-time
+├── synapse-config
+├── synapse-i18n
 ├── synapse-data
 ├── synapse-cache
 ├── synapse-security
@@ -72,6 +75,9 @@ synapse-framework
 | `synapse-webmvc` | Servlet MVC 响应、异常处理、Filter 异常桥接 | [查看](docs/modules/synapse-webmvc.md) |
 | `synapse-webflux` | WebFlux Trace、异常响应、Reactor Context / OperationContext 恢复 | [查看](docs/modules/synapse-webflux.md) |
 | `synapse-cloud` | Spring Cloud / OpenFeign 服务间调用上下文传播 | [查看](docs/modules/synapse-cloud.md) |
+| `synapse-time` | 时间和时区技术支撑，提供 UTC 查询范围转换 | [查看](docs/modules/synapse-time.md) |
+| `synapse-config` | 配置抽象、运行时读取和类型解析，不是配置中心 | [查看](docs/modules/synapse-config.md) |
+| `synapse-i18n` | 国际化消息解析抽象，不是资源中心 | [查看](docs/modules/synapse-i18n.md) |
 | `synapse-data` | 数据层基础能力，当前聚焦 OperationContext 自动填充 | [查看](docs/modules/synapse-data.md) |
 | `synapse-cache` | 缓存、锁、限流、幂等基础设施 | [查看](docs/modules/synapse-cache.md) |
 | `synapse-security` | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 | [查看](docs/modules/synapse-security.md) |
@@ -81,6 +87,8 @@ synapse-framework
 | `synapse-mq` | MQ 消息外壳、发布/消费模板、SPI、上下文传播契约 | [查看](docs/modules/synapse-mq.md) |
 
 模块手册索引：[docs/modules/README.md](docs/modules/README.md)
+
+模块 Skill 索引：[skills/README.md](skills/README.md)
 
 ## 二阶段规划入口
 
@@ -96,8 +104,7 @@ synapse-framework
 
 注意：
 
-- `synapse-webmvc`、`synapse-webflux` 和 `synapse-cloud` 是当前已实现模块。
-- `synapse-config`、`synapse-i18n`、`synapse-time` 仍是二阶段规划模块。
+- `synapse-webmvc`、`synapse-webflux`、`synapse-cloud`、`synapse-time`、`synapse-config`、`synapse-i18n` 是当前已实现模块。
 - 本项目不规划、不创建 `synapse-starter-*`。
 - 本项目不规划、不创建 demo / example / sample application。
 - 未进入 root `pom.xml` reactor 前，不能把规划模块描述成已实现能力。
