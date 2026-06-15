@@ -16,7 +16,13 @@
 - `synapse-config`
 - `synapse-i18n`
 - `synapse-time`
-- `synapse-starter-*`
+
+固定约定：
+
+- 本项目不提供 `synapse-starter-*` 聚合包。
+- 本项目不提供 demo / example / sample application。
+- 业务系统按需直接引用具体 module。
+- 后续文档不得再把 starter 或 demo 作为正向规划。
 
 模块文档必须明确区分：
 
@@ -27,7 +33,7 @@
 
 禁止把规划模块描述成已经实现的模块，禁止把 platform service 的职责写成 framework 模块能力。
 
-## 一阶段模块
+## 当前模块
 
 | 模块 | 手册 | 说明 |
 | --- | --- | --- |
@@ -65,7 +71,7 @@
 5. 不适用场景。
 6. Maven 引入方式。
 7. 核心能力。
-8. 快速使用示例。
+8. 最小使用片段。
 9. 扩展方式。
 10. 配置项。
 11. 边界与注意事项。
