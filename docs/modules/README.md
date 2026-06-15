@@ -7,34 +7,68 @@
 - 业务系统开发者：判断是否需要引入某个模块，以及如何正确使用。
 - 平台系统开发者：判断 framework 提供了哪些底层契约，哪些能力应由平台服务自行实现。
 
+## 当前事实与后续规划
+
+当前正式 modules 以 root `pom.xml` reactor 为准。未进入 root `pom.xml` 的目录或文档规划，不视为已实现模块。
+
+二阶段文档中的以下模块属于规划能力，未进入 reactor 前不能当成当前可用能力：
+
+- `synapse-webmvc`
+- `synapse-webflux`
+- `synapse-cloud`
+- `synapse-config`
+- `synapse-i18n`
+- `synapse-time`
+- `synapse-starter-*`
+
+模块文档必须明确区分：
+
+1. **当前事实**：当前代码已经存在、已经进入 reactor、已经可被消费方引用的能力。
+2. **后续规划**：phase-2 roadmap 中规划但尚未实现的能力。
+3. **禁止事项**：不得进入 framework 的业务能力或平台服务能力。
+4. **Platform 边界**：应由 Synapse Platform 可启动服务承载的能力。
+
+禁止把规划模块描述成已经实现的模块，禁止把 platform service 的职责写成 framework 模块能力。
+
 ## 一阶段模块
 
 | 模块 | 手册 | 说明 |
 | --- | --- | --- |
 | `synapse-core` | [synapse-core.md](synapse-core.md) | 错误码、异常、ID、OperationContext 等核心契约 |
-| `synapse-web` | [synapse-web.md](synapse-web.md) | Servlet MVC 响应、异常处理、Filter 异常桥接 |
+| `synapse-web` | [synapse-web.md](synapse-web.md) | 当前偏 Servlet MVC，提供响应、异常处理、Filter 异常桥接 |
 | `synapse-data` | [synapse-data.md](synapse-data.md) | 数据层基础能力，当前聚焦 OperationContext 自动填充 |
 | `synapse-cache` | [synapse-cache.md](synapse-cache.md) | 缓存、锁、限流、幂等基础设施 |
 | `synapse-security` | [synapse-security.md](synapse-security.md) | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 |
-| `synapse-oauth2` | [synapse-oauth2.md](synapse-oauth2.md) | token、JWT、JWK 基础能力 |
-| `synapse-audit` | [synapse-audit.md](synapse-audit.md) | 审计事件契约 |
-| `synapse-file` | [synapse-file.md](synapse-file.md) | 文件存储抽象与本地轻量实现 |
-| `synapse-mq` | [synapse-mq.md](synapse-mq.md) | MQ 消息外壳、发布/消费模板、异常分类、上下文传播契约 |
+| `synapse-oauth2` | [synapse-oauth2.md](synapse-oauth2.md) | token、JWT、JWK、Resource Server 辅助能力，不是 IAM |
+| `synapse-audit` | [synapse-audit.md](synapse-audit.md) | 审计事件契约，不是审计中心 |
+| `synapse-file` | [synapse-file.md](synapse-file.md) | 文件存储抽象与本地轻量实现，不是文件中心 |
+| `synapse-mq` | [synapse-mq.md](synapse-mq.md) | MQ 消息外壳、发布/消费模板、异常分类、上下文传播契约，不是消息中心 |
 | `synapse-bom` | [synapse-bom.md](synapse-bom.md) | 依赖版本管理 |
+
+## 二阶段文档入口
+
+二阶段模块边界以以下文档为准：
+
+- [Framework Boundary](../phase-2/00-framework-boundary.md)
+- [Module Boundary](../phase-2/01-module-boundary.md)
+- [Phase 2 Roadmap](../phase-2/02-phase-2-roadmap.md)
+- [Boundary Checklist](../phase-2/03-boundary-checklist.md)
 
 ## 手册编写规则
 
 每个模块手册应包含：
 
 1. 模块定位。
-2. 适用场景。
-3. 不适用场景。
-4. Maven 引入方式。
-5. 核心能力。
-6. 快速使用示例。
-7. 扩展方式。
-8. 配置项。
-9. 边界与注意事项。
-10. 常见问题。
+2. 当前事实。
+3. 后续规划。
+4. 适用场景。
+5. 不适用场景。
+6. Maven 引入方式。
+7. 核心能力。
+8. 快速使用示例。
+9. 扩展方式。
+10. 配置项。
+11. 边界与注意事项。
+12. 常见问题。
 
 手册只描述当前代码事实，不写未实现能力，不把平台服务职责写成 framework 模块能力。
