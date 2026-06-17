@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SynapseExceptionBridgeFilterTest {
 
     private final SynapseExceptionBridgeFilter filter = new SynapseExceptionBridgeFilter(
-            SynapseObjectMapperFactory.create(),
+            new WebErrorResponseWriter(SynapseObjectMapperFactory.create()),
             new WebExceptionResponseFactory(
                     new CompositeErrorHttpStatusResolver(
                             List.of(new CommonErrorHttpStatusResolver())

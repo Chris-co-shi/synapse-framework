@@ -44,6 +44,25 @@ class SecurityOperationContextAdapterTest {
     }
 
     @Test
+    void shouldMapAuthenticatedClientToServiceOperationActor() {
+        AuthenticatedClient client = new AuthenticatedClient(
+                "client-a",
+                "message-service",
+                "tenant-a",
+                Set.of("INTERNAL"),
+                Set.of("message:send")
+        );
+
+        OperationActor actor = SecurityOperationContextAdapter.toOperationActor(client);
+
+        assertEquals(OperationActorType.SERVICE, actor.type());
+        assertEquals("client-a", actor.id());
+        assertEquals("message-service", actor.name());
+        assertEquals("tenant-a", actor.tenantId());
+        assertTrue(actor.attributes().isEmpty());
+    }
+
+    @Test
     void shouldRejectNullAuthenticatedUser() {
         assertThrows(IllegalArgumentException.class, () -> SecurityOperationContextAdapter.toOperationActor(null));
         assertThrows(IllegalArgumentException.class, () -> SecurityOperationContextAdapter.toOperationContext(null));

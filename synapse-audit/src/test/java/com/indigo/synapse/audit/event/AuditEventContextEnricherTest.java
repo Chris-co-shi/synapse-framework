@@ -74,6 +74,30 @@ class AuditEventContextEnricherTest {
     }
 
     @Test
+    void shouldFillClientSubjectFromOperationContext() {
+        OperationActor actor = new OperationActor(OperationActorType.SERVICE, "client-a", "Client A", "tenant-a", Map.of());
+        OperationContext context = new OperationContext(
+                actor,
+                actor,
+                null,
+                "trace-client",
+                "tenant-a",
+                "request-1",
+                Instant.parse("2026-05-20T09:59:59Z"),
+                Map.of()
+        );
+
+        try (OperationContextScope ignored = OperationContextHolder.scope(context)) {
+            AuditEvent enriched = enricher.enrich(event(null, null, Map.of()));
+
+            assertEquals("SERVICE", enriched.subject().subjectType());
+            assertEquals("client-a", enriched.subject().subjectId());
+            assertEquals("tenant-a", enriched.subject().tenantId());
+            assertEquals("SERVICE", enriched.attributes().get("operation.actor.type"));
+        }
+    }
+
+    @Test
     void shouldFillOperationAttributesWithoutOverridingExistingKeys() {
         try (OperationContextScope ignored = OperationContextHolder.scope(operationContext())) {
             AuditEvent enriched = enricher.enrich(event(null, null, Map.of(

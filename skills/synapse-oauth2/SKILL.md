@@ -1,38 +1,22 @@
-# synapse-oauth2 Skill
+# synapse-oauth2 Legacy Skill
 
-## 职责
+## 状态
 
-`synapse-oauth2` 只提供 JWT / JWK / token denylist 等 OAuth2 技术辅助能力。
+`synapse-oauth2` 已拆分，不再是正式 reactor module。后续任务不得继续把它作为当前可实现模块。
+
+## 替代模块
+
+- `synapse-oauth2-core`：JWT claim、token、validator、denylist、BearerTokenProvider 契约。
+- `synapse-oauth2-authorization-server-support`：JWT 签发、RSAKey、JWKSource、JwtEncoder 技术支撑。
+- `synapse-oauth2-resource-server-webmvc`：Servlet Resource Server 技术适配。
+- `synapse-oauth2-resource-server-webflux`：Reactive Resource Server 技术适配。
 
 ## 禁止事项
 
-- 不做 IAM。
-- 不做登录、注册、密码校验、用户认证。
-- 不做客户端管理后台、授权后台。
-- 不实现 OAuth2 Authorization Server。
-- 不新增 Resource Server FilterChain。
-- 不新增用户、角色、菜单、组织等业务模型。
-- 不新增 Controller、Entity、Mapper、Repository、migration。
-- 不创建 starter、demo、example、sample application。
+- 不恢复 `synapse-oauth2` 聚合模块。
+- 不创建兼容 starter 或 demo。
+- 不在 Framework 中实现 IAM、登录、客户端管理后台、授权后台或完整 Authorization Server 业务流程。
 
-## 标准实现
+## 后续执行
 
-- JWT 签发和校验通过 `SynapseJwtService`。
-- claims 使用 `JwtClaims`，不得塞入角色、权限、菜单或组织结构。
-- token 主动失效通过 `TokenDenylistPort` 扩展。
-- 生产环境必须由消费方提供真实密钥和 denylist 实现。
-
-## 测试要求
-
-- 覆盖 JWT 签发和校验。
-- 覆盖非法 token。
-- 覆盖 denylist。
-- 覆盖生产环境保护策略。
-- 覆盖自定义 Bean 不覆盖。
-- 覆盖 `synapse.oauth2.*` Spring Boot Configuration Metadata，敏感配置不得写入真实 token 或 credential 示例。
-
-## 必读
-
-- `AGENTS.md`
-- `docs/modules/synapse-oauth2.md`
-- `docs/phase-2/00-framework-boundary.md`
+遇到旧文档或旧引用时，应迁移到上述拆分模块，并同步更新 `README.md`、`AGENTS.md`、`docs/modules/README.md` 和对应模块 Skill。

@@ -96,7 +96,7 @@ Synapse-Framework 固定采用“按需引用具体 module”的交付方式：
 | Platform 服务 | 职责 | Framework 对应边界 |
 | --- | --- | --- |
 | `synapse-gateway` | 统一入口、路由、鉴权前置、Header 注入 | `synapse-webflux` 只提供 WebFlux 技术支撑 |
-| `synapse-iam` | 用户、角色、菜单、资源、登录、授权 | `synapse-security` / `synapse-oauth2` 只提供技术抽象 |
+| `synapse-iam` | 用户、角色、菜单、资源、登录、授权 | `synapse-security` / 拆分后的 OAuth2 技术模块只提供技术抽象 |
 | `synapse-message-service` | 站内信、短信、邮件、消息模板、消息记录 | `synapse-mq` 只提供 MQ 技术抽象 |
 | `synapse-file-service` | 文件管理、附件表、权限、预览、下载审计 | `synapse-file` 只提供文件存储抽象 |
 | `synapse-config-service` | 配置管理、发布、审批、历史版本、后台页面 | `synapse-config` 只提供配置抽象和客户端能力 |
@@ -117,9 +117,16 @@ Framework 中的 `synapse-config` 只能提供配置抽象、配置客户端、�
 
 `synapse-file` 只能提供文件存储技术抽象，例如 `FileStorageClient`、文件对象模型、元数据技术模型、上传/下载策略和 URL 签名抽象；不能提供文件管理 API、附件业务表、文件权限业务、文件审批、文件预览业务或可启动 file-service。
 
-### 6.4 synapse-oauth2
+### 6.4 OAuth2 拆分模块
 
-二阶段 `synapse-oauth2` 只允许提供 JWT、JWK、Token 校验、Token denylist、Resource Server 辅助能力和 OAuth2 技术契约；不能提供授权服务实现、登录接口、用户认证业务、授权记录管理或 IAM 服务。
+OAuth2 能力已拆分为 `synapse-oauth2-core`、`synapse-oauth2-authorization-server-support`、`synapse-oauth2-resource-server-webmvc`、`synapse-oauth2-resource-server-webflux`。
+
+- `synapse-oauth2-core` 只允许提供 JWT claim、token 类型、validator、denylist 端口和 BearerTokenProvider 契约。
+- `synapse-oauth2-authorization-server-support` 只允许提供 JWT 签发、RSAKey、JWKSource、JwtEncoder 等授权服务器侧技术支撑，不实现 Authorization Server 业务流程。
+- `synapse-oauth2-resource-server-webmvc` 只允许提供 Servlet Resource Server 技术适配。
+- `synapse-oauth2-resource-server-webflux` 只允许提供 Reactive Resource Server 技术适配。
+
+以上模块都不能提供登录接口、用户认证业务、客户端管理后台、授权记录管理或 IAM 服务。
 
 ### 6.5 synapse-audit
 

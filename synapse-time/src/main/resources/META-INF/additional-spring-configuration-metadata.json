@@ -1,0 +1,18 @@
+{
+  "properties": [],
+  "hints": [
+    {
+      "name": "synapse.time.default-zone",
+      "values": [
+        {
+          "value": "UTC",
+          "description": "协调世界时，适合作为服务端默认时区。"
+        },
+        {
+          "value": "Asia/Shanghai",
+          "description": "中国标准时间。"
+        }
+      ]
+    }
+  ]
+}

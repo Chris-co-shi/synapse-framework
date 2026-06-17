@@ -7,8 +7,10 @@ import com.indigo.synapse.cloud.remote.RemoteErrorBodyParser;
 import com.indigo.synapse.cloud.security.InternalCallSigner;
 import com.indigo.synapse.cloud.security.NoopInternalCallSigner;
 import com.indigo.synapse.core.context.OperationContextProvider;
+import com.indigo.synapse.oauth2.core.token.BearerTokenProvider;
 import feign.RequestInterceptor;
 import feign.codec.ErrorDecoder;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -16,6 +18,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+
+import java.util.Optional;
 
 /**
  * Synapse Feign 自动配置。
@@ -48,9 +52,16 @@ public class SynapseFeignAutoConfiguration {
             OperationContextProvider contextProvider,
             OperationContextHttpHeaderCodec codec,
             SynapseFeignProperties properties,
-            InternalCallSigner signer
+            InternalCallSigner signer,
+            ObjectProvider<BearerTokenProvider> bearerTokenProvider
     ) {
-        return new SynapseFeignRequestInterceptor(contextProvider, codec, properties, signer);
+        return new SynapseFeignRequestInterceptor(
+                contextProvider,
+                codec,
+                properties,
+                signer,
+                bearerTokenProvider.getIfAvailable(() -> Optional::empty)
+        );
     }
 
     @Bean

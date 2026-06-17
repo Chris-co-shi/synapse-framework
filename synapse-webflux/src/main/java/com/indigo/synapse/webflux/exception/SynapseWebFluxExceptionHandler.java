@@ -1,18 +1,12 @@
 package com.indigo.synapse.webflux.exception;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indigo.synapse.webflux.context.ReactiveRequestContext;
 import com.indigo.synapse.webflux.trace.TraceHeaders;
 import com.indigo.synapse.webflux.trace.TraceIdGenerator;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -20,11 +14,13 @@ import java.util.Objects;
  */
 public final class SynapseWebFluxExceptionHandler implements ErrorWebExceptionHandler {
 
-    private final ObjectMapper objectMapper;
+    private final ReactiveWebErrorResponseWriter responseWriter;
     private final WebFluxExceptionResponseFactory responseFactory;
 
-    public SynapseWebFluxExceptionHandler(ObjectMapper objectMapper, WebFluxExceptionResponseFactory responseFactory) {
-        this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper must not be null");
+    public SynapseWebFluxExceptionHandler(
+            ReactiveWebErrorResponseWriter responseWriter,
+            WebFluxExceptionResponseFactory responseFactory) {
+        this.responseWriter = Objects.requireNonNull(responseWriter, "responseWriter must not be null");
         this.responseFactory = Objects.requireNonNull(responseFactory, "responseFactory must not be null");
     }
 
@@ -34,13 +30,7 @@ public final class SynapseWebFluxExceptionHandler implements ErrorWebExceptionHa
             String traceId = ReactiveRequestContext.traceId(contextView)
                     .orElseGet(() -> fallbackTraceId(exchange));
             WebFluxErrorResponse errorResponse = responseFactory.from(throwable, traceId);
-            exchange.getResponse().setRawStatusCode(errorResponse.status());
-            exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
-            exchange.getResponse().getHeaders().set(HttpHeaders.CONTENT_ENCODING, StandardCharsets.UTF_8.name());
-            exchange.getResponse().getHeaders().set(TraceHeaders.TRACE_ID, traceId);
-            byte[] payload = write(errorResponse);
-            DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(payload);
-            return exchange.getResponse().writeWith(Mono.just(buffer));
+            return responseWriter.write(exchange, errorResponse, traceId);
         });
     }
 
@@ -49,11 +39,4 @@ public final class SynapseWebFluxExceptionHandler implements ErrorWebExceptionHa
         return traceId == null || traceId.isBlank() ? TraceIdGenerator.generate() : traceId;
     }
 
-    private byte[] write(WebFluxErrorResponse errorResponse) {
-        try {
-            return objectMapper.writeValueAsBytes(errorResponse.body());
-        } catch (JsonProcessingException exception) {
-            throw new IllegalStateException("failed to write webflux error response", exception);
-        }
-    }
 }

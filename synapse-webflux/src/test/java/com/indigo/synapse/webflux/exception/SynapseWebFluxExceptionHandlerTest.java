@@ -24,7 +24,7 @@ class SynapseWebFluxExceptionHandlerTest {
     private final ObjectMapper objectMapper = SynapseObjectMapperFactory.create();
 
     private final SynapseWebFluxExceptionHandler handler = new SynapseWebFluxExceptionHandler(
-            objectMapper,
+            new ReactiveWebErrorResponseWriter(objectMapper),
             new WebFluxExceptionResponseFactory(new CompositeErrorHttpStatusResolver(
                     List.of(new CommonErrorHttpStatusResolver())
             ))

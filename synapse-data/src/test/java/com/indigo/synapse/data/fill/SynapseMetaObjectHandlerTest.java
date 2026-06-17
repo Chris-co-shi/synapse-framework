@@ -103,6 +103,26 @@ class SynapseMetaObjectHandlerTest {
     }
 
     @Test
+    void shouldFillAuditFieldsFromClientOperationContext() {
+        Instant now = Instant.parse("2026-05-21T01:02:03Z");
+        SynapseMetaObjectHandler handler = new SynapseMetaObjectHandler(
+                Clock.fixed(now, ZoneOffset.UTC),
+                SynapseAuditorProvider.from(new DefaultOperationContextProvider())
+        );
+        TestEntity entity = new TestEntity();
+        MetaObject metaObject = SystemMetaObject.forObject(entity);
+
+        try (OperationContextScope ignored = OperationContextHolder.scope(
+                operationContext(OperationActorType.SERVICE, "client-a", "tenant-a"))) {
+            handler.insertFill(metaObject);
+        }
+
+        assertEquals("client-a", entity.getCreatedBy());
+        assertEquals("client-a", entity.getUpdatedBy());
+        assertEquals("tenant-a", entity.getTenantId());
+    }
+
+    @Test
     void shouldNotFillAuditorOrTenantWhenOperationContextMissing() {
         Instant now = Instant.parse("2026-05-21T01:02:03Z");
         SynapseMetaObjectHandler handler = new SynapseMetaObjectHandler(
@@ -145,7 +165,11 @@ class SynapseMetaObjectHandlerTest {
     }
 
     private static OperationContext operationContext(String actorId, String tenantId) {
-        OperationActor actor = new OperationActor(OperationActorType.USER, actorId, actorId, tenantId, Map.of());
+        return operationContext(OperationActorType.USER, actorId, tenantId);
+    }
+
+    private static OperationContext operationContext(OperationActorType actorType, String actorId, String tenantId) {
+        OperationActor actor = new OperationActor(actorType, actorId, actorId, tenantId, Map.of());
         return new OperationContext(
                 actor,
                 actor,

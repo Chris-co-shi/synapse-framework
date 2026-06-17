@@ -124,12 +124,15 @@ rg -n "spring-webflux|ServerWebExchange|WebFilter|reactor.core" synapse-webmvc
 ### 3.7 OAuth2 / IAM 边界检查
 
 ```bash
-rg -n "AuthorizationServer|RegisteredClient|OAuth2AuthorizationService|login|client management|用户|角色|菜单|授权后台" synapse-oauth2 synapse-security docs AGENTS.md README.md
+rg -n "AuthorizationServer|RegisteredClient|OAuth2AuthorizationService|login|client management|用户|角色|菜单|授权后台" synapse-oauth2-core synapse-oauth2-authorization-server-support synapse-oauth2-resource-server-webmvc synapse-oauth2-resource-server-webflux synapse-security docs AGENTS.md README.md
+rg -n "RSAKey|JwtEncoder|privateKey|generate\\(" synapse-oauth2-resource-server-webmvc/src/main/java synapse-oauth2-resource-server-webflux/src/main/java
 ```
 
 判断规则：
 
-- 二阶段 `synapse-oauth2` 只允许 JWT / JWK / Token / Resource Server 辅助能力。
+- `synapse-oauth2-core` 不允许依赖 Spring Security / Web / 私钥签发能力。
+- `synapse-oauth2-authorization-server-support` 只允许提供签发技术支撑，不实现完整 Authorization Server 业务流程。
+- Resource Server 模块不允许出现私钥、`JwtEncoder` 或 token 签发能力。
 - Authorization Server 实现、登录、客户端管理、用户认证、授权后台属于 Platform `synapse-iam`。
 - 文档中描述禁止事项属于合理命中。
 

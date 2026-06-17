@@ -97,16 +97,49 @@ class SynapseFeignRequestInterceptorTest {
         assertThat(first(template, SynapseCloudHeaders.SIGNATURE)).isEqualTo("signature-1");
     }
 
+    @Test
+    void shouldRelayBearerTokenWhenEnabled() {
+        RequestTemplate template = template();
+        SynapseFeignProperties properties = properties(false, false);
+        properties.setBearerTokenRelayEnabled(true);
+
+        interceptor(contextProvider(null), properties, null, () -> Optional.of("token-value")).apply(template);
+
+        assertThat(first(template, "Authorization")).isEqualTo("Bearer token-value");
+    }
+
+    @Test
+    void shouldNotOverrideAuthorizationByDefault() {
+        RequestTemplate template = template();
+        template.header("Authorization", "Bearer existing");
+        SynapseFeignProperties properties = properties(false, false);
+        properties.setBearerTokenRelayEnabled(true);
+
+        interceptor(contextProvider(null), properties, null, () -> Optional.of("token-value")).apply(template);
+
+        assertThat(first(template, "Authorization")).isEqualTo("Bearer existing");
+    }
+
     private SynapseFeignRequestInterceptor interceptor(
             OperationContextProvider provider,
             SynapseFeignProperties properties,
             InternalCallSigner signer
     ) {
+        return interceptor(provider, properties, signer, Optional::empty);
+    }
+
+    private SynapseFeignRequestInterceptor interceptor(
+            OperationContextProvider provider,
+            SynapseFeignProperties properties,
+            InternalCallSigner signer,
+            com.indigo.synapse.oauth2.core.token.BearerTokenProvider bearerTokenProvider
+    ) {
         return new SynapseFeignRequestInterceptor(
                 provider,
                 new OperationContextHttpHeaderCodec(),
                 properties,
-                signer
+                signer,
+                bearerTokenProvider
         );
     }
 

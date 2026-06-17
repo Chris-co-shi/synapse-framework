@@ -1,9 +1,9 @@
 package com.indigo.synapse.webmvc.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indigo.synapse.webmvc.context.MvcOperationContextFilter;
 import com.indigo.synapse.webmvc.exception.SynapseExceptionBridgeFilter;
 import com.indigo.synapse.webmvc.exception.WebExceptionResponseFactory;
+import com.indigo.synapse.webmvc.exception.WebErrorResponseWriter;
 import com.indigo.synapse.webmvc.trace.MvcTraceFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -32,9 +32,9 @@ public class SynapseWebMvcAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public SynapseExceptionBridgeFilter synapseExceptionBridgeFilter(
-            ObjectMapper objectMapper,
+            WebErrorResponseWriter responseWriter,
             WebExceptionResponseFactory responseFactory) {
-        return new SynapseExceptionBridgeFilter(objectMapper, responseFactory);
+        return new SynapseExceptionBridgeFilter(responseWriter, responseFactory);
     }
 
     /**

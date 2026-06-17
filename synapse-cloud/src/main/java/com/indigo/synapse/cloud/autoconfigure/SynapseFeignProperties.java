@@ -35,6 +35,12 @@ public class SynapseFeignProperties {
      */
     private boolean internalSignatureEnabled = false;
 
+    /**
+     * 是否透传当前 Bearer Token。默认关闭；开启后只通过 BearerTokenProvider 端口读取 token，
+     * 不从 OperationContext、日志、Servlet 或 Reactive 上下文中读取。
+     */
+    private boolean bearerTokenRelayEnabled = false;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -73,5 +79,13 @@ public class SynapseFeignProperties {
 
     public void setInternalSignatureEnabled(boolean internalSignatureEnabled) {
         this.internalSignatureEnabled = internalSignatureEnabled;
+    }
+
+    public boolean isBearerTokenRelayEnabled() {
+        return bearerTokenRelayEnabled;
+    }
+
+    public void setBearerTokenRelayEnabled(boolean bearerTokenRelayEnabled) {
+        this.bearerTokenRelayEnabled = bearerTokenRelayEnabled;
     }
 }

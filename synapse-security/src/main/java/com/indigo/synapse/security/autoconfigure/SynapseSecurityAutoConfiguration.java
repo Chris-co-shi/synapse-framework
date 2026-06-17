@@ -7,8 +7,8 @@ import com.indigo.synapse.security.password.SynapsePasswordEncoderFactory;
 import com.indigo.synapse.security.permission.DefaultPermissionChecker;
 import com.indigo.synapse.security.permission.PermissionChecker;
 import com.indigo.synapse.security.permission.RequirePermissionAspect;
-import com.indigo.synapse.security.web.TrustedHeaderAuthenticationFilter;
 import org.aopalliance.intercept.MethodInterceptor;
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -16,9 +16,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Role;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,8 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * Security 模块自动配置。
  *
  * <p>本配置只提供轻量安全上下文、密码编码器、PermissionChecker、RequirePermission AOP 适配器和
- * trusted-header Servlet Filter。它不创建 Spring Security FilterChain，也不提供 OAuth2 Resource Server、
- * 登录认证、授权后台或用户数据加载能力。</p>
+ * trusted-header 协议组件。Servlet Filter 由 synapse-security-webmvc 提供。</p>
  */
 @AutoConfiguration
 @EnableConfigurationProperties(SynapseSecurityProperties.class)
@@ -56,6 +53,23 @@ public class SynapseSecurityAutoConfiguration {
     }
 
     /**
+     * RequirePermission 声明式权限检查自动代理创建器。
+     */
+    @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    @ConditionalOnClass(MethodInterceptor.class)
+    @ConditionalOnMissingBean(DefaultAdvisorAutoProxyCreator.class)
+    @ConditionalOnProperty(
+            prefix = "synapse.security.permission",
+            name = "annotation-enabled",
+            havingValue = "true",
+            matchIfMissing = true
+    )
+    public static DefaultAdvisorAutoProxyCreator requirePermissionAutoProxyCreator() {
+        return new DefaultAdvisorAutoProxyCreator();
+    }
+
+    /**
      * RequirePermission 声明式权限检查 Advisor。
      *
      * <p>该 Bean 只在 Spring AOP MethodInterceptor 存在、PermissionChecker 存在且注解开关开启时注册。</p>
@@ -79,39 +93,21 @@ public class SynapseSecurityAutoConfiguration {
         return new RequirePermissionAspect(permissionCheckerProvider);
     }
 
-    /**
-     * trusted-header 认证 Filter。
-     *
-     * <p>该 Filter 默认不启用，必须显式配置 synapse.security.trusted-header.enabled=true。</p>
-     */
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    @ConditionalOnProperty(prefix = "synapse.security.trusted-header", name = "enabled", havingValue = "true")
-    public TrustedHeaderAuthenticationFilter trustedHeaderAuthenticationFilter(SynapseSecurityProperties properties) {
-        properties.validateTrustedHeaderConfiguration();
-        return new TrustedHeaderAuthenticationFilter(
-                properties,
-                new TrustedHeaderAuthenticatedUserResolver(),
-                new TrustedHeaderSignatureVerifier(),
-                new TrustedHeaderTimestampValidator()
-        );
+    public TrustedHeaderAuthenticatedUserResolver trustedHeaderAuthenticatedUserResolver() {
+        return new TrustedHeaderAuthenticatedUserResolver();
     }
 
-    /**
-     * 注册 trusted-header 认证 Filter。
-     *
-     * <p>order=-100，预期晚于 synapse-web 的异常桥接 Filter，早于业务 Controller。</p>
-     */
     @Bean
-    @ConditionalOnMissingBean(name = "trustedHeaderAuthenticationFilterRegistration")
-    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    @ConditionalOnProperty(prefix = "synapse.security.trusted-header", name = "enabled", havingValue = "true")
-    public FilterRegistrationBean<TrustedHeaderAuthenticationFilter> trustedHeaderAuthenticationFilterRegistration(
-            TrustedHeaderAuthenticationFilter filter) {
-        FilterRegistrationBean<TrustedHeaderAuthenticationFilter> registration = new FilterRegistrationBean<>(filter);
-        registration.setName("trustedHeaderAuthenticationFilter");
-        registration.setOrder(-100);
-        return registration;
+    @ConditionalOnMissingBean
+    public TrustedHeaderSignatureVerifier trustedHeaderSignatureVerifier() {
+        return new TrustedHeaderSignatureVerifier();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TrustedHeaderTimestampValidator trustedHeaderTimestampValidator() {
+        return new TrustedHeaderTimestampValidator();
     }
 }

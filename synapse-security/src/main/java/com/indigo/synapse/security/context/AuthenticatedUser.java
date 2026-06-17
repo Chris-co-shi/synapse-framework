@@ -24,7 +24,7 @@ public record AuthenticatedUser(
         String tenantId,
         Set<String> roles,
         Set<String> permissions
-) {
+) implements AuthenticatedPrincipal {
 
     public AuthenticatedUser {
         if (userId == null || userId.isBlank()) {
@@ -47,5 +47,20 @@ public record AuthenticatedUser(
      */
     public boolean hasPermission(String permission) {
         return permission != null && !permission.isBlank() && permissions.contains(permission);
+    }
+
+    @Override
+    public PrincipalType principalType() {
+        return PrincipalType.USER;
+    }
+
+    @Override
+    public String principalId() {
+        return userId;
+    }
+
+    @Override
+    public String displayName() {
+        return username;
     }
 }

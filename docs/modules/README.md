@@ -45,8 +45,12 @@
 | `synapse-i18n` | [synapse-i18n.md](synapse-i18n.md) | 国际化消息解析抽象，不是资源中心 |
 | `synapse-data` | [synapse-data.md](synapse-data.md) | 数据层基础能力，当前聚焦 OperationContext 自动填充 |
 | `synapse-cache` | [synapse-cache.md](synapse-cache.md) | 缓存、锁、限流、幂等基础设施 |
-| `synapse-security` | [synapse-security.md](synapse-security.md) | trusted-header、AuthenticatedUser、PermissionChecker、权限注解适配 |
-| `synapse-oauth2` | [synapse-oauth2.md](synapse-oauth2.md) | token、JWT、JWK、Resource Server 辅助能力，不是 IAM |
+| `synapse-security` | [synapse-security.md](synapse-security.md) | Web 无关安全主体、权限检查和安全上下文 |
+| `synapse-security-webmvc` | [synapse-security-webmvc.md](synapse-security-webmvc.md) | trusted-header Servlet MVC 适配 |
+| `synapse-oauth2-core` | [synapse-oauth2-core.md](synapse-oauth2-core.md) | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 |
+| `synapse-oauth2-authorization-server-support` | [synapse-oauth2-authorization-server-support.md](synapse-oauth2-authorization-server-support.md) | JWT 签发与 JWK 技术支持 |
+| `synapse-oauth2-resource-server-webmvc` | [synapse-oauth2-resource-server-webmvc.md](synapse-oauth2-resource-server-webmvc.md) | Servlet OAuth2 Resource Server 技术适配 |
+| `synapse-oauth2-resource-server-webflux` | [synapse-oauth2-resource-server-webflux.md](synapse-oauth2-resource-server-webflux.md) | Reactive OAuth2 Resource Server 技术适配 |
 | `synapse-audit` | [synapse-audit.md](synapse-audit.md) | 审计事件契约，不是审计中心 |
 | `synapse-file` | [synapse-file.md](synapse-file.md) | 文件存储抽象与本地轻量实现，不是文件中心 |
 | `synapse-mq` | [synapse-mq.md](synapse-mq.md) | MQ 消息外壳、发布/消费模板、异常分类、上下文传播契约，不是消息中心 |

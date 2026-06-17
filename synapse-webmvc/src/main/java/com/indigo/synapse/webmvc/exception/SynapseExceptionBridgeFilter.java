@@ -1,17 +1,14 @@
 package com.indigo.synapse.webmvc.exception;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indigo.synapse.core.exception.SynapseException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -28,14 +25,13 @@ public final class SynapseExceptionBridgeFilter extends OncePerRequestFilter {
      */
     public static final int ORDER = -200;
 
-    private final ObjectMapper objectMapper;
-
+    private final WebErrorResponseWriter responseWriter;
     private final WebExceptionResponseFactory responseFactory;
 
     public SynapseExceptionBridgeFilter(
-            ObjectMapper objectMapper,
+            WebErrorResponseWriter responseWriter,
             WebExceptionResponseFactory responseFactory) {
-        this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper must not be null");
+        this.responseWriter = Objects.requireNonNull(responseWriter, "responseWriter must not be null");
         this.responseFactory = Objects.requireNonNull(responseFactory, "responseFactory must not be null");
     }
 
@@ -51,15 +47,7 @@ public final class SynapseExceptionBridgeFilter extends OncePerRequestFilter {
                 throw exception;
             }
 
-            write(response, responseFactory.mvc(exception));
+            responseWriter.write(response, responseFactory.mvc(exception));
         }
-    }
-
-    private void write(HttpServletResponse response, WebErrorResponse errorResponse) throws IOException {
-        response.resetBuffer();
-        response.setStatus(errorResponse.status());
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        objectMapper.writeValue(response.getWriter(), errorResponse.body());
     }
 }

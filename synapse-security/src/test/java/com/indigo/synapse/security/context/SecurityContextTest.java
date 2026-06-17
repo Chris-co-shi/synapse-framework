@@ -31,7 +31,9 @@ class SecurityContextTest {
 
         SecurityContext.set(user);
 
+        assertEquals(user, SecurityContext.currentPrincipal().orElseThrow());
         assertEquals(user, SecurityContext.currentUser().orElseThrow());
+        assertTrue(SecurityContext.currentClient().isEmpty());
         OperationContext operationContext = OperationContextHolder.current().orElseThrow();
         assertEquals(OperationActorType.USER, operationContext.actor().type());
         assertEquals("1", operationContext.actor().id());
@@ -43,6 +45,56 @@ class SecurityContextTest {
         SecurityContext.clear();
 
         assertTrue(SecurityContext.currentUser().isEmpty());
+        assertTrue(SecurityContext.currentPrincipal().isEmpty());
+        assertTrue(OperationContextHolder.current().isEmpty());
+    }
+
+    @Test
+    void shouldStoreClientWithoutMappingToUser() {
+        AuthenticatedClient client = new AuthenticatedClient(
+                "client-a",
+                "message-service",
+                "tenant-a",
+                Set.of("INTERNAL"),
+                Set.of("message:send")
+        );
+
+        try (SecurityContextScope ignored = SecurityContext.openScope(client)) {
+            assertEquals(client, SecurityContext.currentPrincipal().orElseThrow());
+            assertEquals(client, SecurityContext.currentClient().orElseThrow());
+            assertTrue(SecurityContext.currentUser().isEmpty());
+
+            OperationContext operationContext = OperationContextHolder.current().orElseThrow();
+            assertEquals(OperationActorType.SERVICE, operationContext.actor().type());
+            assertEquals("client-a", operationContext.actor().id());
+            assertEquals("message-service", operationContext.actor().name());
+            assertTrue(operationContext.actor().attributes().isEmpty());
+        }
+
+        assertTrue(SecurityContext.currentPrincipal().isEmpty());
+        assertTrue(OperationContextHolder.current().isEmpty());
+    }
+
+    @Test
+    void shouldRestoreNestedSecurityAndOperationContextScopes() {
+        AuthenticatedUser user = new AuthenticatedUser("1", "admin", "tenant-a", Set.of(), Set.of("a"));
+        AuthenticatedClient client = new AuthenticatedClient("client-a", "client-a", "tenant-b", Set.of(), Set.of("b"));
+
+        try (SecurityContextScope userScope = SecurityContext.openScope(user)) {
+            assertEquals(OperationActorType.USER, OperationContextHolder.requireCurrent().actor().type());
+            assertEquals(user, SecurityContext.currentUser().orElseThrow());
+
+            try (SecurityContextScope clientScope = SecurityContext.openScope(client)) {
+                assertEquals(OperationActorType.SERVICE, OperationContextHolder.requireCurrent().actor().type());
+                assertEquals(client, SecurityContext.currentClient().orElseThrow());
+                assertTrue(SecurityContext.currentUser().isEmpty());
+            }
+
+            assertEquals(OperationActorType.USER, OperationContextHolder.requireCurrent().actor().type());
+            assertEquals(user, SecurityContext.currentUser().orElseThrow());
+        }
+
+        assertTrue(SecurityContext.currentPrincipal().isEmpty());
         assertTrue(OperationContextHolder.current().isEmpty());
     }
 

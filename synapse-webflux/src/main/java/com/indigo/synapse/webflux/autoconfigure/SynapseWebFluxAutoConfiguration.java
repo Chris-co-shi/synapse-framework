@@ -6,6 +6,7 @@ import com.indigo.synapse.webflux.exception.CommonErrorHttpStatusResolver;
 import com.indigo.synapse.webflux.exception.CompositeErrorHttpStatusResolver;
 import com.indigo.synapse.webflux.exception.ErrorHttpStatusResolver;
 import com.indigo.synapse.webflux.exception.SynapseWebFluxExceptionHandler;
+import com.indigo.synapse.webflux.exception.ReactiveWebErrorResponseWriter;
 import com.indigo.synapse.webflux.exception.WebFluxExceptionResponseFactory;
 import com.indigo.synapse.webflux.filter.SynapseWebFluxContextFilter;
 import com.indigo.synapse.webflux.json.SynapseObjectMapperFactory;
@@ -70,8 +71,14 @@ public class SynapseWebFluxAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public SynapseWebFluxExceptionHandler synapseWebFluxExceptionHandler(
-            ObjectMapper objectMapper,
+            ReactiveWebErrorResponseWriter responseWriter,
             WebFluxExceptionResponseFactory responseFactory) {
-        return new SynapseWebFluxExceptionHandler(objectMapper, responseFactory);
+        return new SynapseWebFluxExceptionHandler(responseWriter, responseFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ReactiveWebErrorResponseWriter reactiveWebErrorResponseWriter(ObjectMapper objectMapper) {
+        return new ReactiveWebErrorResponseWriter(objectMapper);
     }
 }

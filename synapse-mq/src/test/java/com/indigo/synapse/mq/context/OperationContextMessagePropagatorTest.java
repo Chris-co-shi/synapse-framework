@@ -43,6 +43,21 @@ class OperationContextMessagePropagatorTest {
     }
 
     @Test
+    void shouldPropagateClientOperationContext() {
+        OperationContext context = context(OperationActorType.SERVICE, "client-a", "trace-client", "tenant-a");
+        OperationContextMessagePropagator propagator = new OperationContextMessagePropagator(
+                new OperationContextMessageCodec(),
+                () -> Optional.of(context)
+        );
+
+        MessageEnvelope enriched = propagator.withCurrentContext(envelope(Map.of()));
+
+        assertEquals("SERVICE", enriched.headers().get(MessageContextHeaders.ACTOR_TYPE));
+        assertEquals("client-a", enriched.headers().get(MessageContextHeaders.ACTOR_ID));
+        assertFalse(enriched.headers().containsKey("Authorization"));
+    }
+
+    @Test
     void shouldNotWriteContextHeadersWhenProviderIsEmpty() {
         OperationContextMessagePropagator propagator = new OperationContextMessagePropagator(
                 new OperationContextMessageCodec(),
@@ -117,7 +132,11 @@ class OperationContextMessagePropagatorTest {
     }
 
     private static OperationContext context(String actorId, String traceId, String tenantId) {
-        OperationActor actor = new OperationActor(OperationActorType.USER, actorId, "Actor", tenantId, Map.of());
+        return context(OperationActorType.USER, actorId, traceId, tenantId);
+    }
+
+    private static OperationContext context(OperationActorType actorType, String actorId, String traceId, String tenantId) {
+        OperationActor actor = new OperationActor(actorType, actorId, "Actor", tenantId, Map.of());
         return new OperationContext(
                 actor,
                 actor,

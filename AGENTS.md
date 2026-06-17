@@ -45,7 +45,11 @@ synapse-i18n
 synapse-data
 synapse-cache
 synapse-security
-synapse-oauth2
+synapse-security-webmvc
+synapse-oauth2-core
+synapse-oauth2-authorization-server-support
+synapse-oauth2-resource-server-webmvc
+synapse-oauth2-resource-server-webflux
 synapse-audit
 synapse-file
 synapse-mq
@@ -56,6 +60,7 @@ synapse-mq
 - `synapse-web` 已拆分为 `synapse-webmvc` 和 `synapse-webflux`，不得恢复为正式模块。
 - `synapse-message` 已更名为 `synapse-mq`，不得继续使用旧名称描述正式模块。
 - `synapse-config`、`synapse-i18n`、`synapse-time` 已在 TASK-205 进入 reactor，必须按当前已实现技术模块描述。
+- `synapse-oauth2` 已拆分为 `synapse-oauth2-core`、`synapse-oauth2-authorization-server-support`、`synapse-oauth2-resource-server-webmvc`、`synapse-oauth2-resource-server-webflux`，不得继续作为正式 reactor module 描述。
 - `synapse-task`、`synapse-tenant`、`synapse-data-permission` 若存在目录，也只视为暂存或历史残留，不得擅自加入 reactor。
 - 本项目不创建 `synapse-starter-*`，不创建 starter 聚合包，不创建 demo / example / sample application。
 
@@ -134,8 +139,12 @@ skills/<module-name>/SKILL.md
 | `synapse-i18n` | 国际化消息解析抽象 | i18n-resource-center / 翻译后台 |
 | `synapse-data` | 数据层技术支撑 | 业务 Entity / Mapper / Repository / Service |
 | `synapse-cache` | 缓存、锁、限流、幂等基础设施 | 业务缓存规则 / 缓存管理后台 |
-| `synapse-security` | 安全上下文、trusted-header、权限检查抽象 | IAM / 登录认证 / 用户角色菜单管理 |
-| `synapse-oauth2` | JWT / JWK / Token / Resource Server 辅助能力 | Authorization Server / 登录 / 客户端管理 |
+| `synapse-security` | Web 无关安全主体、权限检查和安全上下文 | IAM / 登录认证 / 用户角色菜单管理 / Servlet Filter |
+| `synapse-security-webmvc` | trusted-header Servlet MVC 适配 | Spring Security FilterChain / OAuth2 / IAM |
+| `synapse-oauth2-core` | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 | Web / Security / 签发私钥 / Resource Server |
+| `synapse-oauth2-authorization-server-support` | JWT 签发、RSAKey、JWKSource、JwtEncoder 技术支持 | 登录 / RegisteredClient / Authorization Code / IAM |
+| `synapse-oauth2-resource-server-webmvc` | Servlet OAuth2 Resource Server 技术适配 | 签发私钥 / Authorization Server / IAM |
+| `synapse-oauth2-resource-server-webflux` | Reactive OAuth2 Resource Server 技术适配 | Gateway 服务 / 签发私钥 / IAM |
 | `synapse-audit` | 审计事件契约 | 审计中心 / 查询 API / 报表 |
 | `synapse-file` | 文件存储抽象 | 文件中心 / 附件表 / 文件权限业务 |
 | `synapse-mq` | MQ 消息契约和发布消费 SPI | 消息中心 / 站内信 / 短信 / 邮件 / 模板 |

@@ -4,13 +4,14 @@
 
 `synapse-security` 是 Synapse Framework 的轻量安全基础模块。
 
-它不提供完整认证中心，也不创建 Spring Security FilterChain，而是提供业务服务接入可信身份上下文和权限检查所需的基础能力：
+它不提供完整认证中心，也不创建 Spring Security FilterChain，也不直接提供 Servlet Filter / WebFilter，而是提供业务服务接入可信身份上下文和权限检查所需的 Web 无关基础能力：
 
 - `AuthenticatedUser` 已认证用户主体。
+- `AuthenticatedClient` 已认证客户端主体。
+- `AuthenticatedPrincipal` 统一安全主体抽象。
 - `SecurityContext` 当前线程安全上下文。
 - trusted-header 请求头契约。
 - trusted-header HMAC 签名和时间戳校验。
-- `TrustedHeaderAuthenticationFilter`。
 - `PermissionChecker` 显式权限检查入口。
 - `@RequirePermission` 声明式权限适配。
 - security 到 core `OperationContext` 的单向适配。
@@ -20,11 +21,11 @@
 
 业务系统或平台系统在以下场景可以引入 `synapse-security`：
 
-- 服务位于 Gateway / IAM 后方，需要从可信 Header 恢复当前用户。
+- 服务位于 Gateway / IAM 后方，需要从可信 Header 恢复当前用户或客户端。
 - 需要在业务服务中读取当前已认证用户。
 - 需要通过 `PermissionChecker` 显式校验权限。
 - 需要通过 `@RequirePermission` 对 Spring Bean 方法做轻量权限拦截。
-- 需要把当前认证用户同步为 `OperationContext`，供 data、audit、mq 等模块使用。
+- 需要把当前认证主体同步为 `OperationContext`，供 data、audit、mq 等模块使用。
 - 需要一个默认 BCrypt 密码编码器。
 
 ## 3. 不适用场景
@@ -39,12 +40,14 @@
 - OAuth2 Resource Server。
 - JWT / JWK 解析与验证。
 - Spring Security `SecurityFilterChain`。
+- Servlet Filter。
+- WebFlux WebFilter。
 - Spring Security MethodSecurity。
 - ABAC。
 - DataScope。
 - 多租户权限模型。
 
-OAuth2 / JWT / JWK 技术能力属于 `synapse-oauth2`。完整 IAM / RBAC / ABAC 属于后续平台服务，不属于 framework 一阶段。
+OAuth2 / JWT / JWK 技术能力分别属于 `synapse-oauth2-core`、`synapse-oauth2-authorization-server-support`、`synapse-oauth2-resource-server-webmvc`、`synapse-oauth2-resource-server-webflux`。trusted-header Servlet Filter 属于 `synapse-security-webmvc`。完整 IAM / RBAC / ABAC 属于 Platform，不属于 framework。
 
 ## 4. Maven 引入
 
@@ -73,7 +76,16 @@ OAuth2 / JWT / JWK 技术能力属于 `synapse-oauth2`。完整 IAM / RBAC / ABA
 </dependency>
 ```
 
-如果需要 trusted-header Filter 在 Servlet Web 服务中返回统一 JSON 响应，建议同时引入：
+如果需要 trusted-header Filter，请引入 Servlet 适配模块：
+
+```xml
+<dependency>
+    <groupId>com.indigo.synapse</groupId>
+    <artifactId>synapse-security-webmvc</artifactId>
+</dependency>
+```
+
+如果还需要 Filter 阶段异常返回统一 JSON 响应，建议同时引入：
 
 ```xml
 <dependency>
@@ -86,15 +98,17 @@ OAuth2 / JWT / JWK 技术能力属于 `synapse-oauth2`。完整 IAM / RBAC / ABA
 
 ## 5. 核心能力
 
-### 5.1 已认证用户主体
+### 5.1 已认证主体
 
 核心类型：
 
 ```java
+AuthenticatedPrincipal
 AuthenticatedUser
+AuthenticatedClient
 ```
 
-字段：
+用户主体字段：
 
 ```text
 userId
@@ -112,6 +126,21 @@ permissions
 - 不根据角色推导权限。
 - 不包含菜单、组织、数据权限规则。
 
+客户端主体字段：
+
+```text
+clientId
+clientName
+tenantId
+permissions
+```
+
+说明：
+
+- `AuthenticatedClient` 表示服务客户端，不伪装成用户。
+- CLIENT 主体同步到 `OperationContext` 时映射为 `OperationActorType.SERVICE`。
+- roles / permissions 不进入 `OperationContext`。
+
 ### 5.2 SecurityContext
 
 核心类型：
@@ -124,14 +153,20 @@ SecurityContext
 
 ```java
 SecurityContext.set(authenticatedUser);
+try (SecurityContextScope ignored = SecurityContext.openScope(authenticatedClient)) {
+    // 当前作用域内读取 principal / client
+}
+SecurityContext.currentPrincipal();
 SecurityContext.currentUser();
+SecurityContext.currentClient();
 SecurityContext.clear();
 ```
 
-设置用户后，security 会把 `AuthenticatedUser` 单向适配为 core 的 `OperationContext`。
+设置主体后，security 会把安全主体单向适配为 core 的 `OperationContext`。
 
 ```text
 AuthenticatedUser
+AuthenticatedClient
   -> OperationActor
   -> OperationContext
 ```
@@ -149,8 +184,9 @@ TrustedHeaderAuthenticatedUserResolver
 TrustedHeaderCanonicalizer
 TrustedHeaderSignatureVerifier
 TrustedHeaderTimestampValidator
-TrustedHeaderAuthenticationFilter
 ```
+
+`TrustedHeaderAuthenticationFilter` 位于 `synapse-security-webmvc`，不在 `synapse-security` 核心模块。
 
 Header 名称：
 
@@ -269,7 +305,7 @@ PasswordEncoder -> BCryptPasswordEncoder
 
 ## 6. 快速使用
 
-### 6.1 开启 trusted-header
+### 6.1 开启 trusted-header 协议校验
 
 ```yaml
 synapse:
@@ -281,6 +317,8 @@ synapse:
       timestamp-tolerance: 300s
       fail-fast: true
 ```
+
+说明：以上配置属于 trusted-header 协议组件。Servlet Filter 执行入口位于 `synapse-security-webmvc`。
 
 Gateway / IAM 需要注入 Header：
 
@@ -378,7 +416,7 @@ synapse.security.trusted-header
 
 | 配置 | 默认值 | 说明 |
 | --- | --- | --- |
-| `enabled` | `false` | 是否启用 trusted-header Filter |
+| `enabled` | `false` | 是否启用 trusted-header 协议校验；Filter 装配由 `synapse-security-webmvc` 承担 |
 | `signature-enabled` | `true` | 是否启用 HMAC 签名校验 |
 | `secret` | 无 | HMAC 共享密钥；签名开启时必填 |
 | `timestamp-tolerance` | `300s` | 时间戳容忍窗口 |
@@ -416,7 +454,7 @@ synapse.security.permission
 
 ### 9.3 security 不做权限数据加载
 
-默认 `PermissionChecker` 只检查当前用户快照中的 `permissions`。
+默认 `PermissionChecker` 只检查当前安全主体快照中的 `permissions`。
 
 权限数据如何加载，由 Gateway / IAM / 业务系统决定。
 
@@ -430,13 +468,13 @@ permissionChecker.require("sample:read");
 
 ### 9.5 OperationContext 不承载角色权限
 
-security 会把当前用户适配成 `OperationActor`，但不会把 roles / permissions 放入 `OperationContext`。
+security 会把当前安全主体适配成 `OperationActor`，但不会把 roles / permissions 放入 `OperationContext`。
 
 ## 10. 常见问题
 
 ### Q1：为什么不用 Spring Security FilterChain？
 
-一阶段目标是轻量恢复可信身份上下文，不做完整认证体系。完整 Spring Security / OAuth2 能力由后续 oauth2 或平台 IAM 服务处理。
+目标是轻量恢复可信身份上下文，不做完整认证体系。Resource Server 技术适配由 `synapse-oauth2-resource-server-webmvc` / `synapse-oauth2-resource-server-webflux` 承担；完整 IAM 属于 Platform。
 
 ### Q2：为什么 trusted-header 默认关闭？
 

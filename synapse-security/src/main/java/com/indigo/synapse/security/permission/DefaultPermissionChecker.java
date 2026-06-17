@@ -19,8 +19,10 @@ public class DefaultPermissionChecker implements PermissionChecker {
         if (permission == null || permission.isBlank()) {
             throw new IllegalArgumentException("permission must not be blank");
         }
-        AuthenticatedUser authenticatedUser = requireUser();
-        if (!authenticatedUser.hasPermission(permission)) {
+        if (SecurityContext.currentPrincipal().isEmpty()) {
+            throw new SynapseAuthenticationException(SecurityErrorCode.SECURITY_UNAUTHENTICATED);
+        }
+        if (!has(permission)) {
             throw new SynapseAccessDeniedException(SecurityErrorCode.SECURITY_PERMISSION_DENIED);
         }
     }
@@ -30,8 +32,8 @@ public class DefaultPermissionChecker implements PermissionChecker {
         if (permission == null || permission.isBlank()) {
             return false;
         }
-        return SecurityContext.currentUser()
-                .map(authenticatedUser -> authenticatedUser.hasPermission(permission))
+        return SecurityContext.currentPrincipal()
+                .map(principal -> principal.hasPermission(permission))
                 .orElse(false);
     }
 

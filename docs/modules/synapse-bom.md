@@ -86,7 +86,11 @@ synapse-cloud
 synapse-data
 synapse-cache
 synapse-security
-synapse-oauth2
+synapse-security-webmvc
+synapse-oauth2-core
+synapse-oauth2-authorization-server-support
+synapse-oauth2-resource-server-webmvc
+synapse-oauth2-resource-server-webflux
 synapse-audit
 synapse-file
 synapse-mq

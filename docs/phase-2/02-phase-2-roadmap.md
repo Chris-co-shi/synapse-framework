@@ -193,15 +193,15 @@
 
 目标：复查已有风险模块，防止它们从技术抽象滑向平台服务。
 
-修改范围：`synapse-mq`、`synapse-file`、`synapse-audit`、`synapse-oauth2`、对应文档、测试和 Skill。
+修改范围：`synapse-mq`、`synapse-file`、`synapse-audit`、OAuth2 拆分模块、对应文档、测试和 Skill。
 
 完成说明：
 
 - `synapse-mq` 边界复查通过：当前只提供消息外壳、SPI、模板、上下文传播和异常分类，不做 message-service。
 - `synapse-file` 边界复查通过：当前只提供文件存储抽象和本地轻量实现，不做 file-service。
 - `synapse-audit` 边界复查通过：当前只提供审计事件、上下文补齐和输出端口，不做 audit-service。
-- `synapse-oauth2` 边界复查通过：当前只提供 JWT / JWK / Token denylist 技术辅助，不做 IAM 或 Authorization Server。
-- 已新增 `skills/synapse-mq`、`skills/synapse-file`、`skills/synapse-audit`、`skills/synapse-oauth2`。
+- OAuth2 边界复查后已拆分为 `synapse-oauth2-core`、`synapse-oauth2-authorization-server-support`、`synapse-oauth2-resource-server-webmvc`、`synapse-oauth2-resource-server-webflux`；分别承载协议契约、签发技术支撑、Servlet Resource Server 适配和 Reactive Resource Server 适配，不做 IAM。
+- 已新增 `skills/synapse-mq`、`skills/synapse-file`、`skills/synapse-audit` 以及拆分后的 OAuth2 模块 Skill。
 
 不做内容：
 
@@ -215,7 +215,7 @@
 
 交付物：模块 README 边界复查、Skill 补齐、默认实现边界检查、边界扫描命令记录。
 
-验收标准：`synapse-mq` 无站内信、短信、邮件、消息模板管理；`synapse-file` 无上传下载 Controller、附件表、文件权限业务；`synapse-audit` 无审计查询 API、报表、中心后台；`synapse-oauth2` 无登录、客户端管理、Authorization Server 实现。
+验收标准：`synapse-mq` 无站内信、短信、邮件、消息模板管理；`synapse-file` 无上传下载 Controller、附件表、文件权限业务；`synapse-audit` 无审计查询 API、报表、中心后台；OAuth2 拆分模块无登录、客户端管理、Authorization Server 业务实现，Resource Server 模块无私钥签发能力。
 
 ## 9. TASK-207：Docs / Skills / Boundary 收口
 

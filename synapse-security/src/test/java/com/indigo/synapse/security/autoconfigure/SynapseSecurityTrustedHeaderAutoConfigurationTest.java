@@ -3,15 +3,13 @@ package com.indigo.synapse.security.autoconfigure;
 import com.indigo.synapse.security.permission.DefaultPermissionChecker;
 import com.indigo.synapse.security.permission.PermissionChecker;
 import com.indigo.synapse.security.permission.RequirePermissionAspect;
-import com.indigo.synapse.security.web.TrustedHeaderAuthenticationFilter;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -57,19 +55,12 @@ class SynapseSecurityTrustedHeaderAutoConfigurationTest {
     }
 
     @Test
-    void shouldCreateFilterAndRegistrationWhenBeanMethodsAreInvoked() {
-        SynapseSecurityProperties properties = new SynapseSecurityProperties();
-        properties.getTrustedHeader().setEnabled(true);
-        properties.getTrustedHeader().setSecret("secret-value");
+    void shouldCreateTrustedHeaderProtocolComponents() {
         SynapseSecurityAutoConfiguration autoConfiguration = new SynapseSecurityAutoConfiguration();
 
-        TrustedHeaderAuthenticationFilter filter = autoConfiguration.trustedHeaderAuthenticationFilter(properties);
-        FilterRegistrationBean<TrustedHeaderAuthenticationFilter> registration =
-                autoConfiguration.trustedHeaderAuthenticationFilterRegistration(filter);
-
-        assertNotNull(filter);
-        assertEquals("trustedHeaderAuthenticationFilter", registration.getFilterName());
-        assertEquals(-100, registration.getOrder());
+        assertNotNull(autoConfiguration.trustedHeaderAuthenticatedUserResolver());
+        assertNotNull(autoConfiguration.trustedHeaderSignatureVerifier());
+        assertNotNull(autoConfiguration.trustedHeaderTimestampValidator());
     }
 
     @Test
@@ -105,7 +96,7 @@ class SynapseSecurityTrustedHeaderAutoConfigurationTest {
     void shouldDeclareRequirePermissionAspectConditions() throws NoSuchMethodException {
         Method method = SynapseSecurityAutoConfiguration.class.getDeclaredMethod(
                 "requirePermissionAspect",
-                PermissionChecker.class
+                ObjectProvider.class
         );
 
         ConditionalOnClass onClass = method.getAnnotation(ConditionalOnClass.class);
@@ -127,30 +118,10 @@ class SynapseSecurityTrustedHeaderAutoConfigurationTest {
     }
 
     @Test
-    void shouldDeclareServletAndPropertyConditions() throws NoSuchMethodException {
-        Method filterMethod = SynapseSecurityAutoConfiguration.class.getDeclaredMethod(
+    void shouldNotDeclareServletFilterInSecurityAutoConfiguration() {
+        assertThrows(NoSuchMethodException.class, () -> SynapseSecurityAutoConfiguration.class.getDeclaredMethod(
                 "trustedHeaderAuthenticationFilter",
                 SynapseSecurityProperties.class
-        );
-        Method registrationMethod = SynapseSecurityAutoConfiguration.class.getDeclaredMethod(
-                "trustedHeaderAuthenticationFilterRegistration",
-                TrustedHeaderAuthenticationFilter.class
-        );
-
-        assertServletEnabledConditional(filterMethod);
-        assertServletEnabledConditional(registrationMethod);
-        assertNotNull(filterMethod.getAnnotation(ConditionalOnMissingBean.class));
-    }
-
-    private static void assertServletEnabledConditional(Method method) {
-        ConditionalOnWebApplication webApplication = method.getAnnotation(ConditionalOnWebApplication.class);
-        ConditionalOnProperty property = method.getAnnotation(ConditionalOnProperty.class);
-
-        assertNotNull(webApplication);
-        assertEquals(ConditionalOnWebApplication.Type.SERVLET, webApplication.type());
-        assertNotNull(property);
-        assertEquals("synapse.security.trusted-header", property.prefix());
-        assertEquals("enabled", property.name()[0]);
-        assertEquals("true", property.havingValue());
+        ));
     }
 }

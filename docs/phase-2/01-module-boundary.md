@@ -19,7 +19,11 @@ synapse-framework
 ├── synapse-data
 ├── synapse-cache
 ├── synapse-security
-├── synapse-oauth2
+├── synapse-security-webmvc
+├── synapse-oauth2-core
+├── synapse-oauth2-authorization-server-support
+├── synapse-oauth2-resource-server-webmvc
+├── synapse-oauth2-resource-server-webflux
 ├── synapse-audit
 ├── synapse-file
 └── synapse-mq
@@ -30,6 +34,7 @@ synapse-framework
 - 未进入根 `pom.xml` reactor 的目录，不视为当前已实现模块。
 - `synapse-task`、`synapse-tenant`、`synapse-data-permission` 若目录存在，也只能视为暂存目录或历史残留，不能按正式 module 使用。
 - `synapse-web` 已在 TASK-202 中拆分为 `synapse-webmvc` 和 `synapse-webflux`，不再作为正式 reactor module。
+- `synapse-oauth2` 已拆分为 `synapse-oauth2-core`、`synapse-oauth2-authorization-server-support`、`synapse-oauth2-resource-server-webmvc`、`synapse-oauth2-resource-server-webflux`，不再作为正式 reactor module。
 - 新规划模块在真正加入 reactor 前，只能作为路线图，不代表已实现能力。
 - 本项目固定不创建 `synapse-starter-*`，不创建 demo / example / sample application。
 
@@ -47,7 +52,11 @@ synapse-framework
 ├── synapse-data
 ├── synapse-cache
 ├── synapse-security
-├── synapse-oauth2
+├── synapse-security-webmvc
+├── synapse-oauth2-core
+├── synapse-oauth2-authorization-server-support
+├── synapse-oauth2-resource-server-webmvc
+├── synapse-oauth2-resource-server-webflux
 ├── synapse-audit
 ├── synapse-file
 ├── synapse-mq
@@ -77,8 +86,13 @@ sample applications    不创建
 | 新增 | `synapse-cloud` | Spring Cloud / Feign / 服务调用上下文传播 |
 | 保持 | `synapse-data` | 数据层技术支撑 |
 | 保持 | `synapse-cache` | 缓存、锁、限流、幂等技术支撑 |
-| 保持 | `synapse-security` | 安全上下文、权限注解、trusted-header 技术支撑 |
-| 保持并收紧 | `synapse-oauth2` | JWT / JWK / Token / Resource Server 技术辅助，不做 IAM |
+| 收紧 | `synapse-security` | Web 无关安全上下文、权限注解、trusted-header 协议组件 |
+| 新增 | `synapse-security-webmvc` | trusted-header Servlet MVC Filter 适配 |
+| 已拆分 | `synapse-oauth2` | 不再作为正式模块 |
+| 新增 | `synapse-oauth2-core` | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 |
+| 新增 | `synapse-oauth2-authorization-server-support` | JWT 签发、RSAKey、JWKSource、JwtEncoder 技术支持 |
+| 新增 | `synapse-oauth2-resource-server-webmvc` | Servlet OAuth2 Resource Server 技术适配 |
+| 新增 | `synapse-oauth2-resource-server-webflux` | Reactive OAuth2 Resource Server 技术适配 |
 | 保持 | `synapse-audit` | 审计事件和记录端口 |
 | 保持 | `synapse-file` | 文件存储抽象，不做 file-service |
 | 保持 | `synapse-mq` | MQ 技术抽象，不做 message-service |
@@ -158,21 +172,53 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 ### 3.8 synapse-security
 
-当前状态：正式 reactor module，提供轻量安全上下文、trusted-header、密码编码器、PermissionChecker、权限注解适配。
+当前状态：正式 reactor module，提供 Web 无关安全上下文、trusted-header 协议组件、密码编码器、PermissionChecker、权限注解适配。
 
-允许内容：`AuthenticatedUser` 技术模型、`SecurityContext`、trusted-header 解析、Header 签名校验、PermissionChecker 抽象、`@RequirePermission`、OperationContext 与 AuthenticatedUser 互转、WebMVC / WebFlux 安全上下文适配。
+允许内容：`AuthenticatedPrincipal`、`AuthenticatedUser`、`AuthenticatedClient` 技术模型、`SecurityContext`、trusted-header 解析、Header 签名校验、PermissionChecker 抽象、`@RequirePermission`、OperationContext 与安全主体的单向适配。
 
-禁止内容：登录接口、用户表、角色表、菜单表、权限管理后台、IAM 服务、OAuth2 Authorization Server 实现。
+禁止内容：Servlet Filter、WebFilter、Spring Security FilterChain、登录接口、用户表、角色表、菜单表、权限管理后台、IAM 服务、OAuth2 Authorization Server 实现。
 
-### 3.9 synapse-oauth2
+### 3.9 synapse-security-webmvc
 
-当前状态：正式 reactor module，作为 OAuth2 / JWT / JWK 技术能力模块。
+当前状态：正式 reactor module，承接 trusted-header 的 Servlet MVC Filter 适配。
 
-允许内容：JWT 解析、JWK 解析、Token 校验辅助、Token denylist 抽象、Resource Server 辅助配置、OAuth2 技术契约。
+允许内容：`TrustedHeaderAuthenticationFilter`、trusted-header Servlet 请求读取、Filter 阶段异常桥接适配、条件自动配置。
 
-禁止内容：Authorization Server 实现、登录接口、登录页、OAuth2 Client 管理、用户认证业务、授权码流程持久化、授权记录后台、IAM 服务。
+禁止内容：OAuth2 Resource Server、Spring Security FilterChain、登录认证、IAM、WebFlux、Gateway。
 
-### 3.10 synapse-audit
+### 3.10 synapse-oauth2-core
+
+当前状态：正式 reactor module，作为 OAuth2 / JWT 协议无关基础契约模块。
+
+允许内容：JWT claim 常量、token 类型、claim validator、Token denylist 端口、BearerTokenProvider、OAuth2 技术错误码。
+
+禁止内容：Spring Security、WebMVC、WebFlux、私钥生成、JwtEncoder、Resource Server FilterChain、Authorization Server、登录认证、IAM。
+
+### 3.11 synapse-oauth2-authorization-server-support
+
+当前状态：正式 reactor module，只提供授权服务器侧可复用的 JWT 签发技术支撑。
+
+允许内容：RSAKey/JWKSource 技术封装、JwtEncoder、JWT claim 写出、开发密钥保护策略、签发属性和自动配置。
+
+禁止内容：Authorization Server 业务实现、RegisteredClient 管理、授权码流程、登录页、用户认证、客户端管理后台、IAM。
+
+### 3.12 synapse-oauth2-resource-server-webmvc
+
+当前状态：正式 reactor module，提供 Servlet OAuth2 Resource Server 技术适配。
+
+允许内容：JwtDecoder 条件装配、JWT 到 `AuthenticatedPrincipal` 映射、Servlet SecurityContext Bridge、统一 401/403 响应适配、denylist validator。
+
+禁止内容：JWT 签发私钥、JwtEncoder、Authorization Server、登录认证、IAM、用户/角色/菜单管理、WebFlux/Gateway。
+
+### 3.13 synapse-oauth2-resource-server-webflux
+
+当前状态：正式 reactor module，提供 Reactive OAuth2 Resource Server 技术适配。
+
+允许内容：ReactiveJwtDecoder 条件装配、JWT 到 `AuthenticatedPrincipal` 映射、Reactor Context 安全/操作上下文读取、统一 401/403 响应适配。
+
+禁止内容：JWT 签发私钥、JwtEncoder、Authorization Server、登录认证、IAM、Gateway 路由服务、网关业务鉴权。
+
+### 3.14 synapse-audit
 
 当前状态：正式 reactor module，提供审计事件契约和基础设施。
 
@@ -180,7 +226,7 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 禁止内容：审计查询 API、审计报表、审计中心后台、强绑定业务审计表、可启动 audit-service。
 
-### 3.11 synapse-file
+### 3.15 synapse-file
 
 当前状态：正式 reactor module，提供文件存储抽象和本地轻量实现。
 
@@ -188,7 +234,7 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 禁止内容：上传下载 Controller、文件管理后台、附件业务表、文件权限业务、文件审批流程、可启动 file-service。
 
-### 3.12 synapse-mq
+### 3.16 synapse-mq
 
 当前状态：正式 reactor module，`synapse-message` 已改为 `synapse-mq`，提供消息外壳、发布 / 消费模板、SPI、上下文传播契约。
 

@@ -4,6 +4,8 @@ import com.indigo.synapse.webmvc.exception.CommonErrorHttpStatusResolver;
 import com.indigo.synapse.webmvc.exception.CompositeErrorHttpStatusResolver;
 import com.indigo.synapse.webmvc.exception.ErrorHttpStatusResolver;
 import com.indigo.synapse.webmvc.exception.WebExceptionResponseFactory;
+import com.indigo.synapse.webmvc.exception.WebErrorResponseWriter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -31,5 +33,11 @@ public class SynapseWebErrorAutoConfiguration {
     public WebExceptionResponseFactory webExceptionResponseFactory(
             CompositeErrorHttpStatusResolver statusResolver) {
         return new WebExceptionResponseFactory(statusResolver);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public WebErrorResponseWriter webErrorResponseWriter(ObjectMapper objectMapper) {
+        return new WebErrorResponseWriter(objectMapper);
     }
 }

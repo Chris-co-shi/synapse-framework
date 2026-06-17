@@ -17,7 +17,11 @@
 | `synapse-data` | [synapse-data/SKILL.md](synapse-data/SKILL.md) |
 | `synapse-cache` | [synapse-cache/SKILL.md](synapse-cache/SKILL.md) |
 | `synapse-security` | [synapse-security/SKILL.md](synapse-security/SKILL.md) |
-| `synapse-oauth2` | [synapse-oauth2/SKILL.md](synapse-oauth2/SKILL.md) |
+| `synapse-security-webmvc` | [synapse-security-webmvc/SKILL.md](synapse-security-webmvc/SKILL.md) |
+| `synapse-oauth2-core` | [synapse-oauth2-core/SKILL.md](synapse-oauth2-core/SKILL.md) |
+| `synapse-oauth2-authorization-server-support` | [synapse-oauth2-authorization-server-support/SKILL.md](synapse-oauth2-authorization-server-support/SKILL.md) |
+| `synapse-oauth2-resource-server-webmvc` | [synapse-oauth2-resource-server-webmvc/SKILL.md](synapse-oauth2-resource-server-webmvc/SKILL.md) |
+| `synapse-oauth2-resource-server-webflux` | [synapse-oauth2-resource-server-webflux/SKILL.md](synapse-oauth2-resource-server-webflux/SKILL.md) |
 | `synapse-audit` | [synapse-audit/SKILL.md](synapse-audit/SKILL.md) |
 | `synapse-file` | [synapse-file/SKILL.md](synapse-file/SKILL.md) |
 | `synapse-mq` | [synapse-mq/SKILL.md](synapse-mq/SKILL.md) |
