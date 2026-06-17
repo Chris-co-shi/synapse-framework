@@ -31,7 +31,7 @@ class WebFluxExceptionResponseFactoryTest {
         WebFluxErrorResponse response = responseFactory.from(exception, "trace-same");
 
         assertEquals(409, response.status());
-        assertEquals("COMMON_CONFLICT", response.body().code());
+        assertEquals(CommonErrorCode.COMMON_CONFLICT.code(), response.body().code());
         assertEquals("版本冲突", response.body().message());
         assertEquals("trace-same", response.body().traceId());
     }
@@ -44,8 +44,8 @@ class WebFluxExceptionResponseFactoryTest {
         );
 
         assertEquals(500, response.status());
-        assertEquals("COMMON_INTERNAL_ERROR", response.body().code());
-        assertEquals("系统内部错误", response.body().message());
+        assertEquals(CommonErrorCode.COMMON_INTERNAL_ERROR.code(), response.body().code());
+        assertEquals(CommonErrorCode.COMMON_INTERNAL_ERROR.message(), response.body().message());
         assertEquals("trace-internal", response.body().traceId());
     }
 
@@ -69,23 +69,23 @@ class WebFluxExceptionResponseFactoryTest {
         );
 
         assertEquals(400, badRequest.status());
-        assertEquals("COMMON_BAD_REQUEST", badRequest.body().code());
-        assertEquals("请求参数错误", badRequest.body().message());
+        assertEquals(CommonErrorCode.COMMON_BAD_REQUEST.code(), badRequest.body().code());
+        assertEquals(CommonErrorCode.COMMON_BAD_REQUEST.message(), badRequest.body().message());
         assertEquals("trace-400", badRequest.body().traceId());
 
         assertEquals(404, notFound.status());
-        assertEquals("COMMON_NOT_FOUND", notFound.body().code());
-        assertEquals("资源不存在", notFound.body().message());
+        assertEquals(CommonErrorCode.COMMON_NOT_FOUND.code(), notFound.body().code());
+        assertEquals(CommonErrorCode.COMMON_NOT_FOUND.message(), notFound.body().message());
         assertEquals("trace-404", notFound.body().traceId());
 
         assertEquals(405, methodNotAllowed.status());
-        assertEquals("COMMON_METHOD_NOT_ALLOWED", methodNotAllowed.body().code());
-        assertEquals("请求方法不支持", methodNotAllowed.body().message());
+        assertEquals(CommonErrorCode.COMMON_METHOD_NOT_ALLOWED.code(), methodNotAllowed.body().code());
+        assertEquals(CommonErrorCode.COMMON_METHOD_NOT_ALLOWED.message(), methodNotAllowed.body().message());
         assertEquals("trace-405", methodNotAllowed.body().traceId());
 
         assertEquals(415, unsupportedMediaType.status());
-        assertEquals("COMMON_UNSUPPORTED_MEDIA_TYPE", unsupportedMediaType.body().code());
-        assertEquals("媒体类型不支持", unsupportedMediaType.body().message());
+        assertEquals(CommonErrorCode.COMMON_UNSUPPORTED_MEDIA_TYPE.code(), unsupportedMediaType.body().code());
+        assertEquals(CommonErrorCode.COMMON_UNSUPPORTED_MEDIA_TYPE.message(), unsupportedMediaType.body().message());
         assertEquals("trace-415", unsupportedMediaType.body().traceId());
     }
 
@@ -97,8 +97,8 @@ class WebFluxExceptionResponseFactoryTest {
         );
 
         assertEquals(500, response.status());
-        assertEquals("COMMON_INTERNAL_ERROR", response.body().code());
-        assertEquals("系统内部错误", response.body().message());
+        assertEquals(CommonErrorCode.COMMON_INTERNAL_ERROR.code(), response.body().code());
+        assertEquals(CommonErrorCode.COMMON_INTERNAL_ERROR.message(), response.body().message());
         assertEquals("trace-unknown", response.body().traceId());
     }
 }
