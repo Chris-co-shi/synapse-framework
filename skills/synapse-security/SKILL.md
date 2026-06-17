@@ -28,7 +28,7 @@
 - 同步入口存在嵌套可能时，必须使用 `SecurityContext.scope(...)` 和 try-with-resources。
 - `SecurityContext.set(...)` 表示替换当前用户，调用方必须保证最终执行 `clear()`。
 - `SecurityContext.scope(...)` 表示嵌套作用域，关闭时必须精确恢复外层用户和 OperationContext。
-- `SecurityContext.scope(null)` 表示临时未认证作用域，不能继承外层认证用户。
+- `SecurityContext.scope(null)` 表示临时未认证作用域，不能继承外层认证用户；独立技术 OperationContext 继续保留。
 - 重复 `clear()` 和重复 scope close 必须安全。
 - 没有 SecurityContext 绑定时，不得清除独立存在的 Job、Async 或 MQ OperationContext。
 - ThreadLocal 作用域必须在创建它的同一线程关闭。
