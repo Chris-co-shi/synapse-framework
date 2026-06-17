@@ -1,0 +1,23 @@
+# synapse-cache Skill
+
+## 职责
+
+`synapse-cache` 只提供缓存、分布式锁、限流、幂等等通用技术能力。
+
+## 禁止事项
+
+- 不做缓存管理后台。
+- 不沉淀业务缓存规则。
+- 不新增业务 Controller、Entity、Mapper、Repository、Service。
+- 不创建 starter、demo、example、sample application。
+
+## 标准实现
+
+- key 生成必须可预测、可测试。
+- 锁、限流、幂等必须有失败语义和边界测试。
+- Redis 适配不得引入业务语义。
+
+## 验证
+
+- 运行 `mvn -q -pl synapse-cache -am test`。
+- 检查无业务模型和启动类。
