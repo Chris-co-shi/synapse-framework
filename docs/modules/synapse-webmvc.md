@@ -14,7 +14,7 @@
 - 默认 JSON 序列化规则。
 - OpenAPI 可见性基础策略。
 
-一阶段 `synapse-webmvc` 只支持 Servlet MVC，不包含 WebFlux / Gateway。
+当前 `synapse-webmvc` 只支持 Servlet MVC，不包含 WebFlux / Gateway。WebFlux 技术支撑由 `synapse-webflux` 承担，Gateway 可启动服务属于 Synapse Platform。
 
 ## 2. 适用场景
 
@@ -42,7 +42,7 @@
 - 业务错误码定义。
 - 业务响应 DTO。
 
-Gateway / WebFlux 后续应单独模块处理，例如 `synapse-gateway`。
+WebFlux 技术支撑已由 `synapse-webflux` 承担；Gateway 可启动服务属于 Synapse Platform，不属于 Framework。
 
 ## 4. Maven 引入
 
@@ -353,7 +353,7 @@ SynapseExceptionBridgeFilter synapseExceptionBridgeFilter(
 
 ## 8. 配置项
 
-`synapse-webmvc` 一阶段没有复杂外部配置项。
+`synapse-webmvc` 当前没有复杂外部配置项。
 
 当前自动配置主要通过条件装配和用户 Bean 覆盖控制：
 
@@ -368,13 +368,14 @@ SynapseExceptionBridgeFilter synapseExceptionBridgeFilter(
 
 `synapse-webmvc` 只提供 Web 基础设施。业务 API 必须由业务系统或平台服务拥有。
 
-### 9.2 不要把 WebFlux 放回 synapse-webmvc
+### 9.2 不要把 WebFlux / Gateway 放回 synapse-webmvc
 
-一阶段已经明确：
+当前边界已经明确：
 
 ```text
-synapse-webmvc = Servlet MVC
-Gateway / WebFlux = 后续独立模块
+synapse-webmvc = Servlet MVC 技术支撑
+synapse-webflux = WebFlux 技术支撑
+Synapse Platform gateway = 可启动 Gateway 服务
 ```
 
 ### 9.3 Filter 异常和 MVC 异常不是一回事
