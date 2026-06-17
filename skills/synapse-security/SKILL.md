@@ -23,3 +23,4 @@
 
 - 运行 `mvn -q -pl synapse-security -am test`。
 - 搜索 IAM、登录、用户/角色/菜单等业务概念。
+- 修改 `SynapseSecurityProperties` 时必须验证 `synapse.security.*` Spring Boot Configuration Metadata。

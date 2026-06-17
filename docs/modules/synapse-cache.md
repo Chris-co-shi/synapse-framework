@@ -460,3 +460,7 @@ owner 必须在 acquire 和 release 中保持一致，否则释放会失败。
 ### Q5：如何处理缓存穿透、击穿、雪崩？
 
 一阶段只提供基础工具。具体策略，例如空值缓存、随机 TTL、热点 key 保护、预热机制，应由业务系统或后续平台能力设计。
+
+## 11. Configuration Metadata
+
+`synapse-cache` 发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，覆盖 `synapse.cache.l1.*` 和 `synapse.cache.l2.*`。新增配置项时必须补充字段 Javadoc，并运行 metadata 测试。

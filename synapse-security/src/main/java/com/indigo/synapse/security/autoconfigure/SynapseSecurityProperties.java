@@ -36,10 +36,29 @@ public class SynapseSecurityProperties {
      */
     public static class TrustedHeader {
 
+        /**
+         * 是否启用 trusted-header 解析。默认关闭，避免业务服务仅引入模块就强制拦截所有请求。
+         */
         private boolean enabled;
+
+        /**
+         * 是否启用 trusted-header HMAC 签名校验。启用时必须同时提供 `secret`。
+         */
         private boolean signatureEnabled = true;
+
+        /**
+         * trusted-header HMAC 共享密钥。该值属于敏感配置，不要写入日志或提交到代码仓库。
+         */
         private String secret;
+
+        /**
+         * 请求时间戳允许偏差，使用 Spring Boot Duration 格式，例如 `30s`、`5m`；不能为负数。
+         */
         private Duration timestampTolerance = Duration.ofSeconds(300);
+
+        /**
+         * 是否在 trusted-header 校验失败时快速失败。关闭后可由消费方自定义后续处理策略。
+         */
         private boolean failFast = true;
 
         public boolean isEnabled() {
@@ -100,6 +119,9 @@ public class SynapseSecurityProperties {
      */
     public static class Permission {
 
+        /**
+         * 是否启用 `@RequirePermission` 注解适配。关闭后不会注册默认权限注解切面。
+         */
         private boolean annotationEnabled = true;
 
         public boolean isAnnotationEnabled() {

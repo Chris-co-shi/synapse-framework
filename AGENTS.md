@@ -149,6 +149,9 @@ skills/<module-name>/SKILL.md
 - 新增模块必须同时更新 root `pom.xml`、`synapse-bom/pom.xml`、`README.md`、`docs/modules/README.md`、模块手册和必要 Skill。
 - 不得为了复用而让 WebMVC / WebFlux / Cloud / MQ / Security 产生反向依赖或循环依赖。
 - `synapse-cloud` 不得依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-mq`。
+- 所有公开 `@ConfigurationProperties` 必须生成 Spring Boot Configuration Metadata，且配置字段必须有可用于 IDE 展示的说明。
+- `spring-boot-configuration-processor` 只能作为编译期 annotation processor 使用，不得成为消费方运行时强依赖。
+- `additional-spring-configuration-metadata.json` 只能补充自动生成不足的信息，不得重复维护全部普通属性。
 
 ## 7. 开发流程
 
@@ -191,6 +194,7 @@ rg -n "@RestController\b|@Controller\b|@RequestMapping\b|@GetMapping\b|@PostMapp
 rg -n "@TableName\b|BaseMapper\b|IService\b|ServiceImpl\b|CREATE TABLE|create table" '*/src/main'
 rg -n "starter|demo|example|sample" README.md AGENTS.md docs pom.xml synapse-bom/pom.xml
 rg -n "file-service|message-service|config-service|audit-service|task-service|iam-service|配置中心|文件中心|消息中心|审计中心|任务中心" README.md AGENTS.md docs
+find . -path "*/target/classes/META-INF/spring-configuration-metadata.json" -print
 ```
 
 命中不一定违规，但必须说明是否为：
@@ -210,6 +214,13 @@ rg -n "file-service|message-service|config-service|audit-service|task-service|ia
 - `docs/modules/<module-name>.md`
 - `docs/phase-2/*` 中相关规划或状态
 - 已存在的 `skills/<module-name>/SKILL.md`
+
+公开配置项发生变化时，还必须同步检查：
+
+- Properties 字段或 record component Javadoc。
+- 生成的 `spring-configuration-metadata.json`。
+- 必要的 additional metadata hints。
+- 模块手册和 Skill 中的配置说明。
 
 新增或重构完成一个技术模块并通过测试后，可以新增对应 Skill：
 

@@ -14,7 +14,7 @@ import java.nio.file.Path;
 public class SynapseFileProperties {
 
     /**
-     * 本地文件存储根目录。
+     * 本地文件存储根目录，支持文件系统绝对路径或相对路径。该目录只用于 LocalFileStorage，不代表文件中心。
      */
     private Path localRoot = Path.of(System.getProperty("java.io.tmpdir"), "synapse-file");
 

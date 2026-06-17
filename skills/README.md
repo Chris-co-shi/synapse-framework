@@ -28,3 +28,4 @@
 - 新增模块并通过测试后必须新增对应 Skill。
 - Framework 不创建 starter、demo、example、sample application。
 - Skill 不得把 Platform 可启动服务描述成 Framework 能力。
+- 公开 `@ConfigurationProperties` 必须生成 Spring Boot Configuration Metadata，并通过模块测试验证。

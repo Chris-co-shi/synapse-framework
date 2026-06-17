@@ -23,6 +23,7 @@
 - 覆盖 `LocalDateTime` 范围。
 - 覆盖非法范围。
 - 覆盖自动配置和自定义 Bean 不覆盖。
+- 覆盖 `synapse.time.*` Spring Boot Configuration Metadata 和 ZoneId hints。
 
 ## 必读
 

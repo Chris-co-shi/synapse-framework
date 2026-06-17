@@ -281,6 +281,16 @@ rg -n "IAM|登录认证|业务鉴权|注册中心|配置中心|服务治理后�
 - 不新增可启动平台服务。
 - 文档必须区分当前事实和后续规划。
 
+### TASK-208
+
+- 所有公开 `@ConfigurationProperties` 必须生成 Spring Boot Configuration Metadata。
+- 不修改现有配置 key。
+- 不修改现有默认行为。
+- 不把内部实现参数公开成配置项。
+- `spring-boot-configuration-processor` 只能作为编译期 annotation processor。
+- manual additional metadata 只能补充自动生成不足的信息。
+- 发布前必须验证 jar 中存在 `META-INF/spring-configuration-metadata.json`。
+
 ## 6. 最小验收命令
 
 ```bash
@@ -291,6 +301,7 @@ rg -n "file-service|message-service|config-service|audit-service|task-service|�
 rg -n "spring-cloud-starter-gateway|nacos|seata|rocketmq" .
 rg -n "synapse-webmvc|synapse-webflux" synapse-cloud || true
 rg -n "starter|demo|example|sample" README.md AGENTS.md docs pom.xml synapse-bom/pom.xml
+find . -path "*/target/classes/META-INF/spring-configuration-metadata.json" -print
 git diff --check
 ```
 

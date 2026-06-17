@@ -80,3 +80,14 @@
 12. 常见问题。
 
 手册只描述当前代码事实，不写未实现能力，不把平台服务职责写成 framework 模块能力。
+
+## Configuration Metadata 规则
+
+所有公开 `@ConfigurationProperties` 必须生成 Spring Boot Configuration Metadata。
+
+要求：
+
+- 配置类和公开字段必须有清晰 Javadoc。
+- 自动生成 metadata 优先，manual additional metadata 只补充 hints、候选值或自动生成无法表达的信息。
+- module 发布前必须验证 jar 中包含 `META-INF/spring-configuration-metadata.json`。
+- 新增配置项时必须同步检查 IDEA 补全信息，不得把内部实现参数随意公开成配置项。

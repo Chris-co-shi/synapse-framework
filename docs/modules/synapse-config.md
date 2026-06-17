@@ -62,3 +62,7 @@ synapse:
 - 不持久化配置，不建表。
 - 不提供 Controller 或后台。
 - 不做 Synapse Platform 的 `synapse-config-service`。
+
+## 9. Configuration Metadata
+
+`synapse-config` 发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，覆盖 `synapse.config.values`。该 Map 的 key/value 含义必须在字段 Javadoc 中说明，不新增不存在的规划配置。

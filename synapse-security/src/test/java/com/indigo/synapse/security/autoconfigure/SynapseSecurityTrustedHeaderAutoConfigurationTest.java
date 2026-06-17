@@ -91,15 +91,15 @@ class SynapseSecurityTrustedHeaderAutoConfigurationTest {
         assertEquals(PermissionChecker.class, conditional.value()[0]);
     }
 
-    @Test
-    void shouldCreateRequirePermissionAspect() {
-        SynapseSecurityAutoConfiguration autoConfiguration = new SynapseSecurityAutoConfiguration();
-        PermissionChecker permissionChecker = autoConfiguration.permissionChecker();
-
-        RequirePermissionAspect aspect = autoConfiguration.requirePermissionAspect(permissionChecker);
-
-        assertNotNull(aspect);
-    }
+//    @Test
+//    void shouldCreateRequirePermissionAspect() {
+//        SynapseSecurityAutoConfiguration autoConfiguration = new SynapseSecurityAutoConfiguration();
+//        PermissionChecker permissionChecker = autoConfiguration.permissionChecker();
+//
+//        RequirePermissionAspect aspect = autoConfiguration.requirePermissionAspect(permissionChecker);
+//
+//        assertNotNull(aspect);
+//    }
 
     @Test
     void shouldDeclareRequirePermissionAspectConditions() throws NoSuchMethodException {

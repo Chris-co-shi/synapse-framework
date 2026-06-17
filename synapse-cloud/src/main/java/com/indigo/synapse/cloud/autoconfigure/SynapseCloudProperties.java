@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class SynapseCloudProperties {
 
     /**
-     * 是否启用 Synapse Cloud 自动配置。
+     * 是否启用 Synapse Cloud 自动配置。关闭后不会装配 cloud 基础 Bean 和 Feign 技术适配。
      */
     private boolean enabled = true;
 

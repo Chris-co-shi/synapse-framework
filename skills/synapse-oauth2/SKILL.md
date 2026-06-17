@@ -29,6 +29,7 @@
 - 覆盖 denylist。
 - 覆盖生产环境保护策略。
 - 覆盖自定义 Bean 不覆盖。
+- 覆盖 `synapse.oauth2.*` Spring Boot Configuration Metadata，敏感配置不得写入真实 token 或 credential 示例。
 
 ## 必读
 

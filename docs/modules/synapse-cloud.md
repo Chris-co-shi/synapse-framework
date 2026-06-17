@@ -327,3 +327,7 @@ MQ codec 面向消息 Header，命名、语义和 HTTP 服务间调用不同。C
 ### Q3：`synapse-cloud` 是否会自动认证服务间请求？
 
 不会。当前只提供签名扩展点。完整可信边界、登录认证、IAM 和业务鉴权属于 Platform 或业务系统。
+
+## 12. Configuration Metadata
+
+`synapse-cloud` 发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，覆盖 `synapse.cloud.*` 和 `synapse.cloud.feign.*`。新增配置项时必须补充字段 Javadoc，并运行 metadata 测试。

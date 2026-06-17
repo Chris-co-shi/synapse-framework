@@ -26,6 +26,7 @@
 - 覆盖非法 bucket / objectKey。
 - 覆盖自动配置和自定义 Bean 不覆盖。
 - 覆盖本地存储路径边界。
+- 覆盖 `synapse.file.*` Spring Boot Configuration Metadata。
 
 ## 必读
 

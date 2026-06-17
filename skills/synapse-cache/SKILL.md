@@ -21,3 +21,4 @@
 
 - 运行 `mvn -q -pl synapse-cache -am test`。
 - 检查无业务模型和启动类。
+- 修改 `SynapseCacheProperties` 时必须验证 `META-INF/spring-configuration-metadata.json` 包含 `synapse.cache.*` 属性、类型和说明。

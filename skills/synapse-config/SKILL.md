@@ -25,6 +25,7 @@
 - 覆盖常用类型解析。
 - 覆盖不支持类型。
 - 覆盖自动配置和自定义 Bean 不覆盖。
+- 覆盖 `synapse.config.*` Spring Boot Configuration Metadata。
 
 ## 必读
 

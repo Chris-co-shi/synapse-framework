@@ -14,19 +14,19 @@ import java.time.Duration;
 public class SynapseOAuth2Properties {
 
     /**
-     * token issuer，默认 synapse。
+     * JWT issuer，默认 `synapse`。消费方可按平台服务名称设置，但不应包含密码、token 或 credential。
      */
     private String issuer = "synapse";
     /**
-     * JWK key id。生产环境不得使用默认 key id。
+     * JWK key id。生产环境不得使用默认 key id，且不应在日志中输出真实密钥材料。
      */
     private String keyId = "synapse-dev";
     /**
-     * 是否为生产环境。生产环境必须由应用提供真实密钥和 denylist 实现。
+     * 是否为生产环境。启用后必须由应用提供真实 RSA key 和 denylist 实现，禁止开发默认值进入生产。
      */
     private boolean production;
     /**
-     * access token 默认有效期。
+     * access token 默认有效期，使用 Spring Boot Duration 格式，例如 `15m`、`1h`。
      */
     private Duration accessTokenTtl = Duration.ofMinutes(15);
 

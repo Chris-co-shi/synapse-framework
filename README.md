@@ -133,6 +133,16 @@ mvn validate
 /Users/sxc/Documents/tool/apache-maven-3.9.0/bin/mvn -q validate
 ```
 
+### Configuration Metadata
+
+所有公开 `@ConfigurationProperties` 都必须生成 Spring Boot Configuration Metadata。发布前需要确认对应 jar 中包含：
+
+```text
+META-INF/spring-configuration-metadata.json
+```
+
+该 metadata 用于消费方在 IntelliJ IDEA 等 IDE 中获得 `synapse.*` 配置前缀、属性名、类型、默认值、说明和候选值补全。新增配置项时必须同步补充字段 Javadoc，并验证 metadata 进入最终 jar。
+
 ### 业务项目引入方式
 
 业务项目应按需直接引入具体 module，而不是通过 starter 或 demo 应用间接引入。

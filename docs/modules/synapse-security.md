@@ -453,3 +453,7 @@ security 会把当前用户适配成 `OperationActor`，但不会把 roles / per
 ### Q5：如何处理异步任务中的当前用户？
 
 异步任务不应依赖 ThreadLocal 自动存在。调用方需要显式传递 `OperationContextSnapshot`，或在任务入口手动建立 `SecurityContext` / `OperationContext`。
+
+## 11. Configuration Metadata
+
+`synapse-security` 发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，覆盖 `synapse.security.trusted-header.*` 和 `synapse.security.permission.*`。`secret` 等敏感配置只能说明用途和风险，不得写入真实示例值。

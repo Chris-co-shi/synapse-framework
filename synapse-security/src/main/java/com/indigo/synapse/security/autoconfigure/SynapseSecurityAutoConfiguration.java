@@ -9,17 +9,18 @@ import com.indigo.synapse.security.permission.PermissionChecker;
 import com.indigo.synapse.security.permission.RequirePermissionAspect;
 import com.indigo.synapse.security.web.TrustedHeaderAuthenticationFilter;
 import org.aopalliance.intercept.MethodInterceptor;
-import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
-import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Role;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
@@ -55,11 +56,15 @@ public class SynapseSecurityAutoConfiguration {
     }
 
     /**
-     * RequirePermission 声明式权限检查适配器。
+     * RequirePermission 声明式权限检查 Advisor。
      *
      * <p>该 Bean 只在 Spring AOP MethodInterceptor 存在、PermissionChecker 存在且注解开关开启时注册。</p>
+     *
+     * <p>通过 {@link ObjectProvider} 延迟获取 PermissionChecker，避免 Advisor 在 BeanPostProcessor
+     * 注册阶段被扫描时提前初始化权限检查器及其依赖。</p>
      */
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConditionalOnClass(MethodInterceptor.class)
     @ConditionalOnBean(PermissionChecker.class)
     @ConditionalOnMissingBean(RequirePermissionAspect.class)
@@ -69,26 +74,9 @@ public class SynapseSecurityAutoConfiguration {
             havingValue = "true",
             matchIfMissing = true
     )
-    public RequirePermissionAspect requirePermissionAspect(PermissionChecker permissionChecker) {
-        return new RequirePermissionAspect(permissionChecker);
-    }
-
-    /**
-     * Spring AOP 自动代理创建器。
-     *
-     * <p>只有在业务系统没有提供自己的 AutoProxyCreator 时才注册，避免覆盖消费方代理策略。</p>
-     */
-    @Bean
-    @ConditionalOnClass(DefaultAdvisorAutoProxyCreator.class)
-    @ConditionalOnMissingBean(AbstractAutoProxyCreator.class)
-    @ConditionalOnProperty(
-            prefix = "synapse.security.permission",
-            name = "annotation-enabled",
-            havingValue = "true",
-            matchIfMissing = true
-    )
-    public static DefaultAdvisorAutoProxyCreator requirePermissionAdvisorAutoProxyCreator() {
-        return new DefaultAdvisorAutoProxyCreator();
+    public static RequirePermissionAspect requirePermissionAspect(
+            ObjectProvider<PermissionChecker> permissionCheckerProvider) {
+        return new RequirePermissionAspect(permissionCheckerProvider);
     }
 
     /**

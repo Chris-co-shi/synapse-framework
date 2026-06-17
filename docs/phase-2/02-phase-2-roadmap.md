@@ -37,6 +37,7 @@
 | TASK-205 | Time / Config / I18n 基础抽象 | P1 | 新模块 | 已新增 `synapse-time`、`synapse-config`、`synapse-i18n` 基础抽象 |
 | TASK-206 | MQ / File / Audit / OAuth2 边界复查 | P2 | 收敛 | 已复查风险模块边界并补齐 Skill |
 | TASK-207 | Docs / Skills / Boundary 收口 | P2 | 收尾 | 已完成文档、Skill、边界检查和模块状态校准 |
+| TASK-208 | Spring Boot Configuration Metadata 收口 | P2 | 封板补丁 | 已完成公开配置项 metadata 生成、测试和文档收口 |
 
 ## 3. TASK-201：Framework Boundary 固化
 
@@ -259,12 +260,36 @@
 
 风险点：文档和实际代码不一致，或把平台服务写成 framework 能力。
 
-## 10. 推荐执行顺序
+## 10. TASK-208：Spring Boot Configuration Metadata 收口
+
+目标：
+
+- 为所有公开 `@ConfigurationProperties` 生成可发布的 Spring Boot Configuration Metadata。
+- 让消费方在 `application.yml` / `application.properties` 中获得 `synapse.*` 配置补全。
+- 补齐配置项说明、默认值、类型和必要 hints。
+
+完成说明：
+
+- 已通过根 POM 统一配置 Spring Boot configuration processor。
+- 已覆盖 `synapse.cache`、`synapse.cloud`、`synapse.cloud.feign`、`synapse.config`、`synapse.file`、`synapse.i18n`、`synapse.oauth2`、`synapse.security`、`synapse.time`。
+- 已为 `synapse.time.default-zone` 和 `synapse.i18n.default-locale` 增加 additional metadata hints。
+- 已增加 metadata 单元测试和 jar 产物检查。
+
+不做内容：
+
+- 不新增 starter。
+- 不新增 demo / example / sample application。
+- 不新增业务配置模型。
+- 不修改现有配置 key 或默认行为。
+
+验收标准：`mvn package` 后相关 jar 包含 `META-INF/spring-configuration-metadata.json`，metadata JSON 可解析，且包含真实公开配置项。
+
+## 11. 推荐执行顺序
 
 推荐顺序：
 
 ```text
-TASK-201 -> TASK-202 -> TASK-203 -> TASK-204 -> TASK-205 -> TASK-206 -> TASK-207
+TASK-201 -> TASK-202 -> TASK-203 -> TASK-204 -> TASK-205 -> TASK-206 -> TASK-207 -> TASK-208
 ```
 
 理由：
@@ -275,9 +300,10 @@ TASK-201 -> TASK-202 -> TASK-203 -> TASK-204 -> TASK-205 -> TASK-206 -> TASK-207
 4. 再统一 OperationContext 全场景恢复，支撑 HTTP / Feign / MQ / Async / Job。
 5. 再补 Time / Config / I18n，作为 Platform 后续 runtime 基础。
 6. 再复查 MQ / File / Audit / OAuth2，防止已有模块膨胀。
-7. 最后只做 Docs / Skills / Boundary 收口，不做 starter 或 demo。
+7. 再做 Docs / Skills / Boundary 收口，不做 starter 或 demo。
+8. 最后执行 TASK-208 metadata 封板补丁，保证发布产物具备 IDE 配置索引条件。
 
-## 11. 当前结论
+## 12. 当前结论
 
 二阶段后续继续推进时，必须遵守：
 

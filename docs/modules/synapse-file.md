@@ -317,3 +317,7 @@ synapse.file
 ### Q5：业务系统应该保存什么？
 
 业务系统通常保存自己的业务附件记录，例如业务 ID、文件用途、bucket、objectKey、展示名、创建人等。`synapse-file` 只负责存储和读取文件内容。
+
+## 11. Configuration Metadata
+
+`synapse-file` 发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，覆盖 `synapse.file.local-root`。新增本地存储配置时必须说明路径格式、默认值和边界。

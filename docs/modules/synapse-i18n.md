@@ -64,3 +64,7 @@ synapse:
 - 不提供 Controller、Entity、Mapper、migration。
 - 不做翻译工作流或后台管理。
 - 不做 Synapse Platform 的 `synapse-i18n-resource-center`。
+
+## 9. Configuration Metadata
+
+`synapse-i18n` 发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，覆盖 `synapse.i18n.default-locale` 和 `synapse.i18n.messages`。`default-locale` 的常用候选值通过 additional metadata 提供。

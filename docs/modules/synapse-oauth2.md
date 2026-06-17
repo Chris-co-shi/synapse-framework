@@ -369,3 +369,7 @@ OAuth2 是 security 能力的扩展方向，可以依赖 security 的基础安�
 ### Q5：是否支持 refresh token？
 
 一阶段不支持。refresh token 属于完整认证授权流程，后续应在 IAM / Auth 平台服务中设计。
+
+## 11. Configuration Metadata
+
+`synapse-oauth2` 发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，覆盖 `synapse.oauth2.*`。敏感配置说明不得包含真实密码、token 或 credential 示例。

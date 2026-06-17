@@ -8,17 +8,19 @@ import java.util.Map;
 
 /**
  * Synapse i18n 配置项。
+ *
+ * <p>该配置只用于本地轻量消息解析，不代表 i18n-resource-center、翻译审批或资源发布服务。</p>
  */
 @ConfigurationProperties(prefix = "synapse.i18n")
 public class SynapseI18nProperties {
 
     /**
-     * 默认 Locale。
+     * 默认 Locale，使用 IETF BCP 47 language tag 格式，例如 `zh-CN`、`en-US`。
      */
     private Locale defaultLocale = Locale.ROOT;
 
     /**
-     * 本地轻量消息资源。key 为 Locale tag，value 为消息 key/value。
+     * 本地轻量消息资源。第一层 key 为 Locale tag，第二层 key 为消息编码，value 为 MessageFormat 模板。
      */
     private Map<String, Map<String, String>> messages = new LinkedHashMap<>();
 

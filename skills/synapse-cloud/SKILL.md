@@ -82,6 +82,7 @@ com.indigo.synapse.cloud.security
 - InternalCallSigner no-op 和自定义 signer 测试。
 - Feign ErrorDecoder 标准 JSON、非标准 JSON、空 body 测试。
 - 自动配置启用 / 关闭 / 用户 Bean 不覆盖 / 缺少 Feign 类不装配测试。
+- Configuration Metadata 测试，覆盖 `synapse.cloud.*` 和 `synapse.cloud.feign.*`。
 - 依赖边界检查：`synapse-cloud` 不得命中 `synapse-webmvc`、`synapse-webflux`、Gateway、Nacos、Seata、RocketMQ 依赖。
 
 ## 常见错误

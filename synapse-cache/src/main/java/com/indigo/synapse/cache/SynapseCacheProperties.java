@@ -33,8 +33,20 @@ public class SynapseCacheProperties {
      */
     public static final class L1 {
 
+        /**
+         * 是否启用 L1 Caffeine 本地缓存。关闭后默认缓存规格仍会保留 L2 Redis TTL，
+         * 但本地缓存层不会参与读写。
+         */
         private boolean enabled = true;
+
+        /**
+         * L1 本地缓存写入后的过期时间，使用 Spring Boot Duration 格式，例如 `30s`、`5m`。
+         */
         private Duration expireAfterWrite = CacheSpec.DEFAULT_L1_TTL;
+
+        /**
+         * L1 本地缓存最大条目数。达到上限后由 Caffeine 按自身策略驱逐。
+         */
         private long maximumSize = CacheSpec.DEFAULT_L1_MAXIMUM_SIZE;
 
         public boolean isEnabled() {
@@ -67,6 +79,9 @@ public class SynapseCacheProperties {
      */
     public static final class L2 {
 
+        /**
+         * L2 Redis 缓存默认 TTL，使用 Spring Boot Duration 格式，例如 `30s`、`5m`。
+         */
         private Duration ttl = CacheSpec.DEFAULT_L2_TTL;
 
         public Duration getTtl() {

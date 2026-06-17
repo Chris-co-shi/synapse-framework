@@ -24,6 +24,7 @@
 - 覆盖参数格式化。
 - 覆盖缺失 key。
 - 覆盖自动配置和自定义 Bean 不覆盖。
+- 覆盖 `synapse.i18n.*` Spring Boot Configuration Metadata 和 additional metadata hints。
 
 ## 必读
 

@@ -59,3 +59,7 @@ synapse:
 - 不依赖 Web、Security、Data。
 - 不创建 Controller、Entity、Mapper、migration。
 - 不做任何可启动服务。
+
+## 9. Configuration Metadata
+
+`synapse-time` 发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，覆盖 `synapse.time.default-zone`。常用 ZoneId 候选值通过 additional metadata 提供。
