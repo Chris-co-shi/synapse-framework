@@ -4,6 +4,7 @@ import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import com.indigo.synapse.security.autoconfigure.SynapseSecurityProperties;
 import com.indigo.synapse.security.context.AuthenticatedUser;
 import com.indigo.synapse.security.context.SecurityContext;
+import com.indigo.synapse.security.context.SecurityContextScope;
 import com.indigo.synapse.security.exception.SecurityErrorCode;
 import com.indigo.synapse.security.header.SecurityHeaders;
 import com.indigo.synapse.security.header.TrustedHeaderAuthenticatedUserResolver;
@@ -27,12 +28,12 @@ import java.util.Map;
 /**
  * 基于 trusted-header 的轻量认证 Filter。
  *
- * <p>该 Filter 面向位于 Gateway / IAM 后方的业务服务：它只恢复可信 Header 中的
- * {@link AuthenticatedUser} 并写入 {@link SecurityContext}，不做登录、不验签 OAuth2/JWT token、
- * 不创建 Spring Security 过滤链。</p>
+ * <p>该 Filter 面向位于 Gateway / IAM 后方的业务服务：它只校验并恢复可信 Header 中的
+ * {@link AuthenticatedUser}，不做登录、不验签 OAuth2/JWT token、不创建 Spring Security 过滤链。</p>
  *
- * <p>Filter 会在请求结束后清理 SecurityContext，并恢复进入安全上下文前的 OperationContext。
- * 因此它必须运行在业务 Controller 之前，并应被 synapse-web 的异常桥接 Filter 包裹。</p>
+ * <p>Filter 使用 {@link SecurityContextScope} 管理生命周期：请求结束或异常时恢复进入 Filter 前的
+ * SecurityContext 与 OperationContext，而不是无条件清除外层上下文。认证失败只在认证阶段处理，
+ * 下游 Filter 或 Controller 抛出的认证异常不会被本 Filter 捕获或导致 FilterChain 重复执行。</p>
  */
 public class TrustedHeaderAuthenticationFilter implements Filter {
 
@@ -93,7 +94,7 @@ public class TrustedHeaderAuthenticationFilter implements Filter {
     }
 
     /**
-     * 恢复 trusted-header 安全上下文，并确保请求结束或异常时清理当前 Filter 绑定的上下文。
+     * 校验 trusted-header，并在独立安全上下文作用域内执行后续 FilterChain。
      */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -104,27 +105,40 @@ public class TrustedHeaderAuthenticationFilter implements Filter {
             return;
         }
 
+        AuthenticatedUser authenticatedUser;
         try {
             Map<String, String> headers = extractTrustedHeaders(httpRequest);
-            authenticate(headers, trustedHeader);
-            chain.doFilter(request, response);
+            authenticatedUser = authenticate(headers, trustedHeader);
         } catch (SynapseAuthenticationException exception) {
             if (trustedHeader.isFailFast()) {
                 throw exception;
             }
-            chain.doFilter(request, response);
-        } finally {
-            SecurityContext.clear();
+            doFilterWithSecurityContext(request, response, chain, null);
+            return;
         }
+
+        doFilterWithSecurityContext(request, response, chain, authenticatedUser);
     }
 
-    private void authenticate(Map<String, String> headers, SynapseSecurityProperties.TrustedHeader trustedHeader) {
+    private AuthenticatedUser authenticate(
+            Map<String, String> headers,
+            SynapseSecurityProperties.TrustedHeader trustedHeader) {
         timestampValidator.validate(headers, trustedHeader.getTimestampTolerance(), clock);
         if (trustedHeader.isSignatureEnabled()
                 && !signatureVerifier.verify(headers, trustedHeader.getSecret())) {
             throw new SynapseAuthenticationException(SecurityErrorCode.SECURITY_INVALID_SIGNATURE);
         }
-        SecurityContext.set(authenticatedUserResolver.resolveAuthenticatedUser(headers));
+        return authenticatedUserResolver.resolveAuthenticatedUser(headers);
+    }
+
+    private static void doFilterWithSecurityContext(
+            ServletRequest request,
+            ServletResponse response,
+            FilterChain chain,
+            AuthenticatedUser authenticatedUser) throws IOException, ServletException {
+        try (SecurityContextScope ignored = SecurityContext.scope(authenticatedUser)) {
+            chain.doFilter(request, response);
+        }
     }
 
     private static Map<String, String> extractTrustedHeaders(HttpServletRequest request) {

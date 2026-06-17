@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -24,6 +25,23 @@ class TrustedHeaderTimestampValidatorTest {
         long timestamp = CLOCK.instant().minus(Duration.ofSeconds(30)).toEpochMilli();
 
         validator.validate(headers(timestamp), Duration.ofMinutes(1), CLOCK);
+    }
+
+    @Test
+    void shouldAcceptPastAndFutureTimestampExactlyAtToleranceBoundary() {
+        Duration tolerance = Duration.ofMinutes(1);
+        long pastBoundary = CLOCK.instant().minus(tolerance).toEpochMilli();
+        long futureBoundary = CLOCK.instant().plus(tolerance).toEpochMilli();
+
+        assertDoesNotThrow(() -> validator.validate(headers(pastBoundary), tolerance, CLOCK));
+        assertDoesNotThrow(() -> validator.validate(headers(futureBoundary), tolerance, CLOCK));
+    }
+
+    @Test
+    void shouldAcceptCurrentInstantWhenToleranceIsZero() {
+        long timestamp = CLOCK.instant().toEpochMilli();
+
+        assertDoesNotThrow(() -> validator.validate(headers(timestamp), Duration.ZERO, CLOCK));
     }
 
     @Test

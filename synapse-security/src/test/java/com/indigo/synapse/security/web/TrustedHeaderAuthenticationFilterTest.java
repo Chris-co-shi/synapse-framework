@@ -7,6 +7,7 @@ import com.indigo.synapse.core.context.OperationContextHolder;
 import com.indigo.synapse.core.context.OperationContextScope;
 import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import com.indigo.synapse.security.autoconfigure.SynapseSecurityProperties;
+import com.indigo.synapse.security.context.AuthenticatedUser;
 import com.indigo.synapse.security.context.SecurityContext;
 import com.indigo.synapse.security.exception.SecurityErrorCode;
 import com.indigo.synapse.security.header.SecurityHeaders;
@@ -33,8 +34,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -113,9 +118,80 @@ class TrustedHeaderAuthenticationFilterTest {
         try (OperationContextScope ignored = OperationContextHolder.scope(jobContext)) {
             filter.doFilter(request(signedHeaders()), null, new CapturingChain());
 
-            assertEquals(OperationActorType.JOB, OperationContextHolder.requireCurrent().actor().type());
-            assertEquals("job-1", OperationContextHolder.requireCurrent().actor().id());
+            assertSame(jobContext, OperationContextHolder.requireCurrent());
         }
+    }
+
+    @Test
+    void shouldRestorePreviousSecurityContextAfterFilterEnds() throws Exception {
+        TrustedHeaderAuthenticationFilter filter = filter(properties(true, true, SECRET));
+        AuthenticatedUser outerUser = user("outer-user", "outer");
+        SecurityContext.set(outerUser);
+        OperationContext outerOperationContext = OperationContextHolder.requireCurrent();
+        CapturingChain chain = new CapturingChain();
+
+        filter.doFilter(request(signedHeaders()), null, chain);
+
+        assertEquals("1", chain.userId);
+        assertEquals(outerUser, SecurityContext.currentUser().orElseThrow());
+        assertSame(outerOperationContext, OperationContextHolder.requireCurrent());
+    }
+
+    @Test
+    void shouldPreserveOuterSecurityContextWhenAuthenticationFailsFast() {
+        TrustedHeaderAuthenticationFilter filter = filter(properties(true, true, SECRET, true));
+        AuthenticatedUser outerUser = user("outer-user", "outer");
+        SecurityContext.set(outerUser);
+        OperationContext outerOperationContext = OperationContextHolder.requireCurrent();
+        Map<String, String> headers = signedHeaders();
+        headers.put(SecurityHeaders.SIGNATURE, "wrong");
+
+        assertThrows(
+                SynapseAuthenticationException.class,
+                () -> filter.doFilter(request(headers), null, new CapturingChain())
+        );
+
+        assertEquals(outerUser, SecurityContext.currentUser().orElseThrow());
+        assertSame(outerOperationContext, OperationContextHolder.requireCurrent());
+    }
+
+    @Test
+    void shouldContinueOnceWithoutOuterUserWhenAuthenticationFailsOpen() throws Exception {
+        TrustedHeaderAuthenticationFilter filter = filter(properties(true, true, SECRET, false));
+        AuthenticatedUser outerUser = user("outer-user", "outer");
+        SecurityContext.set(outerUser);
+        OperationContext outerOperationContext = OperationContextHolder.requireCurrent();
+        Map<String, String> headers = signedHeaders();
+        headers.put(SecurityHeaders.SIGNATURE, "wrong");
+        UnauthenticatedCapturingChain chain = new UnauthenticatedCapturingChain();
+
+        filter.doFilter(request(headers), null, chain);
+
+        assertEquals(1, chain.invocations);
+        assertFalse(chain.userPresent);
+        assertFalse(chain.operationContextPresent);
+        assertEquals(outerUser, SecurityContext.currentUser().orElseThrow());
+        assertSame(outerOperationContext, OperationContextHolder.requireCurrent());
+    }
+
+    @Test
+    void shouldNotRetryDownstreamChainWhenItThrowsAuthenticationException() {
+        TrustedHeaderAuthenticationFilter filter = filter(properties(true, true, SECRET, false));
+        AtomicInteger invocations = new AtomicInteger();
+        FilterChain chain = (request, response) -> {
+            invocations.incrementAndGet();
+            throw new SynapseAuthenticationException(SecurityErrorCode.SECURITY_UNAUTHENTICATED);
+        };
+
+        SynapseAuthenticationException exception = assertThrows(
+                SynapseAuthenticationException.class,
+                () -> filter.doFilter(request(signedHeaders()), null, chain)
+        );
+
+        assertEquals(SecurityErrorCode.SECURITY_UNAUTHENTICATED, exception.errorCode());
+        assertEquals(1, invocations.get());
+        assertTrue(SecurityContext.currentUser().isEmpty());
+        assertTrue(OperationContextHolder.current().isEmpty());
     }
 
     @Test
@@ -184,12 +260,21 @@ class TrustedHeaderAuthenticationFilterTest {
     }
 
     private static SynapseSecurityProperties properties(boolean enabled, boolean signatureEnabled, String secret) {
+        return properties(enabled, signatureEnabled, secret, true);
+    }
+
+    private static SynapseSecurityProperties properties(
+            boolean enabled,
+            boolean signatureEnabled,
+            String secret,
+            boolean failFast) {
         SynapseSecurityProperties properties = new SynapseSecurityProperties();
         SynapseSecurityProperties.TrustedHeader trustedHeader = properties.getTrustedHeader();
         trustedHeader.setEnabled(enabled);
         trustedHeader.setSignatureEnabled(signatureEnabled);
         trustedHeader.setSecret(secret);
         trustedHeader.setTimestampTolerance(Duration.ofMinutes(5));
+        trustedHeader.setFailFast(failFast);
         return properties;
     }
 
@@ -235,6 +320,16 @@ class TrustedHeaderAuthenticationFilterTest {
         return Collections.enumeration(copy);
     }
 
+    private static AuthenticatedUser user(String userId, String username) {
+        return new AuthenticatedUser(
+                userId,
+                username,
+                "tenant-a",
+                Set.of("ADMIN"),
+                Set.of("system:user:list")
+        );
+    }
+
     private static OperationContext context(OperationActorType actorType, String actorId) {
         OperationActor actor = new OperationActor(actorType, actorId, actorId + "-name", "tenant-a", Map.of());
         return new OperationContext(
@@ -264,6 +359,20 @@ class TrustedHeaderAuthenticationFilterTest {
             username = SecurityContext.currentUser().orElseThrow().username();
             tenantId = SecurityContext.currentUser().orElseThrow().tenantId();
             actorType = OperationContextHolder.requireCurrent().actor().type();
+        }
+    }
+
+    private static final class UnauthenticatedCapturingChain implements FilterChain {
+
+        private int invocations;
+        private boolean userPresent;
+        private boolean operationContextPresent;
+
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response) {
+            invocations++;
+            userPresent = SecurityContext.currentUser().isPresent();
+            operationContextPresent = OperationContextHolder.current().isPresent();
         }
     }
 
