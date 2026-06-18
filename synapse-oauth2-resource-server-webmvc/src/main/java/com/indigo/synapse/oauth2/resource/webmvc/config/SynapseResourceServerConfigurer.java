@@ -11,7 +11,23 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 
 /**
- * Servlet Resource Server 默认配置器。
+ * Servlet OAuth2 Resource Server 的默认 HttpSecurity 配置器。
+ *
+ * <p>该类只负责把框架提供的认证转换器、异常处理器、匿名路径和上下文桥接 Filter 组装进
+ * Spring Security，不实现登录、用户查询、授权数据加载或 JWT 签发。</p>
+ *
+ * <p>默认链路：</p>
+ * <pre>
+ * permit paths / authenticated policy
+ *     -> BearerTokenAuthenticationFilter
+ *     -> JWT decoder and validators
+ *     -> SynapseJwtAuthenticationConverter
+ *     -> SynapseSecurityContextBridgeFilter
+ *     -> Controller / Service
+ * </pre>
+ *
+ * <p>复杂应用提供自定义 {@code SecurityFilterChain} 时，可以显式复用本配置器，而不是复制整套
+ * Resource Server 组装逻辑。</p>
  */
 public final class SynapseResourceServerConfigurer {
 
@@ -34,10 +50,21 @@ public final class SynapseResourceServerConfigurer {
         this.bridgeFilter = bridgeFilter;
     }
 
+    /**
+     * 将 Synapse 默认 Resource Server 策略应用到给定 HttpSecurity。
+     *
+     * <p>配置顺序本身表达了边界：先定义无状态和访问策略，再接入 OAuth2 JWT 转换，最后把
+     * Bridge Filter 放到 {@link BearerTokenAuthenticationFilter} 之后，使其只能读取已经认证完成的主体。</p>
+     *
+     * @param http 消费方正在构建的 HttpSecurity
+     * @return 同一个 HttpSecurity，便于消费方继续追加自定义配置
+     * @throws Exception Spring Security 配置失败
+     */
     public HttpSecurity configure(HttpSecurity http) throws Exception {
         if (!properties.isCsrfEnabled()) {
             http.csrf(csrf -> csrf.disable());
         }
+
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint(entryPoint)
@@ -46,7 +73,8 @@ public final class SynapseResourceServerConfigurer {
             properties.getPermitPaths().forEach(path -> registry.requestMatchers(path).permitAll());
             registry.anyRequest().authenticated();
         });
-        http.oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt -> jwt.jwtAuthenticationConverter(authenticationConverter)));
+        http.oauth2ResourceServer(resourceServer ->
+                resourceServer.jwt(jwt -> jwt.jwtAuthenticationConverter(authenticationConverter)));
         http.addFilterAfter(bridgeFilter, BearerTokenAuthenticationFilter.class);
         return http;
     }
