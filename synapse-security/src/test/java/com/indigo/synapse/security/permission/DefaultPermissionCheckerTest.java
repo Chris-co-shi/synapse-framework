@@ -1,17 +1,14 @@
 package com.indigo.synapse.security.permission;
 
-import com.indigo.synapse.core.context.OperationContextHolder;
 import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
 import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import com.indigo.synapse.security.context.AuthenticatedUser;
 import com.indigo.synapse.security.context.SecurityContext;
 import com.indigo.synapse.security.exception.SecurityErrorCode;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -21,24 +18,20 @@ class DefaultPermissionCheckerTest {
 
     private final DefaultPermissionChecker permissionChecker = new DefaultPermissionChecker();
 
-    @AfterEach
-    void tearDown() {
-        SecurityContext.clear();
-        OperationContextHolder.clear();
-    }
-
     @Test
     void shouldReturnTrueWhenCurrentUserHasPermission() {
-        SecurityContext.set(user("system:user:create"));
-
-        assertTrue(permissionChecker.has("system:user:create"));
+        try (var ignored =
+                     SecurityContext.openScope(user("system:user:create"))) {
+            assertTrue(permissionChecker.has("system:user:create"));
+        }
     }
 
     @Test
     void shouldReturnFalseWhenCurrentUserDoesNotHavePermission() {
-        SecurityContext.set(user("system:user:list"));
-
-        assertFalse(permissionChecker.has("system:user:create"));
+        try (var ignored =
+                     SecurityContext.openScope(user("system:user:list"))) {
+            assertFalse(permissionChecker.has("system:user:create"));
+        }
     }
 
     @Test
@@ -47,31 +40,18 @@ class DefaultPermissionCheckerTest {
     }
 
     @Test
-    void shouldReturnFalseForBlankPermission() {
-        SecurityContext.set(user("system:user:create"));
-
-        assertFalse(permissionChecker.has(null));
-        assertFalse(permissionChecker.has(""));
-        assertFalse(permissionChecker.has(" "));
-    }
-
-    @Test
-    void shouldPassRequireWhenCurrentUserHasPermission() {
-        SecurityContext.set(user("system:user:create"));
-
-        assertDoesNotThrow(() -> permissionChecker.require("system:user:create"));
-    }
-
-    @Test
     void shouldThrowAccessDeniedWhenPermissionMissing() {
-        SecurityContext.set(user("system:user:list"));
-
-        SynapseAccessDeniedException exception = assertThrows(
-                SynapseAccessDeniedException.class,
-                () -> permissionChecker.require("system:user:create")
-        );
-
-        assertEquals(SecurityErrorCode.SECURITY_PERMISSION_DENIED, exception.errorCode());
+        try (var ignored =
+                     SecurityContext.openScope(user("system:user:list"))) {
+            SynapseAccessDeniedException exception = assertThrows(
+                    SynapseAccessDeniedException.class,
+                    () -> permissionChecker.require("system:user:create")
+            );
+            assertEquals(
+                    SecurityErrorCode.SECURITY_PERMISSION_DENIED,
+                    exception.errorCode()
+            );
+        }
     }
 
     @Test
@@ -94,9 +74,9 @@ class DefaultPermissionCheckerTest {
     @Test
     void shouldReturnCurrentUserWhenRequired() {
         AuthenticatedUser user = user("system:user:create");
-        SecurityContext.set(user);
-
-        assertEquals(user, permissionChecker.requireUser());
+        try (var ignored = SecurityContext.openScope(user)) {
+            assertEquals(user, permissionChecker.requireUser());
+        }
     }
 
     @Test

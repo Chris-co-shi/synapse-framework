@@ -6,7 +6,6 @@ import com.indigo.synapse.core.context.OperationContext;
 import com.indigo.synapse.core.context.OperationContextHolder;
 import com.indigo.synapse.core.context.OperationContextScope;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -14,40 +13,9 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SecurityContextTest {
-
-    @AfterEach
-    void tearDown() {
-        SecurityContext.clear();
-        OperationContextHolder.clear();
-    }
-
-    @Test
-    void shouldStoreAndClearCurrentUser() {
-        AuthenticatedUser user = new AuthenticatedUser("1", "admin", "tenant-a", Set.of(), Set.of());
-
-        SecurityContext.set(user);
-
-        assertEquals(user, SecurityContext.currentPrincipal().orElseThrow());
-        assertEquals(user, SecurityContext.currentUser().orElseThrow());
-        assertTrue(SecurityContext.currentClient().isEmpty());
-        OperationContext operationContext = OperationContextHolder.current().orElseThrow();
-        assertEquals(OperationActorType.USER, operationContext.actor().type());
-        assertEquals("1", operationContext.actor().id());
-        assertEquals("admin", operationContext.actor().name());
-        assertEquals("tenant-a", operationContext.actor().tenantId());
-        assertEquals(operationContext.actor(), operationContext.initiator());
-        assertEquals("tenant-a", operationContext.tenantId());
-
-        SecurityContext.clear();
-
-        assertTrue(SecurityContext.currentUser().isEmpty());
-        assertTrue(SecurityContext.currentPrincipal().isEmpty());
-        assertTrue(OperationContextHolder.current().isEmpty());
-    }
 
     @Test
     void shouldStoreClientWithoutMappingToUser() {
@@ -99,45 +67,119 @@ class SecurityContextTest {
     }
 
     @Test
-    void shouldClearWhenSetNull() {
-        SecurityContext.set(new AuthenticatedUser("1", "admin", null, Set.of(), Set.of()));
+    void shouldRestoreOuterContextsAfterNullSecurityScope() {
+        OperationContext jobContext = jobContext();
+        AuthenticatedUser user = new AuthenticatedUser(
+                "user-1",
+                "admin",
+                "tenant-a",
+                Set.of("ADMIN"),
+                Set.of("system:user:list")
+        );
 
-        SecurityContext.set(null);
+        try (OperationContextScope jobScope =
+                     OperationContextHolder.scope(jobContext)) {
 
-        assertTrue(SecurityContext.currentUser().isEmpty());
-        assertTrue(OperationContextHolder.current().isEmpty());
-    }
+            assertEquals(jobContext, OperationContextHolder.requireCurrent());
+            assertTrue(SecurityContext.currentPrincipal().isEmpty());
 
-    @Test
-    void shouldClearOperationContextScopeWhenEmpty() {
-        SecurityContext.set(new AuthenticatedUser("1", "admin", null, Set.of(), Set.of()));
-        SecurityContext.clear();
+            try (SecurityContextScope userScope =
+                         SecurityContext.openScope(user)) {
 
-        SecurityContext.clearIfEmpty();
+                assertEquals(user, SecurityContext.currentPrincipal().orElseThrow());
+                assertEquals(
+                        OperationActorType.USER,
+                        OperationContextHolder.requireCurrent().actor().type()
+                );
 
-        assertTrue(SecurityContext.currentUser().isEmpty());
-        assertTrue(OperationContextHolder.current().isEmpty());
-    }
+                try (SecurityContextScope emptyScope =
+                             SecurityContext.openScope(null)) {
 
-    @Test
-    void shouldRestorePreviousOperationContextWhenCleared() {
-        OperationContext jobContext = context(OperationActorType.JOB, "job-1");
-        AuthenticatedUser user = new AuthenticatedUser("1", "admin", "tenant-a", Set.of("ADMIN"), Set.of("system:user:list"));
+                    assertTrue(SecurityContext.currentPrincipal().isEmpty());
+                    assertTrue(OperationContextHolder.current().isEmpty());
+                }
 
-        try (OperationContextScope ignored = OperationContextHolder.scope(jobContext)) {
-            SecurityContext.set(user);
+                assertEquals(user, SecurityContext.currentPrincipal().orElseThrow());
+                assertEquals(
+                        OperationActorType.USER,
+                        OperationContextHolder.requireCurrent().actor().type()
+                );
+            }
 
-            assertEquals(OperationActorType.USER, OperationContextHolder.requireCurrent().actor().type());
-
-            SecurityContext.clear();
-
-            assertEquals(OperationActorType.JOB, OperationContextHolder.requireCurrent().actor().type());
-            assertEquals("job-1", OperationContextHolder.requireCurrent().actor().id());
+            assertTrue(SecurityContext.currentPrincipal().isEmpty());
+            assertEquals(jobContext, OperationContextHolder.requireCurrent());
         }
     }
 
-    private static OperationContext context(OperationActorType actorType, String actorId) {
-        OperationActor actor = new OperationActor(actorType, actorId, actorId + "-name", "tenant-a", Map.of());
+    @Test
+    void shouldRestoreLexicalScopeAfterManagedSetAndClear() {
+        AuthenticatedUser outerUser = new AuthenticatedUser(
+                "user-a",
+                "outer-user",
+                "tenant-a",
+                Set.of("USER"),
+                Set.of("outer:read")
+        );
+
+        AuthenticatedClient client = new AuthenticatedClient(
+                "client-a",
+                "outer-client",
+                "tenant-a",
+                Set.of("CLIENT"),
+                Set.of("outer:read")
+        );
+
+        AuthenticatedUser innerUser = new AuthenticatedUser(
+                "user-b",
+                "inner-user",
+                "tenant-a",
+                Set.of("USER"),
+                Set.of("inner:read")
+        );
+
+        try (SecurityContextScope outerScope =
+                     SecurityContext.openScope(outerUser)) {
+
+            assertEquals(
+                    outerUser,
+                    SecurityContext.currentPrincipal().orElseThrow()
+            );
+
+            try (SecurityContextScope clientScope =
+                         SecurityContext.openScope(client)) {
+
+                assertEquals(
+                        client,
+                        SecurityContext.currentPrincipal().orElseThrow()
+                );
+
+                try (SecurityContextScope innerScope =
+                             SecurityContext.openScope(innerUser)) {
+
+                    assertEquals(
+                            innerUser,
+                            SecurityContext.currentPrincipal().orElseThrow()
+                    );
+                }
+
+                assertEquals(
+                        client,
+                        SecurityContext.currentPrincipal().orElseThrow()
+                );
+            }
+
+            assertEquals(
+                    outerUser,
+                    SecurityContext.currentPrincipal().orElseThrow()
+            );
+        }
+
+        assertTrue(SecurityContext.currentPrincipal().isEmpty());
+        assertTrue(OperationContextHolder.current().isEmpty());
+    }
+
+    private static OperationContext jobContext() {
+        OperationActor actor = new OperationActor(OperationActorType.JOB, "job-1", "job-1" + "-name", "tenant-a", Map.of());
         return new OperationContext(
                 actor,
                 null,

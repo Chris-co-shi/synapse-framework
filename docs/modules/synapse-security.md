@@ -152,14 +152,12 @@ SecurityContext
 常用方法：
 
 ```java
-SecurityContext.set(authenticatedUser);
-try (SecurityContextScope ignored = SecurityContext.openScope(authenticatedClient)) {
-    // 当前作用域内读取 principal / client
-}
-SecurityContext.currentPrincipal();
-SecurityContext.currentUser();
-SecurityContext.currentClient();
-SecurityContext.clear();
+import com.indigo.synapse.security.context.SecurityContext;
+import com.indigo.synapse.security.context.SecurityContextScope;
+try (SecurityContextScope ignored =
+        SecurityContext.openScope(authenticatedUser)) {
+        // business
+        }
 ```
 
 设置主体后，security 会把安全主体单向适配为 core 的 `OperationContext`。

@@ -18,7 +18,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -42,12 +41,6 @@ class TrustedHeaderAuthenticationFilterTest {
 
     private static final Clock CLOCK = Clock.fixed(Instant.parse("2026-06-14T10:00:00Z"), ZoneOffset.UTC);
     private static final String SECRET = "secret-value";
-
-    @AfterEach
-    void tearDown() {
-        SecurityContext.clear();
-        OperationContextHolder.clear();
-    }
 
     @Test
     void shouldPassThroughWhenTrustedHeaderDisabled() throws Exception {
