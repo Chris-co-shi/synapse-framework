@@ -14,14 +14,15 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class SynapseReactiveJwtAuthenticationConverterTest {
 
+    private final SynapseReactiveJwtAuthenticationConverter converter =
+            new SynapseReactiveJwtAuthenticationConverter();
+
     @Test
     void shouldMapClientWithoutCreatingUser() {
-        SynapseReactiveJwtAuthenticationConverter converter =
-                new SynapseReactiveJwtAuthenticationConverter();
         Jwt jwt = jwt(Map.of(
                 SynapseJwtClaimNames.SUBJECT, "client-subject",
                 SynapseJwtClaimNames.PRINCIPAL_TYPE, SynapsePrincipalType.CLIENT.name(),
@@ -41,15 +42,14 @@ class SynapseReactiveJwtAuthenticationConverterTest {
 
     @Test
     void shouldNormalizeUserClaimsAndAuthorities() {
-        SynapseReactiveJwtAuthenticationConverter converter =
-                new SynapseReactiveJwtAuthenticationConverter();
         Jwt jwt = jwt(Map.of(
                 SynapseJwtClaimNames.SUBJECT, "user-1",
                 SynapseJwtClaimNames.PRINCIPAL_TYPE, SynapsePrincipalType.USER.name(),
-                SynapseJwtClaimNames.ROLES, " admin  operator admin ",
+                SynapseJwtClaimNames.ROLES,
+                List.of(" admin ", "", "admin", "ROLE_operator"),
                 SynapseJwtClaimNames.PERMISSIONS,
-                List.of(" message:read ", "", "message:read"),
-                SynapseJwtClaimNames.SCOPE, "openid  profile openid"
+                List.of(" message:read ", "PERM_message:write", "message:read", " "),
+                SynapseJwtClaimNames.SCOPE, " openid  profile openid SCOPE_email "
         ));
 
         StepVerifier.create(converter.convert(jwt))
@@ -61,19 +61,21 @@ class SynapseReactiveJwtAuthenticationConverterTest {
                             (AuthenticatedUser) authentication.getDetails();
 
                     assertThat(user.roles())
-                            .containsExactlyInAnyOrder("admin", "operator");
+                            .containsExactly("admin", "ROLE_operator");
 
                     assertThat(user.permissions())
-                            .containsExactlyInAnyOrder("message:read");
+                            .containsExactly("message:read", "PERM_message:write");
 
                     assertThat(authentication.getAuthorities())
                             .extracting(GrantedAuthority::getAuthority)
                             .containsExactly(
                                     "SCOPE_openid",
                                     "SCOPE_profile",
+                                    "SCOPE_email",
                                     "ROLE_admin",
                                     "ROLE_operator",
-                                    "PERM_message:read"
+                                    "PERM_message:read",
+                                    "PERM_message:write"
                             );
                 })
                 .verifyComplete();
@@ -81,8 +83,6 @@ class SynapseReactiveJwtAuthenticationConverterTest {
 
     @Test
     void shouldRejectUnsupportedPrincipalType() {
-        SynapseReactiveJwtAuthenticationConverter converter =
-                new SynapseReactiveJwtAuthenticationConverter();
         Jwt jwt = jwt(Map.of(
                 SynapseJwtClaimNames.SUBJECT, "principal-1",
                 SynapseJwtClaimNames.PRINCIPAL_TYPE, "SERVICE"
@@ -90,7 +90,39 @@ class SynapseReactiveJwtAuthenticationConverterTest {
 
         assertThatThrownBy(() -> converter.convert(jwt))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("unsupported principal_type");
+                .hasMessage("unsupported principal_type: SERVICE");
+    }
+
+    @Test
+    void shouldRejectMissingPrincipalType() {
+        Jwt jwt = jwt(Map.of(SynapseJwtClaimNames.SUBJECT, "user-1"));
+
+        assertThatThrownBy(() -> converter.convert(jwt))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("principal_type must not be blank");
+    }
+
+    @Test
+    void shouldRejectMissingSubjectForUser() {
+        Jwt jwt = jwt(Map.of(
+                SynapseJwtClaimNames.PRINCIPAL_TYPE, SynapsePrincipalType.USER.name()
+        ));
+
+        assertThatThrownBy(() -> converter.convert(jwt))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("sub must not be blank");
+    }
+
+    @Test
+    void shouldRejectMissingClientIdForClient() {
+        Jwt jwt = jwt(Map.of(
+                SynapseJwtClaimNames.SUBJECT, "client-subject",
+                SynapseJwtClaimNames.PRINCIPAL_TYPE, SynapsePrincipalType.CLIENT.name()
+        ));
+
+        assertThatThrownBy(() -> converter.convert(jwt))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("client_id must not be blank");
     }
 
     private static Jwt jwt(Map<String, Object> claims) {
