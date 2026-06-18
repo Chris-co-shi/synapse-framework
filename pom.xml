@@ -29,7 +29,6 @@
         <module>synapse-data</module>
         <module>synapse-cache</module>
         <module>synapse-security</module>
-        <module>synapse-security-webmvc</module>
         <module>synapse-oauth2-core</module>
         <module>synapse-oauth2-authorization-server-support</module>
         <module>synapse-oauth2-resource-server-webmvc</module>
