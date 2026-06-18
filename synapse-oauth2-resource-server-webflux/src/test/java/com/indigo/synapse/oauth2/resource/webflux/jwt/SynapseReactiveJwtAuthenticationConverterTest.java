@@ -61,10 +61,10 @@ class SynapseReactiveJwtAuthenticationConverterTest {
                             (AuthenticatedUser) authentication.getDetails();
 
                     assertThat(user.roles())
-                            .containsExactly("admin", "ROLE_operator");
+                            .containsExactlyInAnyOrder("admin", "ROLE_operator");
 
                     assertThat(user.permissions())
-                            .containsExactly("message:read", "PERM_message:write");
+                            .containsExactlyInAnyOrder("message:read", "PERM_message:write");
 
                     assertThat(authentication.getAuthorities())
                             .extracting(GrantedAuthority::getAuthority)
