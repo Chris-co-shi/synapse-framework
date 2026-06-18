@@ -22,6 +22,7 @@
 - 本项目不提供 demo / example / sample application。
 - 业务系统按需直接引用具体 module。
 - 后续文档不得再把 starter 或 demo 作为正向规划。
+- 身份认证只信任经过 Resource Server 验证的 Bearer Token，不提供 trusted-header 身份适配模块。
 
 模块文档必须明确区分：
 
@@ -46,7 +47,6 @@
 | `synapse-data` | [synapse-data.md](synapse-data.md) | 数据层基础能力，当前聚焦 OperationContext 自动填充 |
 | `synapse-cache` | [synapse-cache.md](synapse-cache.md) | 缓存、锁、限流、幂等基础设施 |
 | `synapse-security` | [synapse-security.md](synapse-security.md) | Web 无关安全主体、权限检查和安全上下文 |
-| `synapse-security-webmvc` | [synapse-security-webmvc.md](synapse-security-webmvc.md) | trusted-header Servlet MVC 适配 |
 | `synapse-oauth2-core` | [synapse-oauth2-core.md](synapse-oauth2-core.md) | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 |
 | `synapse-oauth2-authorization-server-support` | [synapse-oauth2-authorization-server-support.md](synapse-oauth2-authorization-server-support.md) | JWT 签发与 JWK 技术支持 |
 | `synapse-oauth2-resource-server-webmvc` | [synapse-oauth2-resource-server-webmvc.md](synapse-oauth2-resource-server-webmvc.md) | Servlet OAuth2 Resource Server 技术适配 |
