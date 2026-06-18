@@ -2,56 +2,72 @@
 
 ## 1. 模块定位
 
-`synapse-security` 是 Synapse Framework 的轻量安全基础模块。
+`synapse-security` 是 Synapse Framework 的 Web 无关安全基础模块。
 
-它不提供完整认证中心，也不创建 Spring Security FilterChain，也不直接提供 Servlet Filter / WebFilter，而是提供业务服务接入可信身份上下文和权限检查所需的 Web 无关基础能力：
+当前能力：
 
-- `AuthenticatedUser` 已认证用户主体。
-- `AuthenticatedClient` 已认证客户端主体。
-- `AuthenticatedPrincipal` 统一安全主体抽象。
-- `SecurityContext` 当前线程安全上下文。
-- trusted-header 请求头契约。
-- trusted-header HMAC 签名和时间戳校验。
-- `PermissionChecker` 显式权限检查入口。
-- `@RequirePermission` 声明式权限适配。
-- security 到 core `OperationContext` 的单向适配。
+- `AuthenticatedPrincipal`：统一安全主体抽象。
+- `AuthenticatedUser`：已认证用户主体。
+- `AuthenticatedClient`：已认证客户端主体。
+- `SecurityContext`：当前线程安全上下文只读门面。
+- `PermissionChecker`：显式权限检查入口。
+- `@RequirePermission`：声明式权限适配。
+- 安全主体到 core `OperationContext` 的单向适配。
 - 默认 `PasswordEncoder`。
 
-## 2. 适用场景
+本模块不负责从 HTTP 请求、Header 或 Token 中建立认证主体。Servlet 和 Reactive 请求的认证入口分别由 OAuth2 Resource Server 适配模块承担。
 
-业务系统或平台系统在以下场景可以引入 `synapse-security`：
+## 2. 认证边界
 
-- 服务位于 Gateway / IAM 后方，需要从可信 Header 恢复当前用户或客户端。
-- 需要在业务服务中读取当前已认证用户。
-- 需要通过 `PermissionChecker` 显式校验权限。
-- 需要通过 `@RequirePermission` 对 Spring Bean 方法做轻量权限拦截。
-- 需要把当前认证主体同步为 `OperationContext`，供 data、audit、mq 等模块使用。
-- 需要一个默认 BCrypt 密码编码器。
+Synapse 当前采用 Bearer Token 作为身份权威：
 
-## 3. 不适用场景
+```text
+Authorization: Bearer <token>
+  -> Resource Server 验证签名
+  -> 校验 issuer / audience / expiry / token contract
+  -> JWT claims 映射为 AuthenticatedUser 或 AuthenticatedClient
+  -> 建立 Synapse SecurityContext
+```
 
-`synapse-security` 不适合承担以下职责：
+固定规则：
 
-- 用户登录。
-- 用户中心。
-- 角色授权后台。
-- 菜单权限管理。
+- Gateway 可以验证 Token，但下游服务仍必须独立验证。
+- Gateway 与下游服务之间只传播 Bearer Token。
+- 不传播或信任用户、角色、权限等身份 Header。
+- `synapse-security` 不提供 trusted-header 协议、HMAC Header 签名或 Servlet Filter。
+- `synapse-security` 不依赖 Spring Security Web / Config。
+
+Web 认证适配模块：
+
+- Servlet：`synapse-oauth2-resource-server-webmvc`。
+- Reactive：`synapse-oauth2-resource-server-webflux`。
+
+## 3. 适用场景
+
+业务系统或平台系统可以使用本模块：
+
+- 读取当前已经过认证的用户或客户端。
+- 通过 `PermissionChecker` 显式校验权限。
+- 通过 `@RequirePermission` 对 Spring Bean 方法执行轻量权限检查。
+- 将当前安全主体同步为 `OperationContext`，供 data、audit、mq 等模块读取。
+- 使用默认 BCrypt 密码编码器。
+
+## 4. 不适用场景
+
+本模块不承担：
+
+- 用户登录、用户中心或角色授权后台。
 - OAuth2 Authorization Server。
 - OAuth2 Resource Server。
-- JWT / JWK 解析与验证。
+- JWT / JWK 解析和验证。
 - Spring Security `SecurityFilterChain`。
-- Servlet Filter。
-- WebFlux WebFilter。
-- Spring Security MethodSecurity。
-- ABAC。
-- DataScope。
-- 多租户权限模型。
+- Servlet Filter 或 WebFlux WebFilter。
+- Gateway 身份 Header 注入。
+- ABAC、DataScope 或多租户权限模型。
 
-OAuth2 / JWT / JWK 技术能力分别属于 `synapse-oauth2-core`、`synapse-oauth2-authorization-server-support`、`synapse-oauth2-resource-server-webmvc`、`synapse-oauth2-resource-server-webflux`。trusted-header Servlet Filter 属于 `synapse-security-webmvc`。完整 IAM / RBAC / ABAC 属于 Platform，不属于 framework。
+完整 IAM / RBAC / ABAC 属于 Synapse Platform。
 
-## 4. Maven 引入
-
-推荐先引入 BOM：
+## 5. Maven 引入
 
 ```xml
 <dependencyManagement>
@@ -65,40 +81,32 @@ OAuth2 / JWT / JWK 技术能力分别属于 `synapse-oauth2-core`、`synapse-oau
         </dependency>
     </dependencies>
 </dependencyManagement>
-```
 
-再引入 security 模块：
-
-```xml
 <dependency>
     <groupId>com.indigo.synapse</groupId>
     <artifactId>synapse-security</artifactId>
 </dependency>
 ```
 
-如果需要 trusted-header Filter，请引入 Servlet 适配模块：
+普通 Servlet Resource Server 还应引入：
 
 ```xml
 <dependency>
     <groupId>com.indigo.synapse</groupId>
-    <artifactId>synapse-security-webmvc</artifactId>
+    <artifactId>synapse-oauth2-resource-server-webmvc</artifactId>
 </dependency>
 ```
 
-如果还需要 Filter 阶段异常返回统一 JSON 响应，建议同时引入：
+Reactive Resource Server 引入：
 
 ```xml
 <dependency>
     <groupId>com.indigo.synapse</groupId>
-    <artifactId>synapse-webmvc</artifactId>
+    <artifactId>synapse-oauth2-resource-server-webflux</artifactId>
 </dependency>
 ```
 
-原因是 Filter 阶段异常需要 `synapse-webmvc` 的 `SynapseExceptionBridgeFilter` 统一桥接。
-
-## 5. 核心能力
-
-### 5.1 已认证主体
+## 6. 已认证主体
 
 核心类型：
 
@@ -118,14 +126,6 @@ roles
 permissions
 ```
 
-说明：
-
-- `userId` 和 `username` 必填。
-- `roles` 和 `permissions` 是当前请求携带的快照。
-- 不查询用户表。
-- 不根据角色推导权限。
-- 不包含菜单、组织、数据权限规则。
-
 客户端主体字段：
 
 ```text
@@ -135,111 +135,36 @@ tenantId
 permissions
 ```
 
-说明：
+约束：
 
-- `AuthenticatedClient` 表示服务客户端，不伪装成用户。
-- CLIENT 主体同步到 `OperationContext` 时映射为 `OperationActorType.SERVICE`。
+- `AuthenticatedClient` 表示客户端或服务主体，不伪装成用户。
+- roles 和 permissions 是当前 Token 中的安全快照。
+- 本模块不查询用户、角色或权限数据源。
+- CLIENT 同步到 `OperationContext` 时映射为 `OperationActorType.SERVICE`。
 - roles / permissions 不进入 `OperationContext`。
 
-### 5.2 SecurityContext
-
-核心类型：
+## 7. SecurityContext
 
 ```java
-SecurityContext
-```
-
-常用方法：
-
-```java
-import com.indigo.synapse.security.context.SecurityContext;
 AuthenticatedUser user = SecurityContext.currentUser()
         .orElseThrow();
-
 ```
-SecurityContext 是面向业务代码的只读门面。
 
-当前认证主体只能由 Synapse Framework 的可信认证适配器绑定。
-业务代码不得直接调用 com.indigo.synapse.security.context.internal
-包中的 Binder、State 或 Scope。
-设置主体后，security 会把安全主体单向适配为 core 的 `OperationContext`。
+`SecurityContext` 是面向业务代码的只读门面。
+
+认证主体只能由 Framework 的认证适配器绑定。业务代码不得直接调用 `com.indigo.synapse.security.context.internal` 包中的 Binder、State 或 Scope。
+
+安全主体会单向适配为 core `OperationContext`：
 
 ```text
-AuthenticatedUser
-AuthenticatedClient
+AuthenticatedUser / AuthenticatedClient
   -> OperationActor
   -> OperationContext
 ```
 
-这样 data、audit、mq 可以通过 `OperationContextProvider` 读取当前操作人，而不需要依赖 security。
+这样 data、audit、mq 可以通过 `OperationContextProvider` 读取当前操作人，不需要依赖 security。
 
-### 5.3 trusted-header 契约
-
-核心类型：
-
-```java
-SecurityHeaders
-TrustedHeaderPrincipal
-TrustedHeaderAuthenticatedUserResolver
-TrustedHeaderCanonicalizer
-TrustedHeaderSignatureVerifier
-TrustedHeaderTimestampValidator
-```
-
-`TrustedHeaderAuthenticationFilter` 位于 `synapse-security-webmvc`，不在 `synapse-security` 核心模块。
-
-Header 名称：
-
-```text
-X-Synapse-User-Id
-X-Synapse-Username
-X-Synapse-Tenant-Id
-X-Synapse-Roles
-X-Synapse-Permissions
-X-Synapse-Trace-Id
-X-Synapse-Request-Id
-X-Synapse-Source
-X-Synapse-Signature
-X-Synapse-Timestamp
-X-Synapse-Nonce
-```
-
-最小必填：
-
-```text
-X-Synapse-User-Id
-X-Synapse-Username
-X-Synapse-Timestamp
-```
-
-如果开启签名校验，还必须提供：
-
-```text
-X-Synapse-Signature
-```
-
-### 5.4 trusted-header 签名
-
-签名算法：
-
-```text
-HmacSHA256 + Base64
-```
-
-签名内容：
-
-- 固定 Header 顺序。
-- 缺失字段按空字符串处理。
-- 不包含 `X-Synapse-Signature` 本身。
-
-注意：
-
-- 签名只降低 Header 被伪造的风险。
-- 不替代网络隔离。
-- 不替代 Gateway 访问控制。
-- 不替代 nonce 存储。
-
-### 5.5 权限检查
+## 8. 权限检查
 
 核心类型：
 
@@ -258,20 +183,11 @@ AuthenticatedUser user = permissionChecker.requireUser();
 
 默认行为：
 
-- 没有用户：抛出 `SynapseAuthenticationException(SECURITY_UNAUTHENTICATED)`。
+- 没有认证主体：抛出 `SynapseAuthenticationException(SECURITY_UNAUTHENTICATED)`。
 - 没有权限：抛出 `SynapseAccessDeniedException(SECURITY_PERMISSION_DENIED)`。
 - 空权限：`require` 抛出 `IllegalArgumentException`，`has` 返回 false。
 
-### 5.6 声明式权限
-
-核心类型：
-
-```java
-@RequirePermission
-RequirePermissionAspect
-```
-
-示例：
+## 9. 声明式权限
 
 ```java
 @RequirePermission("sample:read")
@@ -285,15 +201,9 @@ public SampleDetail getSample(String id) {
 - 方法级注解优先于类型级注解。
 - AOP 只把注解转换为 `PermissionChecker.require(...)`。
 - AOP 不是唯一安全边界。
-- MQ / Task / Async 场景推荐显式调用 `PermissionChecker`。
+- MQ、Task、Async 场景推荐显式调用 `PermissionChecker`。
 
-### 5.7 密码编码器
-
-核心类型：
-
-```java
-SynapsePasswordEncoderFactory
-```
+## 10. 密码编码器
 
 默认自动配置：
 
@@ -303,84 +213,28 @@ PasswordEncoder -> BCryptPasswordEncoder
 
 该能力只依赖 `spring-security-crypto`，不引入 `spring-security-web`。
 
-## 6. 快速使用
-
-### 6.1 开启 trusted-header 协议校验
-
-```yaml
-synapse:
-  security:
-    trusted-header:
-      enabled: true
-      signature-enabled: true
-      secret: your-shared-secret
-      timestamp-tolerance: 300s
-      fail-fast: true
-```
-
-说明：以上配置属于 trusted-header 协议组件。Servlet Filter 执行入口位于 `synapse-security-webmvc`。
-
-Gateway / IAM 需要注入 Header：
-
-```text
-X-Synapse-User-Id: 10001
-X-Synapse-Username: zhangsan
-X-Synapse-Permissions: sample:read,sample:write
-X-Synapse-Timestamp: 1710000000000
-X-Synapse-Nonce: random-value
-X-Synapse-Signature: base64-hmac-sha256
-```
-
-### 6.2 在业务代码中读取当前用户
-
-```java
-AuthenticatedUser user = SecurityContext.currentUser()
-        .orElseThrow(() -> new SynapseAuthenticationException());
-```
-SecurityContext 是业务只读门面。认证主体只能由 Synapse Framework 的可信认证适配器绑定，业务代码不得直接调用 context.internal 包中的生命周期 API。
-更推荐通过 `PermissionChecker` 获取：
-
-```java
-AuthenticatedUser user = permissionChecker.requireUser();
-```
-
-### 6.3 显式权限检查
-
-```java
-permissionChecker.require("sample:read");
-```
-
-### 6.4 声明式权限检查
-
-```java
-@RequirePermission("sample:read")
-public SampleDetail detail(String id) {
-    return sampleService.detail(id);
-}
-```
-
-## 7. 扩展方式
-
-### 7.1 替换 PermissionChecker
-
-业务系统可以提供自定义 Bean：
+自定义 Bean 会覆盖默认 Bean：
 
 ```java
 @Bean
-PermissionChecker permissionChecker() {
-    return new CustomPermissionChecker();
+PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder(12);
 }
 ```
 
-适用场景：
+## 11. 配置项
 
-- 从 IAM 服务远程校验权限。
-- 引入角色到权限的映射。
-- 引入 ABAC / DataScope 前置判断。
+前缀：
 
-注意：这属于业务系统或平台服务扩展，不应反向写入 framework。
+```yaml
+synapse.security.permission
+```
 
-### 7.2 关闭注解权限适配
+| 配置 | 默认值 | 说明 |
+| --- | --- | --- |
+| `annotation-enabled` | `true` | 是否启用 `@RequirePermission` AOP 适配 |
+
+关闭注解权限适配：
 
 ```yaml
 synapse:
@@ -391,107 +245,27 @@ synapse:
 
 关闭后仍可显式调用 `PermissionChecker`。
 
-### 7.3 自定义 PasswordEncoder
+## 12. 扩展 PermissionChecker
+
+业务系统可以提供自定义 Bean：
 
 ```java
 @Bean
-PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder(12);
+PermissionChecker permissionChecker() {
+    return new CustomPermissionChecker();
 }
 ```
 
-用户 Bean 会覆盖默认 Bean。
+可以用于远程 IAM 权限校验、角色到权限映射或业务侧 ABAC 前置判断，但这些业务规则不应反向写入 Framework。
 
-## 8. 配置项
+## 13. 注意事项
 
-### 8.1 trusted-header
+- `synapse-security` 不处理用户名密码登录、不签发 Token、不维护 Session。
+- 默认 `PermissionChecker` 只检查当前主体快照中的 permissions。
+- `@RequirePermission` 只适合 Spring Bean 方法。
+- 异步任务不能假设 ThreadLocal 自动存在，应显式传播 `OperationContextSnapshot`。
+- `OperationContext` 不承载角色和权限。
 
-前缀：
+## 14. Configuration Metadata
 
-```yaml
-synapse.security.trusted-header
-```
-
-配置项：
-
-| 配置 | 默认值 | 说明 |
-| --- | --- | --- |
-| `enabled` | `false` | 是否启用 trusted-header 协议校验；Filter 装配由 `synapse-security-webmvc` 承担 |
-| `signature-enabled` | `true` | 是否启用 HMAC 签名校验 |
-| `secret` | 无 | HMAC 共享密钥；签名开启时必填 |
-| `timestamp-tolerance` | `300s` | 时间戳容忍窗口 |
-| `fail-fast` | `true` | 认证失败时是否直接抛出异常 |
-
-### 8.2 permission
-
-前缀：
-
-```yaml
-synapse.security.permission
-```
-
-配置项：
-
-| 配置 | 默认值 | 说明 |
-| --- | --- | --- |
-| `annotation-enabled` | `true` | 是否启用 `@RequirePermission` AOP 适配 |
-
-## 9. 边界与注意事项
-
-### 9.1 trusted-header 只能来自可信入口
-
-业务服务不能直接信任公网客户端传入的 `X-Synapse-*` Header。
-
-必须保证：
-
-- Header 由 Gateway / IAM 注入。
-- 下游服务不直接暴露给不可信客户端。
-- 签名密钥不泄露。
-
-### 9.2 security 不做登录
-
-`synapse-security` 不处理用户名密码登录、不签发 token、不维护 session。
-
-### 9.3 security 不做权限数据加载
-
-默认 `PermissionChecker` 只检查当前安全主体快照中的 `permissions`。
-
-权限数据如何加载，由 Gateway / IAM / 业务系统决定。
-
-### 9.4 AOP 不是最终安全边界
-
-`@RequirePermission` 只适合 Spring Bean 方法。对于 MQ、Task、Async、内部调用，推荐显式调用：
-
-```java
-permissionChecker.require("sample:read");
-```
-
-### 9.5 OperationContext 不承载角色权限
-
-security 会把当前安全主体适配成 `OperationActor`，但不会把 roles / permissions 放入 `OperationContext`。
-
-## 10. 常见问题
-
-### Q1：为什么不用 Spring Security FilterChain？
-
-目标是轻量恢复可信身份上下文，不做完整认证体系。Resource Server 技术适配由 `synapse-oauth2-resource-server-webmvc` / `synapse-oauth2-resource-server-webflux` 承担；完整 IAM 属于 Platform。
-
-### Q2：为什么 trusted-header 默认关闭？
-
-避免业务系统只引入依赖后就强制拦截所有请求。必须显式配置开启。
-
-### Q3：没有 Gateway 可以直接用 trusted-header 吗？
-
-不建议。trusted-header 的前提是 Header 来自可信入口。没有 Gateway / IAM / 内网隔离时，Header 很容易被伪造。
-
-### Q4：权限码在哪里定义？
-
-业务系统或平台 IAM 定义。framework 只检查传入的字符串。
-
-### Q5：如何处理异步任务中的当前用户？
-
-异步任务不应依赖 ThreadLocal 自动存在。调用方需要显式传递 `OperationContextSnapshot`，或在任务入口手动建立 `SecurityContext` / `OperationContext`。
-
-## 11. Configuration Metadata
-
-`synapse-security` 发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，覆盖 `synapse.security.trusted-header.*` 和 `synapse.security.permission.*`。`secret` 等敏感配置只能说明用途和风险，不得写入真实示例值。
+`synapse-security` 发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，当前只公开 `synapse.security.permission.*` 配置。
