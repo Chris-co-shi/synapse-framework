@@ -1,10 +1,12 @@
 package com.indigo.synapse.oauth2.resource.webflux.jwt;
 
 import com.indigo.synapse.oauth2.core.jwt.SynapseJwtClaimNames;
+import com.indigo.synapse.oauth2.core.jwt.SynapsePrincipalType;
 import com.indigo.synapse.security.context.AuthenticatedClient;
 import com.indigo.synapse.security.context.AuthenticatedPrincipal;
 import com.indigo.synapse.security.context.AuthenticatedUser;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -24,7 +26,7 @@ public final class SynapseReactiveJwtAuthenticationConverter
         implements Converter<Jwt, Mono<AbstractAuthenticationToken>> {
 
     @Override
-    public Mono<AbstractAuthenticationToken> convert(Jwt jwt) {
+    public Mono<AbstractAuthenticationToken> convert(@NonNull Jwt jwt) {
         AuthenticatedPrincipal principal = principal(jwt);
         JwtAuthenticationToken authentication = new JwtAuthenticationToken(jwt, authorities(jwt), principal.principalId());
         authentication.setDetails(principal);
@@ -37,12 +39,12 @@ public final class SynapseReactiveJwtAuthenticationConverter
         Set<String> roles = strings(jwt, SynapseJwtClaimNames.ROLES);
         Set<String> permissions = strings(jwt, SynapseJwtClaimNames.PERMISSIONS);
 
-        if ("CLIENT".equals(principalType)) {
+        if (SynapsePrincipalType.CLIENT.name().equals(principalType)) {
             String clientId = required(jwt, SynapseJwtClaimNames.CLIENT_ID);
             return new AuthenticatedClient(clientId, clientId, tenantId, roles, permissions);
         }
 
-        if ("USER".equals(principalType)) {
+        if (SynapsePrincipalType.USER.name().equals(principalType)) {
             String userId = required(jwt, SynapseJwtClaimNames.SUBJECT);
             String username = jwt.getClaimAsString(SynapseJwtClaimNames.PREFERRED_USERNAME);
             return new AuthenticatedUser(

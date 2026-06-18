@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 class SynapseReactiveJwtAuthenticationConverterTest {
 
@@ -38,5 +39,26 @@ class SynapseReactiveJwtAuthenticationConverterTest {
                     assertThat(client.permissions()).containsExactly("message:send");
                 })
                 .verifyComplete();
+    }
+
+    @Test
+    void shouldRejectUnsupportedPrincipalType() {
+        SynapseReactiveJwtAuthenticationConverter converter =
+                new SynapseReactiveJwtAuthenticationConverter();
+
+        Jwt jwt = new Jwt(
+                "token",
+                Instant.parse("2027-06-17T00:00:00Z"),
+                Instant.parse("2027-06-17T01:00:00Z"),
+                Map.of("alg", "none"),
+                Map.of(
+                        SynapseJwtClaimNames.SUBJECT, "principal-1",
+                        SynapseJwtClaimNames.PRINCIPAL_TYPE, "SERVICE"
+                )
+        );
+
+        assertThatThrownBy(() -> converter.convert(jwt))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("unsupported principal_type");
     }
 }

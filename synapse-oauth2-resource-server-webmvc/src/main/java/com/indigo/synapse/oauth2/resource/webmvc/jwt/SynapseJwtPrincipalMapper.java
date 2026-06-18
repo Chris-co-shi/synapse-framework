@@ -1,13 +1,13 @@
 package com.indigo.synapse.oauth2.resource.webmvc.jwt;
 
+import com.indigo.synapse.oauth2.core.jwt.JwtClaimValues;
 import com.indigo.synapse.oauth2.core.jwt.SynapseJwtClaimNames;
+import com.indigo.synapse.oauth2.core.validation.JwtClaimAccessor;
 import com.indigo.synapse.security.context.AuthenticatedClient;
 import com.indigo.synapse.security.context.AuthenticatedPrincipal;
 import com.indigo.synapse.security.context.AuthenticatedUser;
 import org.springframework.security.oauth2.jwt.Jwt;
-
-import java.util.Collection;
-import java.util.LinkedHashSet;
+import com.indigo.synapse.oauth2.core.jwt.SynapsePrincipalType;
 import java.util.Set;
 
 /**
@@ -35,18 +35,26 @@ public final class SynapseJwtPrincipalMapper {
      * @throws IllegalArgumentException 缺少必填 claim，或 principal_type 不受支持
      */
     public AuthenticatedPrincipal map(Jwt jwt) {
-        String principalType = required(jwt, SynapseJwtClaimNames.PRINCIPAL_TYPE);
+        JwtClaimAccessor claims = new SpringJwtClaimAccessor(jwt);
+        String principalType = JwtClaimValues.requiredString(claims,
+                SynapseJwtClaimNames.PRINCIPAL_TYPE);
         String tenantId = jwt.getClaimAsString(SynapseJwtClaimNames.TENANT_ID);
-        Set<String> roles = strings(jwt, SynapseJwtClaimNames.ROLES);
-        Set<String> permissions = strings(jwt, SynapseJwtClaimNames.PERMISSIONS);
+        Set<String> roles = JwtClaimValues.strings(
+                claims,
+                SynapseJwtClaimNames.ROLES
+        );
+        Set<String> permissions = JwtClaimValues.strings(
+                claims,
+                SynapseJwtClaimNames.PERMISSIONS
+        );
 
-        if ("CLIENT".equals(principalType)) {
-            String clientId = required(jwt, SynapseJwtClaimNames.CLIENT_ID);
+        if (SynapsePrincipalType.CLIENT.name().equals(principalType)) {
+            String clientId = JwtClaimValues.requiredString(claims, SynapseJwtClaimNames.CLIENT_ID);
             return new AuthenticatedClient(clientId, clientId, tenantId, roles, permissions);
         }
 
-        if ("USER".equals(principalType)) {
-            String userId = required(jwt, SynapseJwtClaimNames.SUBJECT);
+        if (SynapsePrincipalType.USER.name().equals(principalType)) {
+            String userId = JwtClaimValues.requiredString(claims, SynapseJwtClaimNames.SUBJECT);
             String username = jwt.getClaimAsString(SynapseJwtClaimNames.PREFERRED_USERNAME);
             return new AuthenticatedUser(
                     userId,
@@ -58,43 +66,5 @@ public final class SynapseJwtPrincipalMapper {
         }
 
         throw new IllegalArgumentException("unsupported principal_type: " + principalType);
-    }
-
-    /**
-     * 读取必填字符串 claim，并在协议数据不完整时尽早失败。
-     */
-    private static String required(Jwt jwt, String claim) {
-        String value = jwt.getClaimAsString(claim);
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(claim + " must not be blank");
-        }
-        return value;
-    }
-
-    /**
-     * 兼容空格分隔字符串和字符串集合两种 claim 表达，并保持输入顺序及去重语义。
-     *
-     * <p>不支持的 claim 类型按空集合处理，避免把任意对象隐式转换成权限标识。</p>
-     */
-    @SuppressWarnings("unchecked")
-    private static Set<String> strings(Jwt jwt, String claim) {
-        Object value = jwt.getClaims().get(claim);
-        if (value instanceof String string) {
-            Set<String> values = new LinkedHashSet<>();
-            for (String part : string.split(" ")) {
-                if (!part.isBlank()) {
-                    values.add(part.trim());
-                }
-            }
-            return values;
-        }
-        if (value instanceof Collection<?> collection) {
-            return collection.stream()
-                    .filter(String.class::isInstance)
-                    .map(String.class::cast)
-                    .filter(part -> !part.isBlank())
-                    .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
-        }
-        return Set.of();
     }
 }

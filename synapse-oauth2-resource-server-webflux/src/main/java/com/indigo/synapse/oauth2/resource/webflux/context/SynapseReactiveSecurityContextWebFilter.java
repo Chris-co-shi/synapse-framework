@@ -3,6 +3,7 @@ package com.indigo.synapse.oauth2.resource.webflux.context;
 import com.indigo.synapse.core.context.OperationContext;
 import com.indigo.synapse.security.context.AuthenticatedPrincipal;
 import com.indigo.synapse.security.context.internal.SecurityOperationContextAdapter;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -19,7 +20,7 @@ import java.util.Optional;
 public final class SynapseReactiveSecurityContextWebFilter implements WebFilter {
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+    public Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         return ReactiveSecurityContextHolder.getContext()
                 .map(securityContext -> Optional.ofNullable(
                         principal(securityContext.getAuthentication())

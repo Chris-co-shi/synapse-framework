@@ -2,7 +2,7 @@ package com.indigo.synapse.oauth2.core.validation;
 
 import com.indigo.synapse.oauth2.core.exception.OAuth2ErrorCode;
 import com.indigo.synapse.oauth2.core.jwt.SynapseJwtClaimNames;
-
+import com.indigo.synapse.oauth2.core.jwt.SynapsePrincipalType;
 import java.util.Set;
 
 /**
@@ -10,9 +10,10 @@ import java.util.Set;
  */
 public final class PrincipalTypeClaimValidator implements SynapseJwtValidator {
 
-    public static final String USER = "USER";
-    public static final String CLIENT = "CLIENT";
-    private static final Set<String> ACCEPTED_TYPES = Set.of(USER, CLIENT);
+    private static final Set<String> ACCEPTED_TYPES = Set.of(
+            SynapsePrincipalType.USER.name(),
+            SynapsePrincipalType.CLIENT.name()
+    );
 
     @Override
     public JwtValidationResult validate(JwtClaimAccessor claims) {
