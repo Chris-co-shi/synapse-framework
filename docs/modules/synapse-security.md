@@ -153,13 +153,15 @@ SecurityContext
 
 ```java
 import com.indigo.synapse.security.context.SecurityContext;
-import com.indigo.synapse.security.context.internal.SecurityContextScope;
-try (SecurityContextScope ignored =
-        SecurityContextBinder.bind(authenticatedUser)) {
-        // business
-        }
-```
+AuthenticatedUser user = SecurityContext.currentUser()
+        .orElseThrow();
 
+```
+SecurityContext 是面向业务代码的只读门面。
+
+当前认证主体只能由 Synapse Framework 的可信认证适配器绑定。
+业务代码不得直接调用 com.indigo.synapse.security.context.internal
+包中的 Binder、State 或 Scope。
 设置主体后，security 会把安全主体单向适配为 core 的 `OperationContext`。
 
 ```text
@@ -335,7 +337,7 @@ X-Synapse-Signature: base64-hmac-sha256
 AuthenticatedUser user = SecurityContext.currentUser()
         .orElseThrow(() -> new SynapseAuthenticationException());
 ```
-
+SecurityContext 是业务只读门面。认证主体只能由 Synapse Framework 的可信认证适配器绑定，业务代码不得直接调用 context.internal 包中的生命周期 API。
 更推荐通过 `PermissionChecker` 获取：
 
 ```java

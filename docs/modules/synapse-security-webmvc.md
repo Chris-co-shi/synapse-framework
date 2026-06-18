@@ -41,7 +41,8 @@ synapse:
       fail-fast: true
 ```
 
-Filter 使用 `SecurityContextBinder.bind(...)`，请求完成或异常时会恢复进入前的 `SecurityContext` 和 `OperationContext`。
+Filter 会在内部建立安全上下文作用域，并在请求正常结束或发生异常时，
+恢复进入 Filter 前的 SecurityContext 和 OperationContext。
 
 ## 5. 边界
 
