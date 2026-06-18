@@ -18,7 +18,6 @@ import java.util.Optional;
 public final class SecurityContext {
 
     private static final ThreadLocal<AuthenticatedPrincipal> CURRENT_PRINCIPAL = new ThreadLocal<>();
-    private static final ThreadLocal<SecurityContextScope> CURRENT_SCOPE = new ThreadLocal<>();
 
     private SecurityContext() {
     }
