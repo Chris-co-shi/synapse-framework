@@ -12,8 +12,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SecurityContextTest {
 
@@ -112,7 +111,7 @@ class SecurityContextTest {
     }
 
     @Test
-    void shouldRestoreLexicalScopeAfterManagedSetAndClear() {
+    void shouldRestoreThreeNestedSecurityScopes() {
         AuthenticatedUser outerUser = new AuthenticatedUser(
                 "user-a",
                 "outer-user",
@@ -176,6 +175,72 @@ class SecurityContextTest {
 
         assertTrue(SecurityContext.currentPrincipal().isEmpty());
         assertTrue(OperationContextHolder.current().isEmpty());
+    }
+
+
+    @Test
+    void shouldRestoreContextsWhenScopedActionThrows() {
+        OperationContext jobContext = jobContext();
+        AuthenticatedUser user = new AuthenticatedUser(
+                "user-1",
+                "admin",
+                "tenant-a",
+                Set.of("ADMIN"),
+                Set.of("system:user:list")
+        );
+
+        try (OperationContextScope jobScope =
+                     OperationContextHolder.scope(jobContext)) {
+
+            assertThrows(IllegalStateException.class, () -> {
+                try (SecurityContextScope userScope =
+                             SecurityContext.openScope(user)) {
+                    throw new IllegalStateException("failed");
+                }
+            });
+
+            assertTrue(SecurityContext.currentPrincipal().isEmpty());
+            assertEquals(jobContext, OperationContextHolder.requireCurrent());
+        }
+    }
+
+    @Test
+    void shouldAllowSecurityScopeToBeClosedRepeatedly() {
+        AuthenticatedUser user = new AuthenticatedUser(
+                "user-1",
+                "admin",
+                "tenant-a",
+                Set.of(),
+                Set.of()
+        );
+
+        SecurityContextScope scope = SecurityContext.openScope(user);
+
+        scope.close();
+        scope.close();
+
+        assertTrue(SecurityContext.currentPrincipal().isEmpty());
+        assertTrue(OperationContextHolder.current().isEmpty());
+    }
+
+    @Test
+    void shouldNotCopyUserRolesAndPermissionsToOperationContext() {
+        AuthenticatedUser user = new AuthenticatedUser(
+                "user-1",
+                "admin",
+                "tenant-a",
+                Set.of("ADMIN"),
+                Set.of("system:user:list")
+        );
+
+        try (SecurityContextScope ignored =
+                     SecurityContext.openScope(user)) {
+
+            OperationContext operationContext =
+                    OperationContextHolder.requireCurrent();
+
+            assertTrue(operationContext.actor().attributes().isEmpty());
+        }
     }
 
     private static OperationContext jobContext() {

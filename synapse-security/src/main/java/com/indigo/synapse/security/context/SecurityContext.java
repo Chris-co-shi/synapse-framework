@@ -24,7 +24,10 @@ public final class SecurityContext {
     /**
      * 打开当前已认证主体作用域，并同步建立 OperationContext 作用域。
      *
-     * @param principal 已认证主体；传入 null 时清理上下文
+     * <p>传入 null 时会建立临时空安全主体作用域；
+     * 作用域关闭后恢复进入前的 SecurityContext 和 OperationContext。</p>
+     *
+     * @param principal 已认证主体；允许为 null
      * @return 可关闭作用域
      */
     public static SecurityContextScope openScope(AuthenticatedPrincipal principal) {

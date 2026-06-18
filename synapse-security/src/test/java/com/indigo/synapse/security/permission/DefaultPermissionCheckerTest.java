@@ -9,10 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class DefaultPermissionCheckerTest {
 
@@ -31,6 +28,28 @@ class DefaultPermissionCheckerTest {
         try (var ignored =
                      SecurityContext.openScope(user("system:user:list"))) {
             assertFalse(permissionChecker.has("system:user:create"));
+        }
+    }
+
+    @Test
+    void shouldReturnFalseForBlankPermission() {
+        try (var ignored =
+                     SecurityContext.openScope(user("system:user:create"))) {
+
+            assertFalse(permissionChecker.has(null));
+            assertFalse(permissionChecker.has(""));
+            assertFalse(permissionChecker.has(" "));
+        }
+    }
+
+    @Test
+    void shouldPassRequireWhenCurrentUserHasPermission() {
+        try (var ignored =
+                     SecurityContext.openScope(user("system:user:create"))) {
+
+            assertDoesNotThrow(
+                    () -> permissionChecker.require("system:user:create")
+            );
         }
     }
 
