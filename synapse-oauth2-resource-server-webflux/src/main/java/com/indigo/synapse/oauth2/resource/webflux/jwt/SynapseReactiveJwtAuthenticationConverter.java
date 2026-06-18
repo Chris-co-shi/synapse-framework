@@ -1,7 +1,9 @@
 package com.indigo.synapse.oauth2.resource.webflux.jwt;
 
+import com.indigo.synapse.oauth2.core.jwt.JwtClaimValues;
 import com.indigo.synapse.oauth2.core.jwt.SynapseJwtClaimNames;
 import com.indigo.synapse.oauth2.core.jwt.SynapsePrincipalType;
+import com.indigo.synapse.oauth2.core.validation.JwtClaimAccessor;
 import com.indigo.synapse.security.context.AuthenticatedClient;
 import com.indigo.synapse.security.context.AuthenticatedPrincipal;
 import com.indigo.synapse.security.context.AuthenticatedUser;
@@ -15,37 +17,47 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 /**
  * Reactive JWT 到 Authentication 转换器。
+ *
+ * <p>JWT claim 的必填校验和字符串集合规范化统一委托给 OAuth2 Core，
+ * 避免 Servlet 与 Reactive Resource Server 产生不同的协议解释。</p>
  */
 public final class SynapseReactiveJwtAuthenticationConverter
         implements Converter<Jwt, Mono<AbstractAuthenticationToken>> {
 
     @Override
     public Mono<AbstractAuthenticationToken> convert(@NonNull Jwt jwt) {
-        AuthenticatedPrincipal principal = principal(jwt);
-        JwtAuthenticationToken authentication = new JwtAuthenticationToken(jwt, authorities(jwt), principal.principalId());
+        JwtClaimAccessor claims = new SpringJwtClaimAccessor(jwt);
+        AuthenticatedPrincipal principal = principal(jwt, claims);
+        JwtAuthenticationToken authentication = new JwtAuthenticationToken(
+                jwt,
+                authorities(claims),
+                principal.principalId()
+        );
         authentication.setDetails(principal);
         return Mono.just(authentication);
     }
 
-    private static AuthenticatedPrincipal principal(Jwt jwt) {
-        String principalType = required(jwt, SynapseJwtClaimNames.PRINCIPAL_TYPE);
+    private static AuthenticatedPrincipal principal(Jwt jwt, JwtClaimAccessor claims) {
+        String principalType = JwtClaimValues.requiredString(
+                claims,
+                SynapseJwtClaimNames.PRINCIPAL_TYPE
+        );
         String tenantId = jwt.getClaimAsString(SynapseJwtClaimNames.TENANT_ID);
-        Set<String> roles = strings(jwt, SynapseJwtClaimNames.ROLES);
-        Set<String> permissions = strings(jwt, SynapseJwtClaimNames.PERMISSIONS);
+        Set<String> roles = JwtClaimValues.strings(claims, SynapseJwtClaimNames.ROLES);
+        Set<String> permissions = JwtClaimValues.strings(claims, SynapseJwtClaimNames.PERMISSIONS);
 
         if (SynapsePrincipalType.CLIENT.name().equals(principalType)) {
-            String clientId = required(jwt, SynapseJwtClaimNames.CLIENT_ID);
+            String clientId = JwtClaimValues.requiredString(claims, SynapseJwtClaimNames.CLIENT_ID);
             return new AuthenticatedClient(clientId, clientId, tenantId, roles, permissions);
         }
 
         if (SynapsePrincipalType.USER.name().equals(principalType)) {
-            String userId = required(jwt, SynapseJwtClaimNames.SUBJECT);
+            String userId = JwtClaimValues.requiredString(claims, SynapseJwtClaimNames.SUBJECT);
             String username = jwt.getClaimAsString(SynapseJwtClaimNames.PREFERRED_USERNAME);
             return new AuthenticatedUser(
                     userId,
@@ -59,47 +71,24 @@ public final class SynapseReactiveJwtAuthenticationConverter
         throw new IllegalArgumentException("unsupported principal_type: " + principalType);
     }
 
-    private static Collection<SimpleGrantedAuthority> authorities(Jwt jwt) {
+    private static Collection<SimpleGrantedAuthority> authorities(JwtClaimAccessor claims) {
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        strings(jwt, SynapseJwtClaimNames.SCOPE).forEach(scope -> add(authorities, "SCOPE_", scope));
-        strings(jwt, SynapseJwtClaimNames.ROLES).forEach(role -> add(authorities, "ROLE_", role));
-        strings(jwt, SynapseJwtClaimNames.PERMISSIONS).forEach(permission -> add(authorities, "PERM_", permission));
-        return authorities;
+        JwtClaimValues.strings(claims, SynapseJwtClaimNames.SCOPE)
+                .forEach(scope -> add(authorities, "SCOPE_", scope));
+        JwtClaimValues.strings(claims, SynapseJwtClaimNames.ROLES)
+                .forEach(role -> add(authorities, "ROLE_", role));
+        JwtClaimValues.strings(claims, SynapseJwtClaimNames.PERMISSIONS)
+                .forEach(permission -> add(authorities, "PERM_", permission));
+        return List.copyOf(authorities);
     }
 
     private static void add(List<SimpleGrantedAuthority> authorities, String prefix, String value) {
-        if (value != null && !value.isBlank()) {
-            String trimmed = value.trim();
-            authorities.add(new SimpleGrantedAuthority(trimmed.startsWith(prefix) ? trimmed : prefix + trimmed));
-        }
-    }
-
-    private static String required(Jwt jwt, String claim) {
-        String value = jwt.getClaimAsString(claim);
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(claim + " must not be blank");
+            return;
         }
-        return value;
-    }
-
-    private static Set<String> strings(Jwt jwt, String claim) {
-        Object value = jwt.getClaims().get(claim);
-        if (value instanceof String string) {
-            Set<String> values = new LinkedHashSet<>();
-            for (String part : string.split(" ")) {
-                if (!part.isBlank()) {
-                    values.add(part.trim());
-                }
-            }
-            return values;
-        }
-        if (value instanceof Collection<?> collection) {
-            return collection.stream()
-                    .filter(String.class::isInstance)
-                    .map(String.class::cast)
-                    .filter(part -> !part.isBlank())
-                    .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
-        }
-        return Set.of();
+        String trimmed = value.trim();
+        authorities.add(new SimpleGrantedAuthority(
+                trimmed.startsWith(prefix) ? trimmed : prefix + trimmed
+        ));
     }
 }
