@@ -4,6 +4,8 @@
 
 `synapse-security` 定义 Web 无关的认证主体、安全上下文和权限检查契约，使业务 Service、任务、MQ 和不同 Web 技术栈可以共享同一安全模型，而不直接依赖 Spring Security Web。
 
+认证主体不由本模块从 HTTP 请求中解析，而是由 OAuth2 Resource Server 等专用适配模块在完成 Bearer Token 验证后建立。
+
 ## 2. 边界
 
 负责：
@@ -12,13 +14,13 @@
 - ThreadLocal `SecurityContext` 与可关闭 Scope。
 - 安全主体到 core `OperationContext` 的单向适配。
 - `PermissionChecker` 与 `@RequirePermission` 轻量适配。
-- trusted-header 的纯协议对象、签名和时间戳验证。
 - 密码编码器工厂。
 
 不负责：
 
 - 登录、用户表、角色菜单后台。
 - JWT/JWK 解析和 OAuth2 Resource Server。
+- trusted-header 身份协议或身份 Header 解析。
 - Servlet Filter / WebFilter。
 - Spring Security FilterChain。
 - ABAC、DataScope 和多租户授权规则。
@@ -61,14 +63,10 @@ Service 层稳定权限入口：
 
 默认实现只检查当前主体 permissions 快照，不查询角色表。
 
-### 4.5 trusted-header 协议组件
-
-负责 canonicalize、HMAC、timestamp 和 Header 主体解析，但 Servlet 生命周期入口属于 `synapse-security-webmvc`。
-
 ## 5. 主链路
 
 ```text
-Trusted Header / OAuth2 adapter
+Validated OAuth2 Resource Server adapter
   -> AuthenticatedPrincipal
   -> SecurityContextBinder.bind
   -> SecurityOperationContextAdapter
@@ -79,9 +77,14 @@ Trusted Header / OAuth2 adapter
 
 ## 6. 身份权威边界
 
-同一个请求应只有一个权威身份来源。trusted-header 与 OAuth2 Resource Server 同时启用可能产生主体覆盖或歧义，因此默认应 fail-fast，除非消费方明确设计优先级。
+同一个请求只允许一个身份权威来源：经过 Resource Server 验证的 Bearer Token。
 
-trusted-header 只适用于网络隔离和入口控制已经建立的可信链路；HMAC 不能替代完整网络和重放防护。
+固定规则：
+
+- Gateway 可以执行入口验证，但下游服务仍需独立验证 Token。
+- Gateway 与下游只传播 Bearer Token。
+- 用户、角色、权限等 Header 不能作为认证依据。
+- `synapse-security` 不提供第二套身份恢复协议。
 
 ## 7. 生命周期与失败边界
 
@@ -95,7 +98,7 @@ trusted-header 只适用于网络隔离和入口控制已经建立的可信链�
 ## 8. 扩展原则
 
 - ABAC / 远程权限校验：替换 `PermissionChecker`。
-- 自定义 Web 入口：将外部身份转换为 `AuthenticatedPrincipal` 后打开 scope。
+- Web 认证入口属于 OAuth2 Resource Server 适配模块，不在 security 中新增 Filter。
 - security 不向 data 暴露 LoginUser；data 只读取 OperationContext。
 - 新主体类型必须同步定义其 OperationActor 映射和审计语义。
 
@@ -110,7 +113,6 @@ AuthenticatedPrincipal
   -> PermissionChecker
   -> DefaultPermissionChecker
   -> RequirePermissionAspect
-  -> trusted-header protocol classes
   -> AutoConfiguration
 ```
 
@@ -129,4 +131,5 @@ AuthenticatedPrincipal
 - 是否忘记关闭 ThreadLocal scope。
 - 是否让 data 反向依赖 security。
 - 是否把 AOP 当成唯一安全边界。
-- trusted-header 是否被描述为可替代 Bearer Token。
+- 是否重新引入用户、角色或权限身份 Header。
+- 是否让 security 自己解析或验证 Bearer Token。
