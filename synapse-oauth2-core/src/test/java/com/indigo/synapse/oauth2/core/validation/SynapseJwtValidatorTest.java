@@ -2,6 +2,7 @@ package com.indigo.synapse.oauth2.core.validation;
 
 import com.indigo.synapse.oauth2.core.exception.OAuth2ErrorCode;
 import com.indigo.synapse.oauth2.core.jwt.SynapseJwtClaimNames;
+import com.indigo.synapse.oauth2.core.jwt.SynapsePrincipalType;
 import com.indigo.synapse.oauth2.core.jwt.SynapseTokenType;
 import com.indigo.synapse.oauth2.core.token.NoopTokenDenylistPort;
 import org.junit.jupiter.api.Test;
@@ -18,8 +19,8 @@ class SynapseJwtValidatorTest {
     @Test
     void shouldValidateTokenTypeAndPrincipalType() {
         JwtClaimAccessor claims = claims(Map.of(
-                SynapseJwtClaimNames.TOKEN_TYPE, "ACCESS_TOKEN",
-                SynapseJwtClaimNames.PRINCIPAL_TYPE, "CLIENT",
+                SynapseJwtClaimNames.TOKEN_TYPE, SynapseTokenType.ACCESS_TOKEN.name(),
+                SynapseJwtClaimNames.PRINCIPAL_TYPE, SynapsePrincipalType.CLIENT.name(),
                 SynapseJwtClaimNames.SUBJECT, "client-a",
                 SynapseJwtClaimNames.CLIENT_ID, "client-a"
         ));
@@ -46,7 +47,7 @@ class SynapseJwtValidatorTest {
     @Test
     void shouldRejectMissingClientIdForClientPrincipal() {
         JwtValidationResult result = new PrincipalClaimsValidator().validate(claims(Map.of(
-                SynapseJwtClaimNames.PRINCIPAL_TYPE, "CLIENT",
+                SynapseJwtClaimNames.PRINCIPAL_TYPE, SynapsePrincipalType.CLIENT.name(),
                 SynapseJwtClaimNames.SUBJECT, "client-a"
         )));
 
