@@ -45,7 +45,6 @@ synapse-i18n
 synapse-data
 synapse-cache
 synapse-security
-synapse-security-webmvc
 synapse-oauth2-core
 synapse-oauth2-authorization-server-support
 synapse-oauth2-resource-server-webmvc
@@ -61,6 +60,8 @@ synapse-mq
 - `synapse-message` 已更名为 `synapse-mq`，不得继续使用旧名称描述正式模块。
 - `synapse-config`、`synapse-i18n`、`synapse-time` 已在 TASK-205 进入 reactor，必须按当前已实现技术模块描述。
 - `synapse-oauth2` 已拆分为 `synapse-oauth2-core`、`synapse-oauth2-authorization-server-support`、`synapse-oauth2-resource-server-webmvc`、`synapse-oauth2-resource-server-webflux`，不得继续作为正式 reactor module 描述。
+- `synapse-security-webmvc` 与 trusted-header 身份协议已移除；认证主体只能由 OAuth2 Resource Server 等验证 Bearer Token 的专用适配模块建立。
+- Gateway 与下游服务之间只传播 Bearer Token，不传播可直接信任的用户、角色或权限 Header；下游服务必须独立验证 token。
 - `synapse-task`、`synapse-tenant`、`synapse-data-permission` 若存在目录，也只视为暂存或历史残留，不得擅自加入 reactor。
 - 本项目不创建 `synapse-starter-*`，不创建 starter 聚合包，不创建 demo / example / sample application。
 
@@ -139,8 +140,7 @@ skills/<module-name>/SKILL.md
 | `synapse-i18n` | 国际化消息解析抽象 | i18n-resource-center / 翻译后台 |
 | `synapse-data` | 数据层技术支撑 | 业务 Entity / Mapper / Repository / Service |
 | `synapse-cache` | 缓存、锁、限流、幂等基础设施 | 业务缓存规则 / 缓存管理后台 |
-| `synapse-security` | Web 无关安全主体、权限检查和安全上下文 | IAM / 登录认证 / 用户角色菜单管理 / Servlet Filter |
-| `synapse-security-webmvc` | trusted-header Servlet MVC 适配 | Spring Security FilterChain / OAuth2 / IAM |
+| `synapse-security` | Web 无关安全主体、权限检查和安全上下文 | IAM / 登录认证 / 用户角色菜单管理 / Web 认证入口 |
 | `synapse-oauth2-core` | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 | Web / Security / 签发私钥 / Resource Server |
 | `synapse-oauth2-authorization-server-support` | JWT 签发、RSAKey、JWKSource、JwtEncoder 技术支持 | 登录 / RegisteredClient / Authorization Code / IAM |
 | `synapse-oauth2-resource-server-webmvc` | Servlet OAuth2 Resource Server 技术适配 | 签发私钥 / Authorization Server / IAM |
