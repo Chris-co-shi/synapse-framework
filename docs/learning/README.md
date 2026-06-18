@@ -15,10 +15,11 @@
 | 顺序 | 文档 | 学习目标 |
 | --- | --- | --- |
 | 1 | [Framework 架构阅读指南](01-framework-architecture-reading-guide.md) | 建立整体模块地图、依赖方向和核心概念 |
-| 2 | [Security 与 OAuth2 请求链路](02-security-oauth2-request-flow.md) | 看懂 Bearer Token 到业务方法之间的完整认证链路 |
-| 3 | [总体架构设计](../02-总体架构设计.md) | 理解 Framework / Platform / Business 的职责边界 |
-| 4 | [核心链路设计](../03-核心链路设计.md) | 理解 OperationContext、Web、Security、Data、MQ 链路 |
-| 5 | [模块使用手册](../modules/README.md) | 按模块查看配置、扩展点和接入方式 |
+| 2 | [按模块设计文档](../design/modules/README.md) | 逐模块理解使命、边界、主链路、扩展点和源码阅读顺序 |
+| 3 | [Security 与 OAuth2 请求链路](02-security-oauth2-request-flow.md) | 看懂 Bearer Token 到业务方法之间的完整认证链路 |
+| 4 | [总体架构设计](../02-总体架构设计.md) | 理解 Framework / Platform / Business 的职责边界 |
+| 5 | [核心链路设计](../03-核心链路设计.md) | 理解 OperationContext、Web、Security、Data、MQ 链路 |
+| 6 | [模块使用手册](../modules/README.md) | 按模块查看配置、扩展点和接入方式 |
 
 ## 2. 每次阅读源码的固定方法
 
