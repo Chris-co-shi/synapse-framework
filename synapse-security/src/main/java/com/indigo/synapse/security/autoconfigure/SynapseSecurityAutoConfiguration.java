@@ -1,8 +1,5 @@
 package com.indigo.synapse.security.autoconfigure;
 
-import com.indigo.synapse.security.header.TrustedHeaderAuthenticatedUserResolver;
-import com.indigo.synapse.security.header.TrustedHeaderSignatureVerifier;
-import com.indigo.synapse.security.header.TrustedHeaderTimestampValidator;
 import com.indigo.synapse.security.password.SynapsePasswordEncoderFactory;
 import com.indigo.synapse.security.permission.DefaultPermissionChecker;
 import com.indigo.synapse.security.permission.PermissionChecker;
@@ -24,8 +21,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 /**
  * Security 模块自动配置。
  *
- * <p>本配置只提供轻量安全上下文、密码编码器、PermissionChecker、RequirePermission AOP 适配器和
- * trusted-header 协议组件。Servlet Filter 由 synapse-security-webmvc 提供。</p>
+ * <p>本配置只提供 Web 无关的密码编码器、PermissionChecker 和 RequirePermission AOP 适配器。
+ * 认证协议与 Web 请求入口由 OAuth2 Resource Server 等专用适配模块负责。</p>
  */
 @AutoConfiguration
 @EnableConfigurationProperties(SynapseSecurityProperties.class)
@@ -91,23 +88,5 @@ public class SynapseSecurityAutoConfiguration {
     public static RequirePermissionAspect requirePermissionAspect(
             ObjectProvider<PermissionChecker> permissionCheckerProvider) {
         return new RequirePermissionAspect(permissionCheckerProvider);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public TrustedHeaderAuthenticatedUserResolver trustedHeaderAuthenticatedUserResolver() {
-        return new TrustedHeaderAuthenticatedUserResolver();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public TrustedHeaderSignatureVerifier trustedHeaderSignatureVerifier() {
-        return new TrustedHeaderSignatureVerifier();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public TrustedHeaderTimestampValidator trustedHeaderTimestampValidator() {
-        return new TrustedHeaderTimestampValidator();
     }
 }
