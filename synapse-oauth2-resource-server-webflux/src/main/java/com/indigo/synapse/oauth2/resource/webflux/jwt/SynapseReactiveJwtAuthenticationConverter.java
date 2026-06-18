@@ -36,19 +36,25 @@ public final class SynapseReactiveJwtAuthenticationConverter
         String tenantId = jwt.getClaimAsString(SynapseJwtClaimNames.TENANT_ID);
         Set<String> roles = strings(jwt, SynapseJwtClaimNames.ROLES);
         Set<String> permissions = strings(jwt, SynapseJwtClaimNames.PERMISSIONS);
+
         if ("CLIENT".equals(principalType)) {
             String clientId = required(jwt, SynapseJwtClaimNames.CLIENT_ID);
             return new AuthenticatedClient(clientId, clientId, tenantId, roles, permissions);
         }
-        String userId = required(jwt, SynapseJwtClaimNames.SUBJECT);
-        String username = jwt.getClaimAsString(SynapseJwtClaimNames.PREFERRED_USERNAME);
-        return new AuthenticatedUser(
-                userId,
-                username == null || username.isBlank() ? userId : username,
-                tenantId,
-                roles,
-                permissions
-        );
+
+        if ("USER".equals(principalType)) {
+            String userId = required(jwt, SynapseJwtClaimNames.SUBJECT);
+            String username = jwt.getClaimAsString(SynapseJwtClaimNames.PREFERRED_USERNAME);
+            return new AuthenticatedUser(
+                    userId,
+                    username == null || username.isBlank() ? userId : username,
+                    tenantId,
+                    roles,
+                    permissions
+            );
+        }
+
+        throw new IllegalArgumentException("unsupported principal_type: " + principalType);
     }
 
     private static Collection<SimpleGrantedAuthority> authorities(Jwt jwt) {
