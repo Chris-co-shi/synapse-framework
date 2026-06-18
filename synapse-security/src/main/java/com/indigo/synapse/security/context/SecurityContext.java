@@ -2,7 +2,6 @@ package com.indigo.synapse.security.context;
 
 import com.indigo.synapse.core.context.OperationContext;
 import com.indigo.synapse.core.context.OperationContextHolder;
-import com.indigo.synapse.core.context.OperationContextScope;
 
 import java.util.Optional;
 
