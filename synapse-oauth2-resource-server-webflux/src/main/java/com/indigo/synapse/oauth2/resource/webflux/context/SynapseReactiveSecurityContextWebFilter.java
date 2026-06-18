@@ -11,6 +11,8 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
+
 /**
  * 将 Reactive Spring SecurityContext 桥接到 Synapse Reactor Context。
  */
@@ -19,21 +21,31 @@ public final class SynapseReactiveSecurityContextWebFilter implements WebFilter 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         return ReactiveSecurityContextHolder.getContext()
-                .map(org.springframework.security.core.context.SecurityContext::getAuthentication)
-                .flatMap(authentication -> Mono.justOrEmpty(principal(authentication)))
-                .flatMap(principal -> {
-                    OperationContext operationContext =
-                            SecurityOperationContextAdapter.toOperationContext(principal);
+                .map(securityContext -> Optional.ofNullable(
+                        principal(securityContext.getAuthentication())
+                ))
+                .defaultIfEmpty(Optional.empty())
+                .flatMap(optionalPrincipal -> optionalPrincipal
+                        .map(principal -> filterWithContext(exchange, chain, principal))
+                        .orElseGet(() -> chain.filter(exchange))
+                );
+    }
 
-                    return chain.filter(exchange)
-                            .contextWrite(context -> context
-                                    .put(SynapseReactiveSecurityContext.PRINCIPAL_KEY, principal)
-                                    .put(
-                                            SynapseReactiveOperationContext.OPERATION_CONTEXT_KEY,
-                                            operationContext
-                                    ));
-                })
-                .switchIfEmpty(chain.filter(exchange));
+    private Mono<Void> filterWithContext(
+            ServerWebExchange exchange,
+            WebFilterChain chain,
+            AuthenticatedPrincipal principal
+    ) {
+        OperationContext operationContext =
+                SecurityOperationContextAdapter.toOperationContext(principal);
+
+        return chain.filter(exchange)
+                .contextWrite(context -> context
+                        .put(SynapseReactiveSecurityContext.PRINCIPAL_KEY, principal)
+                        .put(
+                                SynapseReactiveOperationContext.OPERATION_CONTEXT_KEY,
+                                operationContext
+                        ));
     }
 
     private AuthenticatedPrincipal principal(Authentication authentication) {
