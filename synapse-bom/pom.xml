@@ -77,7 +77,6 @@
                 <version>3.0.2</version>
             </dependency>
 
-
             <!-- Synapse 一阶段内部模块版本。这里仅做版本管理，不产生传递依赖。 -->
             <dependency>
                 <groupId>com.indigo.synapse</groupId>
@@ -141,12 +140,6 @@
 
             <dependency>
                 <groupId>com.indigo.synapse</groupId>
-                <artifactId>synapse-security-webmvc</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.indigo.synapse</groupId>
                 <artifactId>synapse-oauth2-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -187,8 +180,6 @@
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
-
-
     </dependencyManagement>
 
     <!-- GitHub Packages 发布地址。正式发布到 Maven Central 前需要单独补充发布策略。 -->
