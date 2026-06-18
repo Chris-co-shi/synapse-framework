@@ -70,8 +70,8 @@ class SecurityContextApiBoundaryTest {
     }
 
     @Test
-    void shouldKeepOperationContextAdapterPackagePrivate() {
-        assertFalse(
+    void shouldExposeOnlyOperationContextConversionFromAdapter() {
+        assertTrue(
                 Modifier.isPublic(
                         SecurityOperationContextAdapter.class
                                 .getModifiers()
@@ -84,6 +84,39 @@ class SecurityContextApiBoundaryTest {
                                 .getModifiers()
                 )
         );
+
+        Set<String> publicStaticMethods =
+                Arrays.stream(
+                                SecurityOperationContextAdapter.class
+                                        .getDeclaredMethods()
+                        )
+                        .filter(method ->
+                                Modifier.isPublic(method.getModifiers()))
+                        .filter(method ->
+                                Modifier.isStatic(method.getModifiers()))
+                        .map(Method::getName)
+                        .collect(Collectors.toUnmodifiableSet());
+
+        assertEquals(
+                Set.of("toOperationContext"),
+                publicStaticMethods
+        );
+    }
+
+    @Test
+    void shouldKeepOperationContextAdapterNonInstantiable() {
+        boolean allConstructorsPrivate =
+                Arrays.stream(
+                                SecurityOperationContextAdapter.class
+                                        .getDeclaredConstructors()
+                        )
+                        .allMatch(constructor ->
+                                Modifier.isPrivate(
+                                        constructor.getModifiers()
+                                )
+                        );
+
+        assertTrue(allConstructorsPrivate);
     }
 
     @Test
