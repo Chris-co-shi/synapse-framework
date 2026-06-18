@@ -24,19 +24,18 @@
 ### 第三组：安全与 OAuth2
 
 9. [synapse-security](synapse-security.md)
-10. [synapse-security-webmvc](synapse-security-webmvc.md)
-11. [synapse-oauth2-core](synapse-oauth2-core.md)
-12. [synapse-oauth2-authorization-server-support](synapse-oauth2-authorization-server-support.md)
-13. [synapse-oauth2-resource-server-webmvc](synapse-oauth2-resource-server-webmvc.md)
-14. [synapse-oauth2-resource-server-webflux](synapse-oauth2-resource-server-webflux.md)
+10. [synapse-oauth2-core](synapse-oauth2-core.md)
+11. [synapse-oauth2-authorization-server-support](synapse-oauth2-authorization-server-support.md)
+12. [synapse-oauth2-resource-server-webmvc](synapse-oauth2-resource-server-webmvc.md)
+13. [synapse-oauth2-resource-server-webflux](synapse-oauth2-resource-server-webflux.md)
 
 ### 第四组：基础设施能力
 
-15. [synapse-data](synapse-data.md)
-16. [synapse-cache](synapse-cache.md)
-17. [synapse-audit](synapse-audit.md)
-18. [synapse-file](synapse-file.md)
-19. [synapse-mq](synapse-mq.md)
+14. [synapse-data](synapse-data.md)
+15. [synapse-cache](synapse-cache.md)
+16. [synapse-audit](synapse-audit.md)
+17. [synapse-file](synapse-file.md)
+18. [synapse-mq](synapse-mq.md)
 
 ## 每份设计文档的固定结构
 
