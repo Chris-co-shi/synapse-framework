@@ -2,6 +2,7 @@ package com.indigo.synapse.oauth2.authorization.jwt;
 
 import com.indigo.synapse.oauth2.authorization.jwk.SynapseRsaKeyFactory;
 import com.indigo.synapse.oauth2.core.jwt.SynapseJwtClaimNames;
+import com.indigo.synapse.oauth2.core.jwt.SynapsePrincipalType;
 import com.indigo.synapse.oauth2.core.jwt.SynapseTokenType;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -34,7 +35,7 @@ class SynapseJwtIssuerTest {
                 Set.of("service-a"),
                 "token-1",
                 SynapseTokenType.ACCESS_TOKEN,
-                "USER",
+                SynapsePrincipalType.USER.name(),
                 Instant.parse("2027-06-17T00:00:00Z"),
                 Instant.parse("2027-06-17T01:00:00Z"),
                 Map.of(SynapseJwtClaimNames.PREFERRED_USERNAME, "admin")
@@ -42,8 +43,10 @@ class SynapseJwtIssuerTest {
         Jwt jwt = NimbusJwtDecoder.withPublicKey(rsaKey.toRSAPublicKey()).build().decode(token);
 
         assertThat(jwt.getSubject()).isEqualTo("user-1");
-        assertThat(jwt.getClaimAsString(SynapseJwtClaimNames.TOKEN_TYPE)).isEqualTo("ACCESS_TOKEN");
-        assertThat(jwt.getClaimAsString(SynapseJwtClaimNames.PRINCIPAL_TYPE)).isEqualTo("USER");
+        assertThat(jwt.getClaimAsString(SynapseJwtClaimNames.TOKEN_TYPE))
+                .isEqualTo(SynapseTokenType.ACCESS_TOKEN.name());
+        assertThat(jwt.getClaimAsString(SynapseJwtClaimNames.PRINCIPAL_TYPE))
+                .isEqualTo(SynapsePrincipalType.USER.name());
         assertThat(jwt.getClaimAsString(SynapseJwtClaimNames.PREFERRED_USERNAME)).isEqualTo("admin");
     }
 }
