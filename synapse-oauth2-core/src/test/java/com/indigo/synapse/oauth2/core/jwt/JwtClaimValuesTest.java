@@ -28,6 +28,20 @@ class JwtClaimValuesTest {
     }
 
     @Test
+    void shouldRejectMissingRequiredStringClaim() {
+        JwtClaimAccessor claims = accessor(Map.of());
+
+        assertThatThrownBy(() ->
+                JwtClaimValues.requiredString(
+                        claims,
+                        SynapseJwtClaimNames.SUBJECT
+                )
+        )
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("sub must not be blank");
+    }
+
+    @Test
     void shouldRejectBlankRequiredStringClaim() {
         JwtClaimAccessor claims = accessor(
                 Map.of(SynapseJwtClaimNames.SUBJECT, " ")
@@ -42,7 +56,6 @@ class JwtClaimValuesTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("sub must not be blank");
     }
-
 
     @Test
     void shouldNormalizeStringClaimValues() {
