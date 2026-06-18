@@ -62,7 +62,6 @@ synapse-framework
 ├── synapse-data
 ├── synapse-cache
 ├── synapse-security
-├── synapse-security-webmvc
 ├── synapse-oauth2-core
 ├── synapse-oauth2-authorization-server-support
 ├── synapse-oauth2-resource-server-webmvc
@@ -85,7 +84,6 @@ synapse-framework
 | `synapse-data` | 数据层基础能力，当前聚焦 OperationContext 自动填充 | [查看](docs/modules/synapse-data.md) |
 | `synapse-cache` | 缓存、锁、限流、幂等基础设施 | [查看](docs/modules/synapse-cache.md) |
 | `synapse-security` | Web 无关安全主体、AuthenticatedUser/Client、PermissionChecker、权限注解适配 | [查看](docs/modules/synapse-security.md) |
-| `synapse-security-webmvc` | trusted-header Servlet MVC 适配 | [查看](docs/modules/synapse-security-webmvc.md) |
 | `synapse-oauth2-core` | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 | [查看](docs/modules/synapse-oauth2-core.md) |
 | `synapse-oauth2-authorization-server-support` | JWT 签发、RSAKey、JWKSource、JwtEncoder 技术支持 | [查看](docs/modules/synapse-oauth2-authorization-server-support.md) |
 | `synapse-oauth2-resource-server-webmvc` | Servlet OAuth2 Resource Server 技术适配 | [查看](docs/modules/synapse-oauth2-resource-server-webmvc.md) |
@@ -267,7 +265,7 @@ Synapse Framework
 - `synapse-webmvc` 承接原 Servlet MVC Web 能力。
 - `synapse-webflux` 提供 WebFlux 最小技术闭环，不包含 Gateway 服务。
 - `synapse-cloud` 提供 OpenFeign 出站 OperationContext Header 编码、RequestInterceptor、ErrorDecoder 和自动配置，不包含 Gateway、Nacos、Seata、RocketMQ、IAM 或业务鉴权。
-- `synapse-security` 已纯化为 Web 无关安全基础模块，trusted-header Servlet Filter 位于 `synapse-security-webmvc`。
+- `synapse-security` 是 Web 无关安全基础模块；认证主体由 OAuth2 Resource Server 适配模块从经过验证的 Bearer Token 建立。
 - OAuth2 已拆分为 core、authorization-server-support、resource-server-webmvc、resource-server-webflux；旧 `synapse-oauth2` 不再是正式 reactor module。
 - `synapse-web` 不再作为正式 reactor module 保留。
 - `synapse-security` 不依赖 Spring Security Web / Config。
