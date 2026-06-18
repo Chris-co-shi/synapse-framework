@@ -14,8 +14,11 @@ import java.util.Map;
  * <p>该适配器是 security 与 core OperationContext 的边界：security 可以把当前认证主体转换为
  * OperationActor，供 data、audit、message 等模块读取操作人；但 OperationContext 不反向承载角色、
  * 权限、菜单等安全模型。</p>
+ *
+ * <p>该类型是 Synapse Framework 跨模块使用的 internal API，
+ * 不属于业务应用的受支持调用入口。</p>
  */
-final class SecurityOperationContextAdapter {
+public final class SecurityOperationContextAdapter {
 
     private SecurityOperationContextAdapter() {
     }
@@ -48,7 +51,7 @@ final class SecurityOperationContextAdapter {
      * @param principal 已认证主体
      * @return 操作上下文
      */
-    static OperationContext toOperationContext(AuthenticatedPrincipal principal) {
+    public static OperationContext toOperationContext(AuthenticatedPrincipal principal) {
         OperationActor actor = toOperationActor(principal);
         return new OperationContext(
                 actor,
