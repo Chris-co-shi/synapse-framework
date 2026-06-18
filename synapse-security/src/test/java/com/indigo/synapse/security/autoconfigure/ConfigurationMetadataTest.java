@@ -16,12 +16,8 @@ class ConfigurationMetadataTest {
         String json = metadata();
 
         assertJsonObject(json);
-        assertProperty(json, "synapse.security.trusted-header.enabled", "java.lang.Boolean");
-        assertProperty(json, "synapse.security.trusted-header.signature-enabled", "java.lang.Boolean");
-        assertProperty(json, "synapse.security.trusted-header.secret", "java.lang.String");
-        assertProperty(json, "synapse.security.trusted-header.timestamp-tolerance", "java.time.Duration");
-        assertProperty(json, "synapse.security.trusted-header.fail-fast", "java.lang.Boolean");
         assertProperty(json, "synapse.security.permission.annotation-enabled", "java.lang.Boolean");
+        assertFalse(json.contains("synapse.security.trusted-header"));
     }
 
     private static String metadata() throws IOException {
