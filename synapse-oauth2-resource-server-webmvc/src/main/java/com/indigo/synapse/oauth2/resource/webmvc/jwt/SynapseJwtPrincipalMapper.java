@@ -2,12 +2,13 @@ package com.indigo.synapse.oauth2.resource.webmvc.jwt;
 
 import com.indigo.synapse.oauth2.core.jwt.JwtClaimValues;
 import com.indigo.synapse.oauth2.core.jwt.SynapseJwtClaimNames;
+import com.indigo.synapse.oauth2.core.jwt.SynapsePrincipalType;
 import com.indigo.synapse.oauth2.core.validation.JwtClaimAccessor;
 import com.indigo.synapse.security.context.AuthenticatedClient;
 import com.indigo.synapse.security.context.AuthenticatedPrincipal;
 import com.indigo.synapse.security.context.AuthenticatedUser;
 import org.springframework.security.oauth2.jwt.Jwt;
-import com.indigo.synapse.oauth2.core.jwt.SynapsePrincipalType;
+
 import java.util.Set;
 
 /**
@@ -36,8 +37,10 @@ public final class SynapseJwtPrincipalMapper {
      */
     public AuthenticatedPrincipal map(Jwt jwt) {
         JwtClaimAccessor claims = new SpringJwtClaimAccessor(jwt);
-        String principalType = JwtClaimValues.requiredString(claims,
-                SynapseJwtClaimNames.PRINCIPAL_TYPE);
+        String principalType = JwtClaimValues.requiredString(
+                claims,
+                SynapseJwtClaimNames.PRINCIPAL_TYPE
+        );
         String tenantId = jwt.getClaimAsString(SynapseJwtClaimNames.TENANT_ID);
         Set<String> roles = JwtClaimValues.strings(
                 claims,
