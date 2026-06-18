@@ -48,7 +48,7 @@ flowchart TD
     H --> I
     I --> J[Spring SecurityContextHolder]
     J --> K[SynapseSecurityContextBridgeFilter]
-    K --> L[SecurityContext.openScope]
+    K --> L[SecurityContextBinder.bind]
     L --> M[SecurityOperationContextAdapter]
     M --> N[OperationContext]
     L --> O[Controller / Service]
@@ -167,14 +167,14 @@ Filter 的核心行为：
 ```text
 读取 Spring Authentication
   -> 取出 AuthenticatedPrincipal
-  -> SecurityContext.openScope(principal)
+  -> SecurityContextBinder.bind(principal)
   -> 执行后续 Filter / Controller
   -> try-with-resources 自动关闭 scope
 ```
 
 这个 try-with-resources 是上下文安全的关键点。无论后续请求成功还是抛异常，作用域都必须关闭，避免线程池复用时污染下一次请求。
 
-### 3.7 `SecurityContext.openScope`
+### 3.7 `SecurityContextBinder.bind`
 
 它会同时建立两个作用域：
 

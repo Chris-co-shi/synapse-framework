@@ -224,7 +224,7 @@ HTTP Bearer Token
   -> SynapseJwtPrincipalMapper
   -> SynapseJwtAuthenticationToken
   -> SynapseSecurityContextBridgeFilter
-  -> SecurityContext.openScope
+  -> SecurityContextBinder.bind
   -> OperationContext
   -> Controller / Service / PermissionChecker
 ```

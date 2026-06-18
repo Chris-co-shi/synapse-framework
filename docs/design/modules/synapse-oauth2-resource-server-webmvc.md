@@ -56,7 +56,7 @@ Authorization: Bearer token
   -> SynapseJwtAuthenticationToken
   -> Spring SecurityContextHolder
   -> SynapseSecurityContextBridgeFilter
-  -> SecurityContext.openScope
+  -> SecurityContextBinder.bind
   -> OperationContext
   -> Controller / Service / PermissionChecker
   -> scope.close

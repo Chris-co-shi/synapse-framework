@@ -15,7 +15,8 @@
 - `TrustedHeaderAuthenticationFilter`。
 - Filter 自动配置和注册顺序。
 - 调用 security 中的 timestamp、signature、principal resolver。
-- 使用 `SecurityContext.openScope` 管理请求生命周期。
+
+[//]: # (- 使用 `SecurityContextBinder.bind` 管理请求生命周期。)
 
 不负责：
 
@@ -36,7 +37,7 @@ Trusted caller request
   -> validate timestamp
   -> optional HMAC signature verification
   -> resolve AuthenticatedUser / Client
-  -> SecurityContext.openScope
+  -> SecurityContextBinder.bind
   -> downstream filters / controller
   -> scope.close in all outcomes
 ```

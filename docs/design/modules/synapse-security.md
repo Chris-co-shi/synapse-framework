@@ -70,7 +70,7 @@ Service 层稳定权限入口：
 ```text
 Trusted Header / OAuth2 adapter
   -> AuthenticatedPrincipal
-  -> SecurityContext.openScope
+  -> SecurityContextBinder.bind
   -> SecurityOperationContextAdapter
   -> OperationContext
   -> Service / PermissionChecker / data / audit

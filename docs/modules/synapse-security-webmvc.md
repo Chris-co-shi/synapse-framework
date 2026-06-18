@@ -41,7 +41,7 @@ synapse:
       fail-fast: true
 ```
 
-Filter 使用 `SecurityContext.openScope(...)`，请求完成或异常时会恢复进入前的 `SecurityContext` 和 `OperationContext`。
+Filter 使用 `SecurityContextBinder.bind(...)`，请求完成或异常时会恢复进入前的 `SecurityContext` 和 `OperationContext`。
 
 ## 5. 边界
 

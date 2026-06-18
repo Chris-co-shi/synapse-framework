@@ -1,11 +1,12 @@
-package com.indigo.synapse.security.context;
+package com.indigo.synapse.security.context.internal;
 
 import com.indigo.synapse.core.context.OperationContextScope;
+import com.indigo.synapse.security.context.AuthenticatedPrincipal;
 
 /**
- * 安全上下文作用域。
+ * SecurityContext 内部作用域。
  *
- * <p>作用域关闭时会同时恢复进入作用域前的 SecurityContext 和 OperationContext。</p>
+ * <p>关闭时恢复进入作用域前的安全主体和 OperationContext。</p>
  */
 public final class SecurityContextScope implements AutoCloseable {
 
@@ -13,7 +14,10 @@ public final class SecurityContextScope implements AutoCloseable {
     private final OperationContextScope operationContextScope;
     private boolean closed;
 
-    SecurityContextScope(AuthenticatedPrincipal previousPrincipal, OperationContextScope operationContextScope) {
+    SecurityContextScope(
+            AuthenticatedPrincipal previousPrincipal,
+            OperationContextScope operationContextScope
+    ) {
         this.previousPrincipal = previousPrincipal;
         this.operationContextScope = operationContextScope;
     }
@@ -23,13 +27,11 @@ public final class SecurityContextScope implements AutoCloseable {
         if (closed) {
             return;
         }
+
         closed = true;
+
         try {
-            if (previousPrincipal == null) {
-                SecurityContext.clearPrincipalOnly();
-            } else {
-                SecurityContext.setPrincipalOnly(previousPrincipal);
-            }
+            SecurityContextState.setPrincipal(previousPrincipal);
         } finally {
             operationContextScope.close();
         }

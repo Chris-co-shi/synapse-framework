@@ -4,7 +4,8 @@ import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import com.indigo.synapse.security.autoconfigure.SynapseSecurityProperties;
 import com.indigo.synapse.security.context.AuthenticatedUser;
 import com.indigo.synapse.security.context.SecurityContext;
-import com.indigo.synapse.security.context.SecurityContextScope;
+import com.indigo.synapse.security.context.internal.SecurityContextBinder;
+import com.indigo.synapse.security.context.internal.SecurityContextScope;
 import com.indigo.synapse.security.exception.SecurityErrorCode;
 import com.indigo.synapse.security.header.SecurityHeaders;
 import com.indigo.synapse.security.header.TrustedHeaderAuthenticatedUserResolver;
@@ -124,7 +125,7 @@ public class TrustedHeaderAuthenticationFilter implements Filter {
                 && !signatureVerifier.verify(headers, trustedHeader.getSecret())) {
             throw new SynapseAuthenticationException(SecurityErrorCode.SECURITY_INVALID_SIGNATURE);
         }
-        return SecurityContext.openScope(authenticatedUserResolver.resolveAuthenticatedUser(headers));
+        return SecurityContextBinder.bind(authenticatedUserResolver.resolveAuthenticatedUser(headers));
     }
 
     private static Map<String, String> extractTrustedHeaders(HttpServletRequest request) {

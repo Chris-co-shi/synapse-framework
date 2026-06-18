@@ -2,7 +2,7 @@ package com.indigo.synapse.oauth2.resource.webflux.context;
 
 import com.indigo.synapse.core.context.OperationContext;
 import com.indigo.synapse.security.context.AuthenticatedPrincipal;
-import com.indigo.synapse.security.context.SecurityOperationContextAdapter;
+import com.indigo.synapse.security.context.internal.SecurityOperationContextAdapter;
 import reactor.core.publisher.Mono;
 
 /**

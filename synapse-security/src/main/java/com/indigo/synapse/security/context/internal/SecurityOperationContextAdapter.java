@@ -1,8 +1,9 @@
-package com.indigo.synapse.security.context;
+package com.indigo.synapse.security.context.internal;
 
 import com.indigo.synapse.core.context.OperationActor;
 import com.indigo.synapse.core.context.OperationActorType;
 import com.indigo.synapse.core.context.OperationContext;
+import com.indigo.synapse.security.context.AuthenticatedPrincipal;
 
 import java.time.Instant;
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.Map;
  * OperationActor，供 data、audit、message 等模块读取操作人；但 OperationContext 不反向承载角色、
  * 权限、菜单等安全模型。</p>
  */
-public final class SecurityOperationContextAdapter {
+final class SecurityOperationContextAdapter {
 
     private SecurityOperationContextAdapter() {
     }
@@ -25,7 +26,7 @@ public final class SecurityOperationContextAdapter {
      * @param principal 已认证主体
      * @return 操作主体
      */
-    public static OperationActor toOperationActor(AuthenticatedPrincipal principal) {
+    static OperationActor toOperationActor(AuthenticatedPrincipal principal) {
         if (principal == null) {
             throw new IllegalArgumentException("principal must not be null");
         }
@@ -47,7 +48,7 @@ public final class SecurityOperationContextAdapter {
      * @param principal 已认证主体
      * @return 操作上下文
      */
-    public static OperationContext toOperationContext(AuthenticatedPrincipal principal) {
+    static OperationContext toOperationContext(AuthenticatedPrincipal principal) {
         OperationActor actor = toOperationActor(principal);
         return new OperationContext(
                 actor,

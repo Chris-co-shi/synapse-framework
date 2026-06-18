@@ -1,8 +1,10 @@
-package com.indigo.synapse.security.context;
+package com.indigo.synapse.security.context.internal;
 
 import com.indigo.synapse.core.context.OperationActor;
 import com.indigo.synapse.core.context.OperationActorType;
 import com.indigo.synapse.core.context.OperationContext;
+import com.indigo.synapse.security.context.AuthenticatedClient;
+import com.indigo.synapse.security.context.AuthenticatedUser;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;

@@ -6,11 +6,17 @@ import com.indigo.synapse.core.context.OperationContext;
 import com.indigo.synapse.core.context.OperationContextHolder;
 import com.indigo.synapse.core.context.OperationContextScope;
 
+import com.indigo.synapse.security.context.internal.SecurityContextBinder;
+import com.indigo.synapse.security.context.internal.SecurityContextScope;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,7 +32,7 @@ class SecurityContextTest {
                 Set.of("message:send")
         );
 
-        try (SecurityContextScope ignored = SecurityContext.openScope(client)) {
+        try (SecurityContextScope ignored = SecurityContextBinder.bind(client)) {
             assertEquals(client, SecurityContext.currentPrincipal().orElseThrow());
             assertEquals(client, SecurityContext.currentClient().orElseThrow());
             assertTrue(SecurityContext.currentUser().isEmpty());
@@ -47,11 +53,11 @@ class SecurityContextTest {
         AuthenticatedUser user = new AuthenticatedUser("1", "admin", "tenant-a", Set.of(), Set.of("a"));
         AuthenticatedClient client = new AuthenticatedClient("client-a", "client-a", "tenant-b", Set.of(), Set.of("b"));
 
-        try (SecurityContextScope userScope = SecurityContext.openScope(user)) {
+        try (SecurityContextScope userScope = SecurityContextBinder.bind(user)) {
             assertEquals(OperationActorType.USER, OperationContextHolder.requireCurrent().actor().type());
             assertEquals(user, SecurityContext.currentUser().orElseThrow());
 
-            try (SecurityContextScope clientScope = SecurityContext.openScope(client)) {
+            try (SecurityContextScope clientScope = SecurityContextBinder.bind(client)) {
                 assertEquals(OperationActorType.SERVICE, OperationContextHolder.requireCurrent().actor().type());
                 assertEquals(client, SecurityContext.currentClient().orElseThrow());
                 assertTrue(SecurityContext.currentUser().isEmpty());
@@ -83,7 +89,7 @@ class SecurityContextTest {
             assertTrue(SecurityContext.currentPrincipal().isEmpty());
 
             try (SecurityContextScope userScope =
-                         SecurityContext.openScope(user)) {
+                         SecurityContextBinder.bind(user)) {
 
                 assertEquals(user, SecurityContext.currentPrincipal().orElseThrow());
                 assertEquals(
@@ -92,7 +98,7 @@ class SecurityContextTest {
                 );
 
                 try (SecurityContextScope emptyScope =
-                             SecurityContext.openScope(null)) {
+                             SecurityContextBinder.bind(null)) {
 
                     assertTrue(SecurityContext.currentPrincipal().isEmpty());
                     assertTrue(OperationContextHolder.current().isEmpty());
@@ -137,7 +143,7 @@ class SecurityContextTest {
         );
 
         try (SecurityContextScope outerScope =
-                     SecurityContext.openScope(outerUser)) {
+                     SecurityContextBinder.bind(outerUser)) {
 
             assertEquals(
                     outerUser,
@@ -145,7 +151,7 @@ class SecurityContextTest {
             );
 
             try (SecurityContextScope clientScope =
-                         SecurityContext.openScope(client)) {
+                         SecurityContextBinder.bind(client)) {
 
                 assertEquals(
                         client,
@@ -153,7 +159,7 @@ class SecurityContextTest {
                 );
 
                 try (SecurityContextScope innerScope =
-                             SecurityContext.openScope(innerUser)) {
+                             SecurityContextBinder.bind(innerUser)) {
 
                     assertEquals(
                             innerUser,
@@ -194,7 +200,7 @@ class SecurityContextTest {
 
             assertThrows(IllegalStateException.class, () -> {
                 try (SecurityContextScope userScope =
-                             SecurityContext.openScope(user)) {
+                             SecurityContextBinder.bind(user)) {
                     throw new IllegalStateException("failed");
                 }
             });
@@ -214,7 +220,7 @@ class SecurityContextTest {
                 Set.of()
         );
 
-        SecurityContextScope scope = SecurityContext.openScope(user);
+        SecurityContextScope scope = SecurityContextBinder.bind(user);
 
         scope.close();
         scope.close();
@@ -234,13 +240,32 @@ class SecurityContextTest {
         );
 
         try (SecurityContextScope ignored =
-                     SecurityContext.openScope(user)) {
+                     SecurityContextBinder.bind(user)) {
 
             OperationContext operationContext =
                     OperationContextHolder.requireCurrent();
 
             assertTrue(operationContext.actor().attributes().isEmpty());
         }
+    }
+
+    @Test
+    void shouldExposeReadOnlyPublicApi() {
+        Set<String> publicStaticMethods =
+                Arrays.stream(SecurityContext.class.getDeclaredMethods())
+                        .filter(method -> Modifier.isPublic(method.getModifiers()))
+                        .filter(method -> Modifier.isStatic(method.getModifiers()))
+                        .map(Method::getName)
+                        .collect(Collectors.toUnmodifiableSet());
+
+        assertEquals(
+                Set.of(
+                        "currentPrincipal",
+                        "currentUser",
+                        "currentClient"
+                ),
+                publicStaticMethods
+        );
     }
 
     private static OperationContext jobContext() {

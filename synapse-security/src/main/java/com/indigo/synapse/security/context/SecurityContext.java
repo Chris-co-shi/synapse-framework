@@ -1,7 +1,7 @@
 package com.indigo.synapse.security.context;
 
 import com.indigo.synapse.core.context.OperationContext;
-import com.indigo.synapse.core.context.OperationContextHolder;
+import com.indigo.synapse.security.context.internal.SecurityContextState;
 
 import java.util.Optional;
 
@@ -16,36 +16,16 @@ import java.util.Optional;
  */
 public final class SecurityContext {
 
-    private static final ThreadLocal<AuthenticatedPrincipal> CURRENT_PRINCIPAL = new ThreadLocal<>();
-
     private SecurityContext() {
-    }
-
-    /**
-     * 打开当前已认证主体作用域，并同步建立 OperationContext 作用域。
-     *
-     * <p>传入 null 时会建立临时空安全主体作用域；
-     * 作用域关闭后恢复进入前的 SecurityContext 和 OperationContext。</p>
-     *
-     * @param principal 已认证主体；允许为 null
-     * @return 可关闭作用域
-     */
-    public static SecurityContextScope openScope(AuthenticatedPrincipal principal) {
-        AuthenticatedPrincipal previousPrincipal = CURRENT_PRINCIPAL.get();
-        if (principal == null) {
-            CURRENT_PRINCIPAL.remove();
-        } else {
-            CURRENT_PRINCIPAL.set(principal);
-        }
-        OperationContext operationContext = principal == null ? null : SecurityOperationContextAdapter.toOperationContext(principal);
-        return new SecurityContextScope(previousPrincipal, OperationContextHolder.scope(operationContext));
     }
 
     /**
      * 返回当前已认证主体。
      */
     public static Optional<AuthenticatedPrincipal> currentPrincipal() {
-        return Optional.ofNullable(CURRENT_PRINCIPAL.get());
+        return Optional.ofNullable(
+                SecurityContextState.currentPrincipal()
+        );
     }
 
     /**
@@ -65,13 +45,4 @@ public final class SecurityContext {
                 .filter(AuthenticatedClient.class::isInstance)
                 .map(AuthenticatedClient.class::cast);
     }
-
-    static void setPrincipalOnly(AuthenticatedPrincipal principal) {
-        CURRENT_PRINCIPAL.set(principal);
-    }
-
-    static void clearPrincipalOnly() {
-        CURRENT_PRINCIPAL.remove();
-    }
-
 }

@@ -153,9 +153,9 @@ SecurityContext
 
 ```java
 import com.indigo.synapse.security.context.SecurityContext;
-import com.indigo.synapse.security.context.SecurityContextScope;
+import com.indigo.synapse.security.context.internal.SecurityContextScope;
 try (SecurityContextScope ignored =
-        SecurityContext.openScope(authenticatedUser)) {
+        SecurityContextBinder.bind(authenticatedUser)) {
         // business
         }
 ```

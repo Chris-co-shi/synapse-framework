@@ -3,7 +3,7 @@ package com.indigo.synapse.oauth2.resource.webmvc.context;
 import com.indigo.synapse.oauth2.resource.webmvc.jwt.SynapseJwtAuthenticationToken;
 import com.indigo.synapse.security.context.AuthenticatedPrincipal;
 import com.indigo.synapse.security.context.SecurityContext;
-import com.indigo.synapse.security.context.SecurityContextScope;
+import com.indigo.synapse.security.context.internal.SecurityContextScope;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,7 +45,7 @@ public final class SynapseSecurityContextBridgeFilter extends OncePerRequestFilt
             return;
         }
 
-        try (SecurityContextScope ignored = SecurityContext.openScope(principal)) {
+        try (SecurityContextScope ignored = SecurityContextBinder.bind(principal)) {
             filterChain.doFilter(request, response);
         }
     }
