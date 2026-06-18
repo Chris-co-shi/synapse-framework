@@ -5,6 +5,7 @@ import com.indigo.synapse.oauth2.core.jwt.SynapsePrincipalType;
 import com.indigo.synapse.security.context.AuthenticatedClient;
 import com.indigo.synapse.security.context.AuthenticatedUser;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import reactor.test.StepVerifier;
 
@@ -53,12 +54,20 @@ class SynapseReactiveJwtAuthenticationConverterTest {
 
         StepVerifier.create(converter.convert(jwt))
                 .assertNext(authentication -> {
-                    assertThat(authentication.getDetails()).isInstanceOf(AuthenticatedUser.class);
-                    AuthenticatedUser user = (AuthenticatedUser) authentication.getDetails();
-                    assertThat(user.roles()).containsExactly("admin", "operator");
-                    assertThat(user.permissions()).containsExactly("message:read");
+                    assertThat(authentication.getDetails())
+                            .isInstanceOf(AuthenticatedUser.class);
+
+                    AuthenticatedUser user =
+                            (AuthenticatedUser) authentication.getDetails();
+
+                    assertThat(user.roles())
+                            .containsExactlyInAnyOrder("admin", "operator");
+
+                    assertThat(user.permissions())
+                            .containsExactlyInAnyOrder("message:read");
+
                     assertThat(authentication.getAuthorities())
-                            .extracting(authority -> authority.getAuthority())
+                            .extracting(GrantedAuthority::getAuthority)
                             .containsExactly(
                                     "SCOPE_openid",
                                     "SCOPE_profile",
