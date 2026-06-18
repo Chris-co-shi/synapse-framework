@@ -98,6 +98,16 @@ synapse-framework
 
 模块 Skill 索引：[skills/README.md](skills/README.md)
 
+## 学习入口
+
+如果需要重新接管代码、按设计理解模块或开始手写练习，请从以下文档开始：
+
+| 文档 | 内容 |
+| --- | --- |
+| [学习路径索引](docs/learning/README.md) | 推荐阅读顺序、学习方法和掌握标准 |
+| [Framework 架构阅读指南](docs/learning/01-framework-architecture-reading-guide.md) | 三层边界、模块地图、依赖方向和源码阅读方式 |
+| [Security 与 OAuth2 请求链路](docs/learning/02-security-oauth2-request-flow.md) | Bearer Token 到 SecurityContext、OperationContext 和权限检查的完整链路 |
+
 ## 二阶段规划入口
 
 二阶段规划文档位于 `docs/phase-2`：
@@ -204,6 +214,7 @@ OpenFeign 服务间调用引入：
 
 | 文档 | 内容 |
 | --- | --- |
+| [学习路径](docs/learning/README.md) | 面向代码接管和手写练习的阅读顺序 |
 | [01-项目定位与边界](docs/01-项目定位与边界.md) | 项目定位、一阶段边界、成功标准 |
 | [02-总体架构设计](docs/02-总体架构设计.md) | 模块职责、依赖方向、设计原则 |
 | [03-核心链路设计](docs/03-核心链路设计.md) | OperationContext、Web、Security、Data、MQ 等核心链路 |
