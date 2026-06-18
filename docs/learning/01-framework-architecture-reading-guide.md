@@ -47,7 +47,6 @@ synapse-security
 ```text
 synapse-webmvc
 synapse-webflux
-synapse-security-webmvc
 synapse-oauth2-resource-server-webmvc
 synapse-oauth2-resource-server-webflux
 synapse-oauth2-authorization-server-support
@@ -64,6 +63,8 @@ synapse-cloud
   -> Synapse 核心模型
   -> Synapse Context
 ```
+
+身份认证适配只接受经过验证的 Bearer Token，不提供 trusted-header 身份恢复模块。
 
 ### 2.3 基础设施能力层
 
@@ -129,6 +130,8 @@ Jwt
 `oauth2-resource-server-*` 负责把 OAuth2/JWT 世界中的对象转换成 Synapse 安全模型。
 
 `security` 本身不解析 JWT，也不创建 `SecurityFilterChain`。
+
+Gateway 可以做入口 Token 验证，但下游服务必须继续验证自己的 issuer、audience、有效期和签名；用户、角色与权限 Header 不能替代 Token。
 
 ### 3.3 WebMVC 与 WebFlux 必须分离
 
@@ -259,5 +262,6 @@ HTTP Bearer Token
 - 是否把 CLIENT 主体伪装成 USER。
 - 是否因自动配置抢占了消费方自定义 Bean。
 - 是否把 Servlet 和 Reactive 生命周期混在一起。
+- 是否重新引入可伪造的用户、角色或权限身份 Header。
 
 先掌握这些边界，再深入具体实现，代码会从“很多类”变成少数几个稳定模式。
