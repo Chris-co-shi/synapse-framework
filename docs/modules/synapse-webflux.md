@@ -80,7 +80,29 @@ WebFlux Throwable
   -> Result JSON
 ```
 
-## 7. OperationContext Header
+## 7. 异常映射
+
+`WebFluxExceptionResponseFactory` 支持以下通用映射：
+
+| 异常场景 | HTTP 状态 | 错误码 |
+| --- | --- | --- |
+| `SynapseAuthenticationException` | 401 | 调用方传入的认证错误码 |
+| `SynapseAccessDeniedException` | 403 | 调用方传入的权限错误码 |
+| 其他 `SynapseException` | 由 `ErrorHttpStatusResolver` 决定 | 调用方传入的错误码 |
+| `ResponseStatusException` 400 | 400 | `COMMON_BAD_REQUEST` |
+| `ResponseStatusException` 404 | 404 | `COMMON_NOT_FOUND` |
+| `ResponseStatusException` 405 | 405 | `COMMON_METHOD_NOT_ALLOWED` |
+| `ResponseStatusException` 415 | 415 | `COMMON_UNSUPPORTED_MEDIA_TYPE` |
+| 未识别异常 | 500 | `COMMON_INTERNAL_ERROR` |
+
+说明：
+
+- WebFlux 技术异常统一以 Spring WebFlux 的 `ResponseStatusException` 状态码作为输入。
+- 原始异常 reason 不直接暴露到响应体，避免泄露内部信息。
+- Gateway 路由失败、鉴权业务失败和平台业务错误码不在本模块内定义。
+- `traceId` 必须由 reactive 链路显式传入异常响应工厂。
+
+## 8. OperationContext Header
 
 当前支持的技术 Header：
 
@@ -106,13 +128,13 @@ X-Synapse-Source-Entrypoint
 - Header 是否可信、是否签名、是否来自 Gateway 不在本模块内判定。
 - `synapse-webflux` 不做认证和授权。
 
-## 8. 边界与注意事项
+## 9. 边界与注意事项
 
-### 8.1 不要做 Gateway 服务
+### 9.1 不要做 Gateway 服务
 
 Gateway 可启动服务属于 Synapse Platform。Framework 中的 `synapse-webflux` 只能提供 WebFlux 技术支撑。
 
-### 8.2 不要引入 MVC / Servlet
+### 9.2 不要引入 MVC / Servlet
 
 `synapse-webflux` 禁止引入：
 
@@ -121,11 +143,25 @@ Gateway 可启动服务属于 Synapse Platform。Framework 中的 `synapse-webfl
 - `DispatcherServlet`
 - Servlet Filter
 
-### 8.3 Reactor Context 是主通道
+### 9.3 Reactor Context 是主通道
 
 WebFlux 场景不要依赖 Servlet ThreadLocal。请求上下文、traceId、requestId、OperationContextSnapshot 应通过 Reactor Context 读取。
 
-## 9. 常见问题
+### 9.4 Result 契约与 WebMVC 保持兼容
+
+`synapse-webflux` 与 `synapse-webmvc` 各自维护 `Result` 类型，目的是避免 WebFlux 模块间接依赖 MVC / Servlet。
+
+两个 Result 必须保持字段语义兼容：
+
+```text
+code
+message
+data
+traceId
+timestamp
+```
+
+## 10. 常见问题
 
 ### Q1：`synapse-webflux` 是否能被 `synapse-gateway` 引用？
 
@@ -133,4 +169,4 @@ WebFlux 场景不要依赖 Servlet ThreadLocal。请求上下文、traceId、req
 
 ### Q2：为什么不复用 `synapse-webmvc` 的 `Result`？
 
-为了避免 WebFlux 模块间接依赖 MVC / Servlet。当前两个模块各自拥有响应结构，后续如果重复成本变高，再评估独立公共模块。
+为了避免 WebFlux 模块间接依赖 MVC / Servlet。当前两个模块各自拥有响应结构，必须通过契约测试保持字段和错误语义一致；后续如果重复成本变高，再评估独立公共模块。

@@ -6,6 +6,8 @@ import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
 import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import com.indigo.synapse.core.exception.SynapseException;
 import com.indigo.synapse.webflux.response.Result;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * WebFlux 异常响应工厂。
@@ -24,6 +26,9 @@ public final class WebFluxExceptionResponseFactory {
         if (throwable instanceof SynapseException synapseException) {
             return business(synapseException, traceId);
         }
+        if (throwable instanceof ResponseStatusException responseStatusException) {
+            return responseStatus(responseStatusException.getStatusCode(), traceId);
+        }
         return error(CommonErrorCode.COMMON_INTERNAL_ERROR, CommonErrorCode.COMMON_INTERNAL_ERROR.message(), traceId);
     }
 
@@ -36,6 +41,21 @@ public final class WebFluxExceptionResponseFactory {
             return new WebFluxErrorResponse(403, Result.fail(errorCode, exception.getMessage(), traceId));
         }
         return error(errorCode, exception.getMessage(), traceId);
+    }
+
+    private WebFluxErrorResponse responseStatus(HttpStatusCode statusCode, String traceId) {
+        return switch (statusCode.value()) {
+            case 400 -> error(CommonErrorCode.COMMON_BAD_REQUEST,
+                    CommonErrorCode.COMMON_BAD_REQUEST.message(), traceId);
+            case 404 -> error(CommonErrorCode.COMMON_NOT_FOUND,
+                    CommonErrorCode.COMMON_NOT_FOUND.message(), traceId);
+            case 405 -> error(CommonErrorCode.COMMON_METHOD_NOT_ALLOWED,
+                    CommonErrorCode.COMMON_METHOD_NOT_ALLOWED.message(), traceId);
+            case 415 -> error(CommonErrorCode.COMMON_UNSUPPORTED_MEDIA_TYPE,
+                    CommonErrorCode.COMMON_UNSUPPORTED_MEDIA_TYPE.message(), traceId);
+            default -> error(CommonErrorCode.COMMON_INTERNAL_ERROR,
+                    CommonErrorCode.COMMON_INTERNAL_ERROR.message(), traceId);
+        };
     }
 
     private WebFluxErrorResponse error(ErrorCode errorCode, String message, String traceId) {
