@@ -17,7 +17,6 @@
 | `synapse-data` | [synapse-data/SKILL.md](synapse-data/SKILL.md) |
 | `synapse-cache` | [synapse-cache/SKILL.md](synapse-cache/SKILL.md) |
 | `synapse-security` | [synapse-security/SKILL.md](synapse-security/SKILL.md) |
-| `synapse-security-webmvc` | [synapse-security-webmvc/SKILL.md](synapse-security-webmvc/SKILL.md) |
 | `synapse-oauth2-core` | [synapse-oauth2-core/SKILL.md](synapse-oauth2-core/SKILL.md) |
 | `synapse-oauth2-authorization-server-support` | [synapse-oauth2-authorization-server-support/SKILL.md](synapse-oauth2-authorization-server-support/SKILL.md) |
 | `synapse-oauth2-resource-server-webmvc` | [synapse-oauth2-resource-server-webmvc/SKILL.md](synapse-oauth2-resource-server-webmvc/SKILL.md) |
@@ -32,4 +31,5 @@
 - 新增模块并通过测试后必须新增对应 Skill。
 - Framework 不创建 starter、demo、example、sample application。
 - Skill 不得把 Platform 可启动服务描述成 Framework 能力。
+- 身份认证只信任经过 Resource Server 验证的 Bearer Token。
 - 公开 `@ConfigurationProperties` 必须生成 Spring Boot Configuration Metadata，并通过模块测试验证。
