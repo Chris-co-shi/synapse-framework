@@ -3,11 +3,14 @@ package com.indigo.synapse.oauth2.client;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 编排 client credentials token 的读取、提前刷新与存储。
  *
  * <p>该类型不会绑定 CurrentPrincipalContext，机器身份不会污染当前入站用户身份。</p>
+ * <p>同一个 registrationId 的刷新串行化，不同 registrationId 可以并行刷新。</p>
  */
 public final class OAuth2ClientTokenManager {
 
@@ -15,6 +18,7 @@ public final class OAuth2ClientTokenManager {
     private final ClientCredentialsTokenProvider tokenProvider;
     private final Clock clock;
     private final Duration refreshSkew;
+    private final ConcurrentMap<String, Object> refreshLocks = new ConcurrentHashMap<>();
 
     /**
      * @param tokenStore authorized-client token 存储
@@ -39,15 +43,29 @@ public final class OAuth2ClientTokenManager {
      * @param registrationId 客户端注册标识
      * @return 可用 token；缺失或进入刷新窗口时重新获取
      */
-    public synchronized OAuth2ClientToken getToken(String registrationId) {
-        return tokenStore.load(registrationId)
-                .filter(token -> !token.requiresRefresh(clock.instant(), refreshSkew))
-                .orElseGet(() -> acquireAndSave(registrationId));
+    public OAuth2ClientToken getToken(String registrationId) {
+        String id = requireRegistrationId(registrationId);
+        OAuth2ClientToken cached = usableToken(id);
+        if (cached != null) {
+            return cached;
+        }
+
+        Object lock = refreshLocks.computeIfAbsent(id, ignored -> new Object());
+        synchronized (lock) {
+            OAuth2ClientToken rechecked = usableToken(id);
+            return rechecked != null ? rechecked : acquireAndSave(id);
+        }
     }
 
     /** @param registrationId 要失效的客户端注册标识 */
     public void invalidate(String registrationId) {
-        tokenStore.remove(registrationId);
+        tokenStore.remove(requireRegistrationId(registrationId));
+    }
+
+    private OAuth2ClientToken usableToken(String registrationId) {
+        return tokenStore.load(registrationId)
+                .filter(token -> !token.requiresRefresh(clock.instant(), refreshSkew))
+                .orElse(null);
     }
 
     private OAuth2ClientToken acquireAndSave(String registrationId) {
@@ -55,5 +73,12 @@ public final class OAuth2ClientTokenManager {
                 "tokenProvider returned null");
         tokenStore.save(registrationId, token);
         return token;
+    }
+
+    private static String requireRegistrationId(String registrationId) {
+        if (registrationId == null || registrationId.isBlank()) {
+            throw new IllegalArgumentException("registrationId must not be blank");
+        }
+        return registrationId;
     }
 }
