@@ -1,0 +1,37 @@
+{
+  "hints": [
+    {
+      "name": "synapse.mybatis-plus.pagination.db-type",
+      "values": [
+        {
+          "value": "POSTGRE_SQL",
+          "description": "PostgreSQL 数据库。"
+        },
+        {
+          "value": "MYSQL",
+          "description": "MySQL 数据库。"
+        },
+        {
+          "value": "MARIADB",
+          "description": "MariaDB 数据库。"
+        },
+        {
+          "value": "ORACLE",
+          "description": "Oracle 数据库。"
+        },
+        {
+          "value": "SQL_SERVER",
+          "description": "SQL Server 数据库。"
+        },
+        {
+          "value": "H2",
+          "description": "H2 数据库，通常用于测试。"
+        },
+        {
+          "value": "CLICK_HOUSE",
+          "description": "ClickHouse 数据库。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "hints": [
+    {
+      "name": "synapse.datasource.load-balance.default-strategy",
+      "values": [
+        {
+          "value": "ROUND_ROBIN",
+          "description": "按轮询顺序选择可用读库。"
+        },
+        {
+          "value": "RANDOM",
+          "description": "预留随机选择策略。"
+        },
+        {
+          "value": "HEALTH_FIRST",
+          "description": "预留健康优先选择策略。"
+        }
+      ]
+    },
+    {
+      "name": "synapse.datasource.health.initial-delay",
+      "values": [
+        {
+          "value": "10s",
+          "description": "启动后延迟 10 秒再开始健康检查。"
+        }
+      ]
+    },
+    {
+      "name": "synapse.datasource.health.interval",
+      "values": [
+        {
+          "value": "30s",
+          "description": "每 30 秒执行一次健康检查。"
+        },
+        {
+          "value": "1m",
+          "description": "每 1 分钟执行一次健康检查。"
+        }
+      ]
+    },
+    {
+      "name": "synapse.datasource.health.timeout",
+      "values": [
+        {
+          "value": "2s",
+          "description": "单次健康检查 2 秒超时。"
+        },
+        {
+          "value": "5s",
+          "description": "单次健康检查 5 秒超时。"
+        }
+      ]
+    }
+  ]
+}
