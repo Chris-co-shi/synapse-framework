@@ -19,14 +19,15 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Resilience4j 默认编排实现。
  *
- * <p>同名策略首次使用时固定配置以保留熔断状态。该实现不捕获异常生成 fallback，也不会把
- * 非幂等操作提升为可重试。</p>
+ * <p>同名策略首次使用时固定配置以保留熔断状态。后续传入同名不同配置会明确失败，避免静默
+ * 使用旧策略。该实现不捕获异常生成 fallback，也不会把非幂等操作提升为可重试。</p>
  */
 public final class DefaultResilienceOperations implements ResilienceOperations {
 
     private final ResilienceExceptionClassifier classifier;
     private final SynapseObservationOperations observations;
     private final ExecutorService executor;
+    private final ConcurrentMap<String, ResiliencePolicy> policies = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Retry> retries = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, CircuitBreaker> circuitBreakers = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Bulkhead> bulkheads = new ConcurrentHashMap<>();
@@ -44,6 +45,7 @@ public final class DefaultResilienceOperations implements ResilienceOperations {
     public <T> T execute(ResiliencePolicy policy, Callable<T> action) throws Exception {
         Objects.requireNonNull(policy, "policy must not be null");
         Objects.requireNonNull(action, "action must not be null");
+        registerPolicy(policy);
         return observations.observe(SynapseObservationNames.RESILIENCE, "resilience", policy.name(), () -> {
             Callable<T> decorated = Bulkhead.decorateCallable(bulkhead(policy), action);
             decorated = CircuitBreaker.decorateCallable(circuitBreaker(policy), decorated);
@@ -62,9 +64,19 @@ public final class DefaultResilienceOperations implements ResilienceOperations {
                 if (cause instanceof Exception exception) {
                     throw exception;
                 }
+                if (cause instanceof Error error) {
+                    throw error;
+                }
                 throw ex;
             }
         });
+    }
+
+    private void registerPolicy(ResiliencePolicy policy) {
+        ResiliencePolicy existing = policies.putIfAbsent(policy.name(), policy);
+        if (existing != null && !existing.equals(policy)) {
+            throw new ResiliencePolicyConflictException(policy.name());
+        }
     }
 
     private Retry retry(ResiliencePolicy policy) {
