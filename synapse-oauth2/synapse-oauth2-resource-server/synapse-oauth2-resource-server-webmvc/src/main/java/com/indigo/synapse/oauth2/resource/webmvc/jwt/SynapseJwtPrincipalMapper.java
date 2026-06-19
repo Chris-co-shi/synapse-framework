@@ -1,15 +1,8 @@
 package com.indigo.synapse.oauth2.resource.webmvc.jwt;
 
-import com.indigo.synapse.oauth2.core.jwt.JwtClaimValues;
-import com.indigo.synapse.oauth2.core.jwt.SynapseJwtClaimNames;
-import com.indigo.synapse.oauth2.core.jwt.SynapsePrincipalType;
-import com.indigo.synapse.oauth2.core.validation.JwtClaimAccessor;
-import com.indigo.synapse.security.context.AuthenticatedClient;
+import com.indigo.synapse.oauth2.resource.core.SynapsePrincipalClaimMapper;
 import com.indigo.synapse.security.context.AuthenticatedPrincipal;
-import com.indigo.synapse.security.context.AuthenticatedUser;
 import org.springframework.security.oauth2.jwt.Jwt;
-
-import java.util.Set;
 
 /**
  * 将 JWT claims 映射为 Synapse Web 无关的已认证主体。
@@ -28,6 +21,8 @@ import java.util.Set;
  */
 public final class SynapseJwtPrincipalMapper {
 
+    private final SynapsePrincipalClaimMapper delegate = new SynapsePrincipalClaimMapper();
+
     /**
      * 根据 {@code principal_type} 将 JWT 映射为用户主体或客户端主体。
      *
@@ -36,38 +31,6 @@ public final class SynapseJwtPrincipalMapper {
      * @throws IllegalArgumentException 缺少必填 claim，或 principal_type 不受支持
      */
     public AuthenticatedPrincipal map(Jwt jwt) {
-        JwtClaimAccessor claims = new SpringJwtClaimAccessor(jwt);
-        String principalType = JwtClaimValues.requiredString(
-                claims,
-                SynapseJwtClaimNames.PRINCIPAL_TYPE
-        );
-        String tenantId = jwt.getClaimAsString(SynapseJwtClaimNames.TENANT_ID);
-        Set<String> roles = JwtClaimValues.strings(
-                claims,
-                SynapseJwtClaimNames.ROLES
-        );
-        Set<String> permissions = JwtClaimValues.strings(
-                claims,
-                SynapseJwtClaimNames.PERMISSIONS
-        );
-
-        if (SynapsePrincipalType.CLIENT.name().equals(principalType)) {
-            String clientId = JwtClaimValues.requiredString(claims, SynapseJwtClaimNames.CLIENT_ID);
-            return new AuthenticatedClient(clientId, clientId, tenantId, roles, permissions);
-        }
-
-        if (SynapsePrincipalType.USER.name().equals(principalType)) {
-            String userId = JwtClaimValues.requiredString(claims, SynapseJwtClaimNames.SUBJECT);
-            String username = jwt.getClaimAsString(SynapseJwtClaimNames.PREFERRED_USERNAME);
-            return new AuthenticatedUser(
-                    userId,
-                    username == null || username.isBlank() ? userId : username,
-                    tenantId,
-                    roles,
-                    permissions
-            );
-        }
-
-        throw new IllegalArgumentException("unsupported principal_type: " + principalType);
+        return delegate.map(new SpringJwtClaimAccessor(jwt));
     }
 }

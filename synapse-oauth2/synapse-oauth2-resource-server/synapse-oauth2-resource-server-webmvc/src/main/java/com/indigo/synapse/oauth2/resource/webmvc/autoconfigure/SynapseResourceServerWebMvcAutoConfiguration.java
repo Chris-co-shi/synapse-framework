@@ -1,15 +1,8 @@
 package com.indigo.synapse.oauth2.resource.webmvc.autoconfigure;
 
-import com.indigo.synapse.oauth2.core.token.NoopTokenDenylistPort;
 import com.indigo.synapse.oauth2.core.token.TokenDenylistPort;
-import com.indigo.synapse.oauth2.core.validation.AudienceValidator;
-import com.indigo.synapse.oauth2.core.validation.DenylistedTokenValidator;
-import com.indigo.synapse.oauth2.core.validation.PrincipalClaimsValidator;
-import com.indigo.synapse.oauth2.core.validation.PrincipalTypeClaimValidator;
-import com.indigo.synapse.oauth2.core.validation.RequiredClaimsValidator;
 import com.indigo.synapse.oauth2.core.validation.SynapseJwtValidator;
-import com.indigo.synapse.oauth2.core.validation.SynapseJwtValidatorFactory;
-import com.indigo.synapse.oauth2.core.validation.TokenTypeValidator;
+import com.indigo.synapse.oauth2.resource.core.ResourceServerValidatorFactory;
 import com.indigo.synapse.oauth2.resource.webmvc.config.SynapseResourceServerConfigurer;
 import com.indigo.synapse.oauth2.resource.webmvc.context.SynapsePrincipalContextBridgeFilter;
 import com.indigo.synapse.oauth2.resource.webmvc.gatewayproof.GatewayProofAccessDeniedHandler;
@@ -140,23 +133,8 @@ public class SynapseResourceServerWebMvcAutoConfiguration {
     public SynapseJwtValidator synapseJwtValidator(
             SynapseResourceServerProperties properties,
             org.springframework.beans.factory.ObjectProvider<TokenDenylistPort> denylistPortProvider) {
-        properties.validate();
-        List<SynapseJwtValidator> validators = new ArrayList<>();
-        validators.add(new RequiredClaimsValidator(properties.getRequiredClaims()));
-        if (properties.isAudienceValidationEnabled()) {
-            validators.add(new AudienceValidator(properties.getAudiences()));
-        }
-        validators.add(new TokenTypeValidator(properties.getAcceptedTokenTypes()));
-        validators.add(new PrincipalTypeClaimValidator());
-        validators.add(new PrincipalClaimsValidator());
-        if (properties.isDenylistEnabled()) {
-            TokenDenylistPort denylistPort = denylistPortProvider.getIfAvailable();
-            if (denylistPort == null || denylistPort instanceof NoopTokenDenylistPort) {
-                throw new IllegalStateException("real TokenDenylistPort is required when denylist is enabled");
-            }
-            validators.add(new DenylistedTokenValidator(denylistPort));
-        }
-        return SynapseJwtValidatorFactory.composite(validators);
+        return ResourceServerValidatorFactory.create(
+                properties.toValidationPolicy(), denylistPortProvider.getIfAvailable());
     }
 
     @Bean
@@ -201,8 +179,8 @@ public class SynapseResourceServerWebMvcAutoConfiguration {
     public SynapseResourceServerConfigurer synapseResourceServerConfigurer(
             SynapseResourceServerProperties properties,
             SynapseJwtAuthenticationConverter authenticationConverter,
-            SynapseBearerAuthenticationEntryPoint entryPoint,
-            SynapseAccessDeniedHandler accessDeniedHandler,
+            AuthenticationEntryPoint entryPoint,
+            AccessDeniedHandler accessDeniedHandler,
             SynapsePrincipalContextBridgeFilter bridgeFilter,
             ObjectProvider<GatewayProofVerificationFilter> gatewayProofFilter) {
         return new SynapseResourceServerConfigurer(

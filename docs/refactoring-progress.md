@@ -38,16 +38,20 @@
   MVC/WebFlux 删除重复实现和全局 ObjectMapper Bean，改为复用 Boot Jackson 构建链。
 - 测试结果：三个 Web JAR 相关测试、web-core 禁止依赖检查、`mvn clean verify` 和
   `git diff --check` 均通过，27 个 reactor project 全部成功。
-- Commit SHA：待提交
+- Commit SHA：`d5aa4db`
 - 遗留问题：保留现有 WebFlux 测试中 Spring 待删除 API 的编译告警，后续自动配置契约阶段处理。
 
 ## Phase 4：重构 OAuth2
 
-- 状态：未开始
-- 修改摘要：待执行。
-- 测试结果：未执行。
+- 状态：已完成
+- 修改摘要：统一 Resource Server 验证策略、主体/authority 映射和失败模型；实现协议中立的
+  Token Relay、Client Credentials、Authorized Client token store 与生命周期编排。
+- 测试结果：OAuth2 六个 JAR 相关测试、Resource Server Core 技术栈边界检查、OAuth2 Client
+  主体上下文隔离检查、Configuration Metadata 检查、`mvn clean verify` 和 `git diff --check`
+  均通过，27 个 reactor project 全部成功。
 - Commit SHA：待提交
-- 遗留问题：无。
+- 遗留问题：内存 Authorized Client Store 仅适合单实例或测试，生产集群需由消费方提供安全的
+  持久化实现；具体 token endpoint 和 HTTP 客户端适配由应用按技术栈实现。
 
 ## Phase 5：修复现有自动配置契约
 

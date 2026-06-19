@@ -1,10 +1,14 @@
 package com.indigo.synapse.oauth2.resource.webflux.autoconfigure;
 
+import com.indigo.synapse.oauth2.core.token.TokenDenylistPort;
+import com.indigo.synapse.oauth2.core.validation.SynapseJwtValidator;
+import com.indigo.synapse.oauth2.resource.core.ResourceServerValidatorFactory;
 import com.indigo.synapse.oauth2.resource.webflux.config.SynapseResourceServerServerHttpSecurityConfigurer;
 import com.indigo.synapse.oauth2.resource.webflux.context.ReactivePrincipalContextWebFilter;
 import com.indigo.synapse.oauth2.resource.webflux.gatewayproof.GatewayProofServerAccessDeniedHandler;
 import com.indigo.synapse.oauth2.resource.webflux.gatewayproof.GatewayProofWebFilter;
 import com.indigo.synapse.oauth2.resource.webflux.jwt.SynapseReactiveJwtAuthenticationConverter;
+import com.indigo.synapse.oauth2.resource.webflux.jwt.SynapseReactiveJwtValidatorAdapter;
 import com.indigo.synapse.oauth2.resource.webflux.web.SynapseServerAccessDeniedHandler;
 import com.indigo.synapse.oauth2.resource.webflux.web.SynapseServerAuthenticationEntryPoint;
 import com.indigo.synapse.webflux.exception.ReactiveWebErrorResponseWriter;
@@ -24,10 +28,16 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoders;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtIssuerValidator;
+import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import java.time.Clock;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,6 +54,29 @@ public class SynapseResourceServerWebFluxAutoConfiguration {
     @ConditionalOnMissingBean
     public SynapseReactiveJwtAuthenticationConverter synapseReactiveJwtAuthenticationConverter() {
         return new SynapseReactiveJwtAuthenticationConverter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SynapseJwtValidator synapseReactiveSynapseJwtValidator(
+            SynapseReactiveResourceServerProperties properties,
+            ObjectProvider<TokenDenylistPort> denylistPortProvider) {
+        return ResourceServerValidatorFactory.create(
+                properties.toValidationPolicy(), denylistPortProvider.getIfAvailable());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public OAuth2TokenValidator<Jwt> synapseReactiveSpringJwtValidator(
+            SynapseReactiveResourceServerProperties properties,
+            SynapseJwtValidator validator) {
+        List<OAuth2TokenValidator<Jwt>> validators = new ArrayList<>();
+        validators.add(new JwtTimestampValidator(properties.getClockSkew()));
+        if (properties.isIssuerValidationEnabled()) {
+            validators.add(new JwtIssuerValidator(properties.getIssuerUri()));
+        }
+        validators.add(new SynapseReactiveJwtValidatorAdapter(validator));
+        return new DelegatingOAuth2TokenValidator<>(validators);
     }
 
     @Bean
@@ -112,14 +145,21 @@ public class SynapseResourceServerWebFluxAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(ReactiveJwtDecoder.class)
-    public ReactiveJwtDecoder synapseReactiveJwtDecoder(SynapseReactiveResourceServerProperties properties) {
+    public ReactiveJwtDecoder synapseReactiveJwtDecoder(
+            SynapseReactiveResourceServerProperties properties,
+            OAuth2TokenValidator<Jwt> validator) {
+        properties.validate();
+        NimbusReactiveJwtDecoder decoder;
         if (properties.getJwkSetUri() != null && !properties.getJwkSetUri().isBlank()) {
-            return NimbusReactiveJwtDecoder.withJwkSetUri(properties.getJwkSetUri()).build();
+            decoder = NimbusReactiveJwtDecoder.withJwkSetUri(properties.getJwkSetUri()).build();
+        } else if (properties.getIssuerUri() != null && !properties.getIssuerUri().isBlank()) {
+            decoder = NimbusReactiveJwtDecoder.withIssuerLocation(properties.getIssuerUri()).build();
+        } else {
+            throw new IllegalStateException(
+                    "ReactiveJwtDecoder or key source must be configured for reactive resource server");
         }
-        if (properties.getIssuerUri() != null && !properties.getIssuerUri().isBlank()) {
-            return ReactiveJwtDecoders.fromIssuerLocation(properties.getIssuerUri());
-        }
-        throw new IllegalStateException("ReactiveJwtDecoder or key source must be configured for reactive resource server");
+        decoder.setJwtValidator(validator);
+        return decoder;
     }
 
     @Bean

@@ -1,15 +1,11 @@
 package com.indigo.synapse.oauth2.resource.webmvc.jwt;
 
-import com.indigo.synapse.oauth2.core.jwt.JwtClaimValues;
-import com.indigo.synapse.oauth2.core.jwt.SynapseJwtClaimNames;
-import com.indigo.synapse.oauth2.core.validation.JwtClaimAccessor;
+import com.indigo.synapse.oauth2.resource.core.SynapseAuthorityClaimMapper;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Synapse JWT authority 转换器。
@@ -19,25 +15,12 @@ import java.util.List;
  */
 public final class SynapseJwtGrantedAuthoritiesConverter {
 
-    public Collection<GrantedAuthority> convert(Jwt jwt) {
-        JwtClaimAccessor claims = new SpringJwtClaimAccessor(jwt);
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        JwtClaimValues.strings(claims, SynapseJwtClaimNames.SCOPE)
-                .forEach(scope -> add(authorities, "SCOPE_", scope));
-        JwtClaimValues.strings(claims, SynapseJwtClaimNames.ROLES)
-                .forEach(role -> add(authorities, "ROLE_", role));
-        JwtClaimValues.strings(claims, SynapseJwtClaimNames.PERMISSIONS)
-                .forEach(permission -> add(authorities, "PERM_", permission));
-        return List.copyOf(authorities);
-    }
+    private final SynapseAuthorityClaimMapper delegate = new SynapseAuthorityClaimMapper();
 
-    private static void add(List<GrantedAuthority> authorities, String prefix, String value) {
-        if (value == null || value.isBlank()) {
-            return;
-        }
-        String trimmed = value.trim();
-        authorities.add(new SimpleGrantedAuthority(
-                trimmed.startsWith(prefix) ? trimmed : prefix + trimmed
-        ));
+    public Collection<GrantedAuthority> convert(Jwt jwt) {
+        return delegate.map(new SpringJwtClaimAccessor(jwt)).stream()
+                .map(SimpleGrantedAuthority::new)
+                .map(GrantedAuthority.class::cast)
+                .toList();
     }
 }

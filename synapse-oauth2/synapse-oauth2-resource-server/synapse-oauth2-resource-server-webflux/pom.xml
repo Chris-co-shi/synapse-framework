@@ -20,7 +20,7 @@
         </dependency>
         <dependency>
             <groupId>com.indigo.synapse</groupId>
-            <artifactId>synapse-oauth2-core</artifactId>
+            <artifactId>synapse-oauth2-resource-server-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.indigo.synapse</groupId>

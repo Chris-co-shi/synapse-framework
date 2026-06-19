@@ -2,6 +2,7 @@ package com.indigo.synapse.oauth2.resource.webmvc.autoconfigure;
 
 import com.indigo.synapse.oauth2.core.jwt.SynapseJwtClaimNames;
 import com.indigo.synapse.oauth2.core.jwt.SynapseTokenType;
+import com.indigo.synapse.oauth2.resource.core.ResourceServerValidationPolicy;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 
@@ -82,15 +83,14 @@ public class SynapseResourceServerProperties {
         if (jwkSetUri != null && !jwkSetUri.isBlank() && publicKeyLocation != null) {
             throw new IllegalStateException("jwk-set-uri and public-key-location cannot be configured together");
         }
-        if (issuerValidationEnabled && (issuerUri == null || issuerUri.isBlank())) {
-            throw new IllegalStateException("issuer-uri must be configured when issuer validation is enabled");
-        }
-        if (audienceValidationEnabled && audiences.isEmpty()) {
-            throw new IllegalStateException("audiences must not be empty when audience validation is enabled");
-        }
-        if (acceptedTokenTypes == null || acceptedTokenTypes.isEmpty()) {
-            throw new IllegalStateException("accepted-token-types must not be empty");
-        }
+        toValidationPolicy().validate();
+    }
+
+    /** @return 与 Reactive 适配器共享的协议验证策略 */
+    public ResourceServerValidationPolicy toValidationPolicy() {
+        return new ResourceServerValidationPolicy(
+                issuerValidationEnabled, issuerUri, audienceValidationEnabled, audiences,
+                acceptedTokenTypes, requiredClaims, clockSkew, denylistEnabled);
     }
 
     public boolean isEnabled() {

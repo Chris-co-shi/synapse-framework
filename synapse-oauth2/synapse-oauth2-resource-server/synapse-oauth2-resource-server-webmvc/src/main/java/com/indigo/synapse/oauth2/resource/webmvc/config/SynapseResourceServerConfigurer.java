@@ -3,13 +3,13 @@ package com.indigo.synapse.oauth2.resource.webmvc.config;
 import com.indigo.synapse.oauth2.resource.webmvc.autoconfigure.SynapseResourceServerProperties;
 import com.indigo.synapse.oauth2.resource.webmvc.context.SynapsePrincipalContextBridgeFilter;
 import com.indigo.synapse.oauth2.resource.webmvc.jwt.SynapseJwtAuthenticationConverter;
-import com.indigo.synapse.oauth2.resource.webmvc.web.SynapseAccessDeniedHandler;
-import com.indigo.synapse.oauth2.resource.webmvc.web.SynapseBearerAuthenticationEntryPoint;
 import com.indigo.synapse.oauth2.resource.webmvc.gatewayproof.GatewayProofVerificationFilter;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 
 /**
  * Servlet OAuth2 Resource Server 的默认 HttpSecurity 配置器。
@@ -34,16 +34,16 @@ public final class SynapseResourceServerConfigurer {
 
     private final SynapseResourceServerProperties properties;
     private final SynapseJwtAuthenticationConverter authenticationConverter;
-    private final SynapseBearerAuthenticationEntryPoint entryPoint;
-    private final SynapseAccessDeniedHandler accessDeniedHandler;
+    private final AuthenticationEntryPoint entryPoint;
+    private final AccessDeniedHandler accessDeniedHandler;
     private final SynapsePrincipalContextBridgeFilter bridgeFilter;
     private final GatewayProofVerificationFilter gatewayProofVerificationFilter;
 
     public SynapseResourceServerConfigurer(
             SynapseResourceServerProperties properties,
             SynapseJwtAuthenticationConverter authenticationConverter,
-            SynapseBearerAuthenticationEntryPoint entryPoint,
-            SynapseAccessDeniedHandler accessDeniedHandler,
+            AuthenticationEntryPoint entryPoint,
+            AccessDeniedHandler accessDeniedHandler,
             SynapsePrincipalContextBridgeFilter bridgeFilter) {
         this(properties, authenticationConverter, entryPoint, accessDeniedHandler, bridgeFilter, null);
     }
@@ -51,8 +51,8 @@ public final class SynapseResourceServerConfigurer {
     public SynapseResourceServerConfigurer(
             SynapseResourceServerProperties properties,
             SynapseJwtAuthenticationConverter authenticationConverter,
-            SynapseBearerAuthenticationEntryPoint entryPoint,
-            SynapseAccessDeniedHandler accessDeniedHandler,
+            AuthenticationEntryPoint entryPoint,
+            AccessDeniedHandler accessDeniedHandler,
             SynapsePrincipalContextBridgeFilter bridgeFilter,
             GatewayProofVerificationFilter gatewayProofVerificationFilter) {
         this.properties = properties;

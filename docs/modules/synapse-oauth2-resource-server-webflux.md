@@ -40,6 +40,9 @@ synapse:
       enabled: true
       issuer-uri: http://127.0.0.1:8100
       jwk-set-uri: http://127.0.0.1:8100/oauth2/jwks
+      audiences:
+        - message-service
+      denylist-enabled: false
       permit-paths:
         - /actuator/health
         - /error
@@ -53,8 +56,16 @@ synapse:
 | `synapse.security.resource-server.enabled` | `true` | 是否启用 Reactive OAuth2 Resource Server 自动配置 |
 | `synapse.security.resource-server.issuer-uri` | 无 | 预期 JWT issuer；未提供 `jwk-set-uri` 时也用于创建默认 `ReactiveJwtDecoder` |
 | `synapse.security.resource-server.jwk-set-uri` | 无 | JWK Set 地址，用于远程加载 JWT 验签公钥 |
+| `synapse.security.resource-server.issuer-validation-enabled` | `true` | 是否校验 issuer |
+| `synapse.security.resource-server.audience-validation-enabled` | `true` | 是否校验 audience |
+| `synapse.security.resource-server.audiences` | 空列表 | 当前服务接受的 audience |
+| `synapse.security.resource-server.accepted-token-types` | `[ACCESS_TOKEN]` | 接受的 token_type |
+| `synapse.security.resource-server.required-claims` | `sub`, `exp`, `iat`, `token_type`, `principal_type` | 必填 claim |
+| `synapse.security.resource-server.clock-skew` | `60s` | 时间校验偏移 |
+| `synapse.security.resource-server.denylist-enabled` | `true` | 是否启用 denylist；启用时必须提供真实端口 |
 | `synapse.security.resource-server.permit-paths` | `/actuator/health`, `/error` | 无需认证即可访问的 WebFlux 路径 |
 | `synapse.security.resource-server.csrf-enabled` | `false` | 是否启用 Spring Security CSRF 防护 |
+| `synapse.security.resource-server.fail-fast` | `true` | 是否在配置不完整时启动失败 |
 
 发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，并为上述配置项提供 IDE 可读说明。
 

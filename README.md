@@ -96,8 +96,8 @@ synapse-framework
 | `synapse-security` | Web 无关安全主体、PermissionChecker、权限注解适配、GatewayProof 协议基础 | [查看](docs/modules/synapse-security.md) |
 | `synapse-oauth2-core` | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 | [查看](docs/modules/synapse-oauth2-core.md) |
 | `synapse-oauth2-authorization-server-support` | JWT 签发、RSAKey、JWKSource、JwtEncoder 技术支持 | [查看](docs/modules/synapse-oauth2-authorization-server-support.md) |
-| `synapse-oauth2-client` | OAuth2 出站客户端技术能力骨架 | [查看](docs/modules/synapse-oauth2-client.md) |
-| `synapse-oauth2-resource-server-core` | Resource Server 共享验证语义骨架 | [查看](docs/modules/synapse-oauth2-resource-server-core.md) |
+| `synapse-oauth2-client` | Token Relay、Client Credentials 和 Token 生命周期契约 | [查看](docs/modules/synapse-oauth2-client.md) |
+| `synapse-oauth2-resource-server-core` | Resource Server 共享验证、主体与 authority 映射语义 | [查看](docs/modules/synapse-oauth2-resource-server-core.md) |
 | `synapse-oauth2-resource-server-webmvc` | Servlet OAuth2 Resource Server 技术适配 | [查看](docs/modules/synapse-oauth2-resource-server-webmvc.md) |
 | `synapse-oauth2-resource-server-webflux` | Reactive OAuth2 Resource Server 技术适配 | [查看](docs/modules/synapse-oauth2-resource-server-webflux.md) |
 | `synapse-audit` | 审计事件契约 | [查看](docs/modules/synapse-audit.md) |
@@ -265,7 +265,8 @@ Synapse Framework
 ## 当前状态
 
 - `synapse-web` 和 `synapse-oauth2` 只做 Maven 聚合，不供应用直接依赖。
-- `synapse-oauth2-client`、`synapse-oauth2-resource-server-core` 当前是可编译边界骨架，完整能力在后续阶段实现。
+- `synapse-oauth2-client` 提供协议中立的出站 token 编排契约，不包装 OpenFeign 或具体 HTTP 客户端。
+- `synapse-oauth2-resource-server-core` 统一 MVC/WebFlux 的验证策略、主体映射和 authority 规则。
 - `synapse-webmvc` 承接 Servlet MVC Web 能力；`synapse-webflux` 提供 Reactive 技术支撑，不包含 Gateway 服务。
 - `synapse-security` 是 Web 无关安全基础模块；认证主体由 OAuth2 Resource Server 适配模块从经过验证的 Bearer Token 建立；GatewayProof 只证明可信入口。
 - OAuth2 当前通过聚合层组织 core、authorization support、client 和 resource server 子模块。

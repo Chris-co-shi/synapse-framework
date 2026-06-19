@@ -51,8 +51,8 @@
 | `synapse-security` | [synapse-security.md](synapse-security.md) | Web 无关安全主体、权限检查和安全上下文 |
 | `synapse-oauth2-core` | [synapse-oauth2-core.md](synapse-oauth2-core.md) | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 |
 | `synapse-oauth2-authorization-server-support` | [synapse-oauth2-authorization-server-support.md](synapse-oauth2-authorization-server-support.md) | JWT 签发与 JWK 技术支持 |
-| `synapse-oauth2-client` | [synapse-oauth2-client.md](synapse-oauth2-client.md) | OAuth2 出站客户端边界骨架 |
-| `synapse-oauth2-resource-server-core` | [synapse-oauth2-resource-server-core.md](synapse-oauth2-resource-server-core.md) | Resource Server 共享验证语义骨架 |
+| `synapse-oauth2-client` | [synapse-oauth2-client.md](synapse-oauth2-client.md) | Token Relay、Client Credentials 与 Token 生命周期 |
+| `synapse-oauth2-resource-server-core` | [synapse-oauth2-resource-server-core.md](synapse-oauth2-resource-server-core.md) | Resource Server 共享验证与主体映射语义 |
 | `synapse-oauth2-resource-server-webmvc` | [synapse-oauth2-resource-server-webmvc.md](synapse-oauth2-resource-server-webmvc.md) | Servlet OAuth2 Resource Server 技术适配 |
 | `synapse-oauth2-resource-server-webflux` | [synapse-oauth2-resource-server-webflux.md](synapse-oauth2-resource-server-webflux.md) | Reactive OAuth2 Resource Server 技术适配 |
 | `synapse-audit` | [synapse-audit.md](synapse-audit.md) | 审计事件契约，不是审计中心 |
