@@ -18,6 +18,7 @@ import com.indigo.synapse.datasource.health.MySqlDataSourceValidationStrategy;
 import com.indigo.synapse.datasource.health.OracleDataSourceValidationStrategy;
 import com.indigo.synapse.datasource.health.PostgreSqlDataSourceValidationStrategy;
 import com.indigo.synapse.datasource.lifecycle.DatasourceGovernanceLifecycle;
+import com.indigo.synapse.datasource.lifecycle.DatasourceInventorySynchronizer;
 import com.indigo.synapse.datasource.lifecycle.ScheduledDataSourceHealthMonitor;
 import com.indigo.synapse.datasource.loadbalance.DataSourceCandidateFilter;
 import com.indigo.synapse.datasource.loadbalance.LoadBalanceSelector;
@@ -159,7 +160,7 @@ public class SynapseDatasourceAutoConfiguration {
             SynapseDatasourceProperties properties,
             LoadBalanceSelectorFactory factory
     ) {
-        return factory.create(properties.getLoadBalance().getDefaultStrategy());
+        return factory.create(properties);
     }
 
     @Bean
@@ -213,13 +214,16 @@ public class SynapseDatasourceAutoConfiguration {
         return new DynamicDatasourceInventoryAdapter(routingDataSource, properties);
     }
 
-    @Bean
+    @Bean(destroyMethod = "shutdown")
     @ConditionalOnMissingBean(name = "synapseDatasourceTaskScheduler")
     @ConditionalOnBean(DatasourceInventory.class)
+    @ConditionalOnProperty(prefix = "synapse.datasource.health", name = "enabled", havingValue = "true", matchIfMissing = true)
     public TaskScheduler synapseDatasourceTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setThreadNamePrefix("synapse-datasource-health-");
         scheduler.setPoolSize(1);
+        scheduler.setWaitForTasksToCompleteOnShutdown(true);
+        scheduler.setAwaitTerminationSeconds(5);
         scheduler.initialize();
         return scheduler;
     }
@@ -227,14 +231,27 @@ public class SynapseDatasourceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnBean(DatasourceInventory.class)
+    public DatasourceInventorySynchronizer datasourceInventorySynchronizer(
+            DatasourceInventory inventory,
+            DataSourceDescriptorResolver descriptorResolver,
+            DataSourceDescriptorRegistry descriptorRegistry,
+            DataSourceHealthRegistry healthRegistry
+    ) {
+        return new DatasourceInventorySynchronizer(inventory, descriptorResolver, descriptorRegistry, healthRegistry);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnBean({DatasourceInventory.class, TaskScheduler.class})
+    @ConditionalOnProperty(prefix = "synapse.datasource.health", name = "enabled", havingValue = "true", matchIfMissing = true)
     public ScheduledDataSourceHealthMonitor scheduledDataSourceHealthMonitor(
             SynapseDatasourceProperties properties,
-            DatasourceInventory inventory,
+            DatasourceInventorySynchronizer inventorySynchronizer,
             DataSourceDescriptorRegistry descriptorRegistry,
             DataSourceHealthChecker healthChecker,
             TaskScheduler taskScheduler
     ) {
-        return new ScheduledDataSourceHealthMonitor(properties, inventory, descriptorRegistry, healthChecker, taskScheduler);
+        return new ScheduledDataSourceHealthMonitor(properties, inventorySynchronizer, descriptorRegistry, healthChecker, taskScheduler);
     }
 
     @Bean
@@ -242,24 +259,22 @@ public class SynapseDatasourceAutoConfiguration {
     @ConditionalOnBean(DatasourceInventory.class)
     public DatasourceGovernanceLifecycle datasourceGovernanceLifecycle(
             SynapseDatasourceProperties properties,
-            DatasourceInventory inventory,
-            DataSourceDescriptorResolver descriptorResolver,
+            DatasourceInventorySynchronizer inventorySynchronizer,
             DataSourceDescriptorRegistry descriptorRegistry,
             DataSourceHealthRegistry healthRegistry,
             DataSourceHealthChecker healthChecker,
             DataSourceSafetyChecker safetyChecker,
-            ScheduledDataSourceHealthMonitor healthMonitor,
+            ObjectProvider<ScheduledDataSourceHealthMonitor> healthMonitor,
             DatasourceStartupReporter reporter
     ) {
         return new DatasourceGovernanceLifecycle(
                 properties,
-                inventory,
-                descriptorResolver,
+                inventorySynchronizer,
                 descriptorRegistry,
                 healthRegistry,
                 healthChecker,
                 safetyChecker,
-                healthMonitor,
+                healthMonitor.getIfAvailable(),
                 reporter
         );
     }

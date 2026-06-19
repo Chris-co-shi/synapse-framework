@@ -78,14 +78,27 @@ public class DataSourceDescriptorRegistry {
     }
 
     /**
-     * 查找 primary 数据源描述符。
+     * 查找唯一 primary 数据源描述符。
      *
-     * @return primary 描述符
+     * <p>如果注册表中不存在 primary 或存在多个 primary，本方法返回空，调用方必须通过
+     * {@link #findPrimaries()} 区分缺失和重复。这样可以避免在多个 primary 时随机选择第一个导致路由错误。</p>
+     *
+     * @return 唯一 primary 描述符
      */
     public Optional<DataSourceDescriptor> findPrimary() {
+        List<DataSourceDescriptor> primaries = findPrimaries();
+        return primaries.size() == 1 ? Optional.of(primaries.getFirst()) : Optional.empty();
+    }
+
+    /**
+     * 查找所有被标记为 primary 的描述符。
+     *
+     * @return 不可变 primary 描述符列表
+     */
+    public List<DataSourceDescriptor> findPrimaries() {
         return descriptors.values().stream()
                 .filter(DataSourceDescriptor::primary)
-                .findFirst();
+                .toList();
     }
 
     /**

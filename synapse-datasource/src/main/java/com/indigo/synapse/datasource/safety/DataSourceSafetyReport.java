@@ -41,4 +41,12 @@ public record DataSourceSafetyReport(
                 Instant.now()
         );
     }
+
+    public static DataSourceSafetyReport violation(
+            String dataSourceName,
+            String message,
+            DataSourceSafetyViolationCode code
+    ) {
+        return violation(dataSourceName, message, code.name());
+    }
 }

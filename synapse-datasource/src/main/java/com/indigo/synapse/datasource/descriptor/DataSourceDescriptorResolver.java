@@ -27,14 +27,22 @@ public class DataSourceDescriptorResolver {
         this.dbTypeDetector = dbTypeDetector;
     }
 
+    /**
+     * 解析单个数据源描述符。
+     *
+     * @param name 数据源名称
+     * @param dataSource 数据源对象；只用于数据库类型 metadata 检测，不会被关闭或持有
+     * @param jdbcUrl 可选 JDBC URL；只参与类型识别，不写入描述符属性
+     * @param primaryName dynamic-datasource 显式 primary 名称
+     * @return 数据源描述符
+     */
     public DataSourceDescriptor resolve(
             String name,
             DataSource dataSource,
             Optional<String> jdbcUrl,
             Optional<String> primaryName
     ) {
-        boolean primary = primaryName.map(name::equals).orElse(false)
-                || properties.getConvention().getMasterName().equals(name);
+        boolean primary = primaryName.map(name::equals).orElse(false);
         DataSourceRole role = resolveRole(name, primary);
         String group = resolveGroup(name, role);
         SynapseDbType dbType = properties.getDetection().isEnabled()

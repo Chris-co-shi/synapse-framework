@@ -1,9 +1,6 @@
 package com.indigo.synapse.datasource.lifecycle;
 
-import com.indigo.synapse.datasource.descriptor.DataSourceDescriptor;
 import com.indigo.synapse.datasource.descriptor.DataSourceDescriptorRegistry;
-import com.indigo.synapse.datasource.descriptor.DataSourceDescriptorResolver;
-import com.indigo.synapse.datasource.dynamic.DatasourceInventory;
 import com.indigo.synapse.datasource.health.DataSourceHealthChecker;
 import com.indigo.synapse.datasource.health.DataSourceHealthRegistry;
 import com.indigo.synapse.datasource.properties.SynapseDatasourceProperties;
@@ -11,20 +8,24 @@ import com.indigo.synapse.datasource.report.DatasourceStartupReporter;
 import com.indigo.synapse.datasource.safety.DataSourceSafetyChecker;
 import org.springframework.context.SmartLifecycle;
 
-import javax.sql.DataSource;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
  * 数据源治理生命周期。
+ *
+ * <p>该类属于 `synapse-datasource` 生命周期边界，由 Spring 容器按 {@link SmartLifecycle} 管理。
+ * 它负责启动时触发 inventory 同步、安全检查、首轮健康检查、启动报告和定时健康监控。它不创建业务服务，
+ * 不执行 SQL 路由，不切换 dynamic-datasource 上下文，也不关闭外部托管 DataSource。</p>
+ *
+ * <p>实例通过 CAS 保证 start 幂等，stop 后允许再次 start。启动失败会让异常向 Spring 暴露，
+ * 便于消费方 fail-fast；stop 会停止健康监控但不会清空注册表。</p>
  */
 public class DatasourceGovernanceLifecycle implements SmartLifecycle {
 
     private final SynapseDatasourceProperties properties;
-    private final DatasourceInventory inventory;
-    private final DataSourceDescriptorResolver descriptorResolver;
+    private final DatasourceInventorySynchronizer inventorySynchronizer;
     private final DataSourceDescriptorRegistry descriptorRegistry;
     private final DataSourceHealthRegistry healthRegistry;
     private final DataSourceHealthChecker healthChecker;
@@ -35,8 +36,7 @@ public class DatasourceGovernanceLifecycle implements SmartLifecycle {
 
     public DatasourceGovernanceLifecycle(
             SynapseDatasourceProperties properties,
-            DatasourceInventory inventory,
-            DataSourceDescriptorResolver descriptorResolver,
+            DatasourceInventorySynchronizer inventorySynchronizer,
             DataSourceDescriptorRegistry descriptorRegistry,
             DataSourceHealthRegistry healthRegistry,
             DataSourceHealthChecker healthChecker,
@@ -45,8 +45,7 @@ public class DatasourceGovernanceLifecycle implements SmartLifecycle {
             DatasourceStartupReporter reporter
     ) {
         this.properties = properties;
-        this.inventory = inventory;
-        this.descriptorResolver = descriptorResolver;
+        this.inventorySynchronizer = inventorySynchronizer;
         this.descriptorRegistry = descriptorRegistry;
         this.healthRegistry = healthRegistry;
         this.healthChecker = healthChecker;
@@ -60,47 +59,43 @@ public class DatasourceGovernanceLifecycle implements SmartLifecycle {
         if (!running.compareAndSet(false, true)) {
             return;
         }
-        Map<String, DataSource> dataSources = inventory.refreshInventory();
-        Set<String> names = dataSources.keySet();
-        descriptorRegistry.findAll().stream()
-                .map(DataSourceDescriptor::name)
-                .filter(name -> !names.contains(name))
-                .toList()
-                .forEach(name -> {
-                    descriptorRegistry.remove(name);
-                    healthRegistry.remove(name);
-                });
-        dataSources.forEach((name, dataSource) -> {
-            DataSourceDescriptor descriptor = descriptorResolver.resolve(
-                    name,
-                    dataSource,
-                    inventory.getJdbcUrl(name),
-                    inventory.getPrimaryName()
-            );
-            descriptorRegistry.register(descriptor);
-            healthRegistry.registerUnknown(descriptor.name(), descriptor.group());
-        });
+        DatasourceInventorySnapshot snapshot = inventorySynchronizer.synchronize();
         if (properties.getSafety().isEnabled() && properties.getSafety().isCheckOnStartup()) {
-            inventory.getPrimaryName().map(safetyChecker::checkPrimary).ifPresent(safetyChecker::assertSafe);
-            safetyChecker.assertSafe(safetyChecker.checkStrict(inventory.isStrict()));
+            safetyChecker.assertSafe(safetyChecker.checkPrimaryDescriptor(
+                    snapshot.primaryName(),
+                    snapshot.dataSources(),
+                    descriptorRegistry
+            ));
+            safetyChecker.assertSafe(safetyChecker.checkStrict(snapshot.strict()));
+            if (properties.getDetection().isFailOnUnknown()) {
+                safetyChecker.assertSafe(safetyChecker.checkKnownDatabaseTypes(snapshot.descriptors()));
+            }
         }
-        dataSources.forEach((name, dataSource) -> descriptorRegistry.find(name)
-                .ifPresent(descriptor -> healthChecker.check(descriptor, dataSource)));
-        if (properties.getSafety().isEnabled() && properties.getSafety().isFailOnMasterUnavailable()) {
-            descriptorRegistry.findPrimary()
-                    .filter(primary -> !healthRegistry.isAvailable(primary.name()))
-                    .map(primary -> safetyChecker.checkPrimary("unavailable:" + primary.name()))
-                    .ifPresent(safetyChecker::assertSafe);
+        if (properties.getHealth().isEnabled()) {
+            snapshot.dataSources().forEach((name, dataSource) -> descriptorRegistry.find(name)
+                    .ifPresent(descriptor -> healthChecker.check(descriptor, dataSource)));
+        }
+        if (properties.getSafety().isEnabled()) {
+            if (properties.getHealth().isEnabled() && properties.getSafety().isCheckReadonlyRole()) {
+                safetyChecker.assertSafe(safetyChecker.checkReadonlyRole(snapshot.descriptors(), healthRegistry));
+            }
+            if (properties.getHealth().isEnabled() && properties.getSafety().isFailOnMasterUnavailable()) {
+                descriptorRegistry.findPrimary()
+                        .map(primary -> safetyChecker.checkMasterAvailable(primary, healthRegistry))
+                        .ifPresent(safetyChecker::assertSafe);
+            }
         }
         reporter.report();
-        if (properties.getHealth().isEnabled()) {
+        if (properties.getHealth().isEnabled() && healthMonitor != null) {
             healthMonitor.start();
         }
     }
 
     @Override
     public void stop() {
-        healthMonitor.stop();
+        if (healthMonitor != null) {
+            healthMonitor.stop();
+        }
         running.set(false);
     }
 
@@ -111,7 +106,7 @@ public class DatasourceGovernanceLifecycle implements SmartLifecycle {
 
     public Set<String> registeredNames() {
         return descriptorRegistry.findAll().stream()
-                .map(DataSourceDescriptor::name)
+                .map(com.indigo.synapse.datasource.descriptor.DataSourceDescriptor::name)
                 .collect(Collectors.toUnmodifiableSet());
     }
 }

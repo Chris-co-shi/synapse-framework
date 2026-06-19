@@ -412,11 +412,6 @@ public class SynapseDatasourceProperties {
         private LoadBalanceStrategy defaultStrategy = LoadBalanceStrategy.ROUND_ROBIN;
 
         /**
-         * 是否优先过滤不可用数据源。
-         */
-        private boolean healthFirst = true;
-
-        /**
          * 读库候选选择时是否允许 DEGRADED 状态参与。
          */
         private boolean acceptDegraded = false;
@@ -440,14 +435,6 @@ public class SynapseDatasourceProperties {
 
         public void setDefaultStrategy(LoadBalanceStrategy defaultStrategy) {
             this.defaultStrategy = defaultStrategy;
-        }
-
-        public boolean isHealthFirst() {
-            return healthFirst;
-        }
-
-        public void setHealthFirst(boolean healthFirst) {
-            this.healthFirst = healthFirst;
         }
 
         public boolean isAcceptDegraded() {
@@ -474,11 +461,6 @@ public class SynapseDatasourceProperties {
         private boolean enabled = true;
 
         /**
-         * 读库故障时是否从候选读库中排除。
-         */
-        private boolean excludeDownReadDatasource = true;
-
-        /**
          * 所有读库不可用时是否回退到主库。
          */
         private boolean readFallbackToMaster = true;
@@ -494,14 +476,6 @@ public class SynapseDatasourceProperties {
 
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
-        }
-
-        public boolean isExcludeDownReadDatasource() {
-            return excludeDownReadDatasource;
-        }
-
-        public void setExcludeDownReadDatasource(boolean excludeDownReadDatasource) {
-            this.excludeDownReadDatasource = excludeDownReadDatasource;
         }
 
         public boolean isReadFallbackToMaster() {

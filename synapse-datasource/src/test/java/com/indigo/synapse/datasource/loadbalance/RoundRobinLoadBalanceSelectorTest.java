@@ -9,9 +9,11 @@ import com.indigo.synapse.datasource.health.DataSourceHealthStatus;
 import com.indigo.synapse.datasource.properties.SynapseDatasourceProperties;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,6 +44,19 @@ class RoundRobinLoadBalanceSelectorTest {
         );
 
         assertThat(selector.select(candidates)).contains(descriptor("slave_2"));
+    }
+
+    @Test
+    void shouldKeepIndexValidWhenCounterOverflows() throws Exception {
+        RoundRobinLoadBalanceSelector selector = new RoundRobinLoadBalanceSelector();
+        Field counter = RoundRobinLoadBalanceSelector.class.getDeclaredField("counter");
+        counter.setAccessible(true);
+        ((AtomicInteger) counter.get(selector)).set(Integer.MAX_VALUE);
+
+        assertThat(selector.select(List.of(descriptor("slave_1"), descriptor("slave_2"))))
+                .contains(descriptor("slave_2"));
+        assertThat(selector.select(List.of(descriptor("slave_1"), descriptor("slave_2"))))
+                .contains(descriptor("slave_1"));
     }
 
     private static DataSourceDescriptor descriptor(String name) {

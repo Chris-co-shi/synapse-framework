@@ -63,4 +63,4 @@ PageResult<String> result = PageResult.of(List.of("a"), 1, 1, 20);
 
 MyBatis-Plus 工程增强属于 `synapse-mybatis-plus`。
 
-多数据源、数据库类型识别、健康检查、Load Balance、Router、Failover / Failback 等数据源治理能力属于 `synapse-datasource`。
+多数据源、数据库类型识别、健康检查、Load Balance、Router、Failover / Fail-fast 等数据源治理能力属于 `synapse-datasource`。

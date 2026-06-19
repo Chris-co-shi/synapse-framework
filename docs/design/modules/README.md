@@ -29,13 +29,18 @@
 12. [synapse-oauth2-resource-server-webmvc](synapse-oauth2-resource-server-webmvc.md)
 13. [synapse-oauth2-resource-server-webflux](synapse-oauth2-resource-server-webflux.md)
 
-### 第四组：基础设施能力
+### 第四组：数据层基础设施
 
 14. [synapse-data](synapse-data.md)
-15. [synapse-cache](synapse-cache.md)
-16. [synapse-audit](synapse-audit.md)
-17. [synapse-file](synapse-file.md)
-18. [synapse-mq](synapse-mq.md)
+15. [synapse-mybatis-plus](synapse-mybatis-plus.md)
+16. [synapse-datasource](synapse-datasource.md)
+
+### 第五组：通用基础设施能力
+
+17. [synapse-cache](synapse-cache.md)
+18. [synapse-audit](synapse-audit.md)
+19. [synapse-file](synapse-file.md)
+20. [synapse-mq](synapse-mq.md)
 
 ## 每份设计文档的固定结构
 

@@ -181,9 +181,11 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 当前状态：正式 reactor module，提供数据源治理能力。
 
-允许内容：dynamic-datasource 基础接入、数据源命名和分组规范、数据源元信息识别、数据库类型识别、数据源角色识别、数据库连接安全检测、健康检查、健康状态注册表、故障数据源摘除、故障恢复检测、读库 Load Balance、Router 抽象、Failover / Failback 抽象、启动诊断、运行时状态查询基础模型。
+允许内容：dynamic-datasource 基础接入、数据源命名和分组规范、运行时 inventory 同步、数据源元信息识别、数据库类型识别、数据库真实角色探测、数据库连接安全检测、健康检查、健康状态注册表、健康状态变化事件、故障数据源摘除、故障恢复检测、读库 Load Balance、Router 抽象、Failover / Fail-fast 抽象、启动诊断、运行时状态查询基础模型。
 
 禁止内容：`@DS` 封装、`@MasterDS`、`@ReadOnlyDS`、业务显式切换数据源 API、Seata 集成、MyBatis SQL 自动读写路由拦截器、应用层主库晋升、业务 Entity / Mapper / Repository / Service。
+
+运行时约束：写请求、事务读、写后读和锁读必须使用唯一且健康状态为 `UP` 的 primary master；master 缺失、重复或非 `UP` 时必须 fail-fast。新增数据源先进入 `UNKNOWN`，删除数据源必须同步移除 descriptor 和 health snapshot。
 
 ### 3.9 synapse-cache
 

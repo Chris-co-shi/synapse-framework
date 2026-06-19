@@ -11,13 +11,23 @@
 - 数据源运行时清单适配。
 - 数据源描述模型、描述符注册表、数据库类型识别、角色识别。
 - 连接安全检测。
-- 健康检查和健康状态注册表。
+- 健康检查、健康状态注册表和状态变化事件。
+- PostgreSQL / MySQL / MariaDB 真实数据库角色探测。
 - 故障摘除和恢复检测。
 - 读库 Load Balance。
 - Router 抽象和基础路由决策。
-- Failover / Failback 抽象。
+- Failover / Fail-fast 抽象。
 - 启动诊断和运行时状态查询基础模型。
-- 生命周期闭环：发现清单、注册描述符、初始健康快照、安全检查、首轮健康检查、启动摘要、定时健康监控。
+- 生命周期闭环：发现清单、注册描述符、初始健康快照、安全检查、首轮健康检查、启动摘要、定时健康监控、运行期 inventory 同步。
+
+## 运行时规则
+
+- 新增数据源先注册为 `UNKNOWN`，等待健康检查刷新。
+- 删除数据源必须同步移除 descriptor 和 health snapshot。
+- 写请求、事务读、写后读和锁读必须使用唯一且健康状态为 `UP` 的 primary master。
+- 普通读请求没有可用只读候选时，只有 failover 开启且允许 read fallback 时才回退到健康 master。
+- master 缺失、重复或非 `UP` 时必须 fail-fast。
+- 健康关闭时不创建定时巡检器，不执行首轮健康检查。
 
 ## 禁止事项
 
@@ -36,3 +46,4 @@
 - 搜索 `DynamicDataSourceContextHolder`，当前阶段不应在生产代码中操作它。
 - 搜索 MyBatis 拦截器类型，当前模块不应提供 SQL 自动路由拦截器。
 - 确认 `router.enabled=false` 时不注册 `DataSourceRouter`。
+- 确认 `load-balance.health-first` 和 `failover.exclude-down-read-datasource` 不再作为配置项出现。
