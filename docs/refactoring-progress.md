@@ -72,16 +72,19 @@
 - 测试结果：Provider 顺序/重复定义、路由四级优先级、Scope 嵌套恢复与清理、事务内切换拒绝、
   注解拦截测试通过；dynamic-datasource/Seata/MyBatis 边界扫描、`mvn clean verify` 和
   `git diff --check` 通过，27 个 reactor project 全部成功。
-- Commit SHA：待提交
+- Commit SHA：`59480bd`
 - 遗留问题：Micrometer Observation 接入按 Phase 7 统一实现，避免 Datasource 单独绑定观测实现。
 
 ## Phase 7：实现 Observability 和 Resilience
 
-- 状态：未开始
-- 修改摘要：待执行。
-- 测试结果：未执行。
+- 状态：已完成
+- 修改摘要：Observability 新增稳定命名、低基数标签、trace context/MDC 和健康扩展约定；
+  Resilience 基于 Resilience4j 实现保守 timeout/retry/circuit breaker/bulkhead 与 Observation 编排。
+- 测试结果：低基数 tag、异常传播、幂等重试、非重试异常、超时、熔断、bulkhead、自动配置
+  退让与多 Executor 测试通过；APM/Sentinel/敏感标签边界扫描、`mvn clean verify` 和
+  `git diff --check` 通过，27 个 reactor project 全部成功。
 - Commit SHA：待提交
-- 遗留问题：无。
+- 遗留问题：Messaging/Audit 的实际链路观测在其对应重构阶段接入统一 Operations。
 
 ## Phase 8：重构 Messaging
 

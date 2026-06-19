@@ -102,8 +102,8 @@ synapse-framework
 | `synapse-oauth2-resource-server-webflux` | Reactive OAuth2 Resource Server 技术适配 | [查看](docs/modules/synapse-oauth2-resource-server-webflux.md) |
 | `synapse-audit` | 审计事件契约 | [查看](docs/modules/synapse-audit.md) |
 | `synapse-messaging` | MQ 消息外壳、发布/消费模板、SPI、上下文传播契约 | [查看](docs/modules/synapse-messaging.md) |
-| `synapse-observability` | Micrometer Observation 观测能力骨架 | [查看](docs/modules/synapse-observability.md) |
-| `synapse-resilience` | 超时、重试、熔断和隔离能力骨架 | [查看](docs/modules/synapse-resilience.md) |
+| `synapse-observability` | Micrometer Observation 命名、低基数标签、MDC 与健康扩展约定 | [查看](docs/modules/synapse-observability.md) |
+| `synapse-resilience` | 基于 Resilience4j 的超时、重试、熔断、隔离和观测 | [查看](docs/modules/synapse-resilience.md) |
 
 模块手册索引：[docs/modules/README.md](docs/modules/README.md)
 
@@ -278,7 +278,8 @@ Synapse Framework
 - `synapse-mybatis-plus` 只提供 MyBatis-Plus 工程增强，不包含业务 Entity / Mapper。
 - `synapse-datasource` 只提供数据源治理能力，不提供 `@DS` 封装、Seata、MyBatis SQL 自动路由或应用层主库晋升。
 - 文件能力已移出 Framework，归 Synapse Platform 的可启动文件服务。
-- `synapse-observability`、`synapse-resilience` 当前仅建立边界骨架，尚未提供运行时自动配置。
+- `synapse-observability` 不创建 APM/exporter；消费方可提供 ObservationRegistry 与 TraceContextProvider。
+- `synapse-resilience` 默认不重试非幂等操作，也不提供假成功 fallback。
 - Framework 不提供 starter，也不提供 demo / example / sample application。
 
 ## 许可证

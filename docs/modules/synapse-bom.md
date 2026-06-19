@@ -69,8 +69,10 @@
 | --- | --- |
 | Java | 21 |
 | Spring Boot | 3.5.15 |
+| Spring Cloud | 2025.0.2 |
 | MyBatis-Plus | 3.5.16 |
 | dynamic-datasource | 4.3.1 |
+| Resilience4j | 2.2.0 |
 | JUnit Jupiter | 5.10.3 |
 | Jakarta Validation API | 3.0.2 |
 

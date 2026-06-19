@@ -26,6 +26,8 @@
 | `synapse-oauth2-resource-server-webflux` | [synapse-oauth2-resource-server-webflux/SKILL.md](synapse-oauth2-resource-server-webflux/SKILL.md) |
 | `synapse-audit` | [synapse-audit/SKILL.md](synapse-audit/SKILL.md) |
 | `synapse-messaging` | [synapse-messaging/SKILL.md](synapse-messaging/SKILL.md) |
+| `synapse-observability` | [synapse-observability/SKILL.md](synapse-observability/SKILL.md) |
+| `synapse-resilience` | [synapse-resilience/SKILL.md](synapse-resilience/SKILL.md) |
 
 ## 固定约定
 

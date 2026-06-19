@@ -57,8 +57,8 @@
 | `synapse-oauth2-resource-server-webflux` | [synapse-oauth2-resource-server-webflux.md](synapse-oauth2-resource-server-webflux.md) | Reactive OAuth2 Resource Server 技术适配 |
 | `synapse-audit` | [synapse-audit.md](synapse-audit.md) | 审计事件契约，不是审计中心 |
 | `synapse-messaging` | [synapse-messaging.md](synapse-messaging.md) | MQ 消息外壳、发布/消费模板、异常分类、上下文传播契约，不是消息中心 |
-| `synapse-observability` | [synapse-observability.md](synapse-observability.md) | Micrometer Observation 观测边界骨架 |
-| `synapse-resilience` | [synapse-resilience.md](synapse-resilience.md) | 超时、重试、熔断和隔离边界骨架 |
+| `synapse-observability` | [synapse-observability.md](synapse-observability.md) | Micrometer Observation 与低基数标签约定 |
+| `synapse-resilience` | [synapse-resilience.md](synapse-resilience.md) | Resilience4j 超时、重试、熔断和隔离 |
 | `synapse-bom` | [synapse-bom.md](synapse-bom.md) | 依赖版本管理 |
 
 ## 二阶段文档入口
