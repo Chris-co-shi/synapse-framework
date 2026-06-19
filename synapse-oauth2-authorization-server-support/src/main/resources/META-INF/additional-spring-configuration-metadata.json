@@ -1,0 +1,13 @@
+{
+  "hints": [
+    {
+      "name": "synapse.oauth2.authorization.key-id",
+      "values": [
+        {
+          "value": "synapse-dev",
+          "description": "开发环境默认 key id；生产环境不得使用该值。"
+        }
+      ]
+    }
+  ]
+}

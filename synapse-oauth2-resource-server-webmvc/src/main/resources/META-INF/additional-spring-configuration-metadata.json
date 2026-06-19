@@ -1,0 +1,13 @@
+{
+  "hints": [
+    {
+      "name": "synapse.security.resource-server.accepted-token-types",
+      "values": [
+        {
+          "value": "ACCESS_TOKEN",
+          "description": "访问令牌。"
+        }
+      ]
+    }
+  ]
+}
