@@ -18,6 +18,7 @@
 - WebFlux 支持 enabled、issuer、JWK Set、audience、token type、required claims、clock skew、denylist、permit paths、CSRF 和 fail fast 配置。
 - GatewayProof 复用 `synapse.security.gateway-proof`，WebFilter 必须位于 OAuth2 Authentication 之前。
 - 公开配置项必须生成 Spring Boot Configuration Metadata。
+- 用户提供 `ServerAuthenticationEntryPoint` 或 `ServerAccessDeniedHandler` 接口实现时，默认处理器必须退让。
 - WebFlux 与 WebMVC 通过 resource-server-core 共享验证策略；本地公钥位置仍只由 MVC 提供。
 
 ## 禁止事项

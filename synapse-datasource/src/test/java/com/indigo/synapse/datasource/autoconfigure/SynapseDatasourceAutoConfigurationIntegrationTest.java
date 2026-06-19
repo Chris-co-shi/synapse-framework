@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import javax.sql.DataSource;
 import java.util.Map;
@@ -76,6 +77,18 @@ class SynapseDatasourceAutoConfigurationIntegrationTest {
                     assertThat(context).hasSingleBean(LoadBalanceSelector.class);
                     assertThat(context.getBean(LoadBalanceSelector.class))
                             .isInstanceOf(FirstAvailableLoadBalanceSelector.class);
+                });
+    }
+
+    @Test
+    void shouldUseNamedFrameworkSchedulerWhenApplicationHasAnotherScheduler() {
+        contextRunner
+                .withBean("applicationTaskScheduler", TaskScheduler.class, ThreadPoolTaskScheduler::new)
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    assertThat(context).hasSingleBean(ScheduledDataSourceHealthMonitor.class);
+                    assertThat(context).hasBean("synapseDatasourceTaskScheduler");
+                    assertThat(context).hasBean("applicationTaskScheduler");
                 });
     }
 

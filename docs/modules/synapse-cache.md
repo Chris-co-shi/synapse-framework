@@ -107,6 +107,7 @@ CacheClient
 说明：
 
 - 只有 `StringRedisTemplate` 存在时自动配置才生效。
+- Spring Data Redis 类存在但没有 `StringRedisTemplate` Bean 时，模块会完整退让且不会阻止应用启动。
 - 所有核心 Bean 都可以由消费方自定义覆盖。
 - L1 本地缓存可以关闭。
 

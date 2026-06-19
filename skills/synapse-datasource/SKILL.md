@@ -28,6 +28,8 @@
 - 普通读请求没有可用只读候选时，只有 failover 开启且允许 read fallback 时才回退到健康 master。
 - master 缺失、重复或非 `UP` 时必须 fail-fast。
 - 健康关闭时不创建定时巡检器，不执行首轮健康检查。
+- 健康监控必须限定注入 `synapseDatasourceTaskScheduler`，不得因应用存在多个 `TaskScheduler` 而歧义。
+- 用户提供 `ScheduledDataSourceHealthMonitor` 时默认实现必须退让。
 
 ## 禁止事项
 

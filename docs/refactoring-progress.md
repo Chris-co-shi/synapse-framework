@@ -49,15 +49,18 @@
 - 测试结果：OAuth2 六个 JAR 相关测试、Resource Server Core 技术栈边界检查、OAuth2 Client
   主体上下文隔离检查、Configuration Metadata 检查、`mvn clean verify` 和 `git diff --check`
   均通过，27 个 reactor project 全部成功。
-- Commit SHA：待提交
+- Commit SHA：`33eae8d`
 - 遗留问题：内存 Authorized Client Store 仅适合单实例或测试，生产集群需由消费方提供安全的
   持久化实现；具体 token endpoint 和 HTTP 客户端适配由应用按技术栈实现。
 
 ## Phase 5：修复现有自动配置契约
 
-- 状态：未开始
-- 修改摘要：待执行。
-- 测试结果：未执行。
+- 状态：已完成
+- 修改摘要：Cache 增加 StringRedisTemplate Bean 条件；Datasource 健康监控限定框架调度器并按
+  监控器类型退让；Reactive Resource Server 的 401/403 处理器按 Spring Security 接口退让。
+- 测试结果：Cache 缺失 Redis Bean/用户 Bean 覆盖、Datasource 多调度器、Reactive 安全处理器
+  接口退让测试通过；全仓条件注解完成扫描；`mvn clean verify` 与 `git diff --check` 通过，
+  27 个 reactor project 全部成功。
 - Commit SHA：待提交
 - 遗留问题：无。
 

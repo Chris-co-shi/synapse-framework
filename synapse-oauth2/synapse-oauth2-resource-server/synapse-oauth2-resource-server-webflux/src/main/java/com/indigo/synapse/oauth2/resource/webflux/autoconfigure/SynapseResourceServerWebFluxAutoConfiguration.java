@@ -35,6 +35,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtIssuerValidator;
 import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
+import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +88,7 @@ public class SynapseResourceServerWebFluxAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(ServerAuthenticationEntryPoint.class)
     public SynapseServerAuthenticationEntryPoint synapseServerAuthenticationEntryPoint(
             WebFluxExceptionResponseFactory responseFactory,
             ReactiveWebErrorResponseWriter responseWriter) {
@@ -94,7 +96,7 @@ public class SynapseResourceServerWebFluxAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(ServerAccessDeniedHandler.class)
     public SynapseServerAccessDeniedHandler synapseServerAccessDeniedHandler(
             WebFluxExceptionResponseFactory responseFactory,
             ReactiveWebErrorResponseWriter responseWriter) {
@@ -167,8 +169,8 @@ public class SynapseResourceServerWebFluxAutoConfiguration {
     public SynapseResourceServerServerHttpSecurityConfigurer synapseResourceServerServerHttpSecurityConfigurer(
             SynapseReactiveResourceServerProperties properties,
             SynapseReactiveJwtAuthenticationConverter authenticationConverter,
-            SynapseServerAuthenticationEntryPoint entryPoint,
-            SynapseServerAccessDeniedHandler accessDeniedHandler,
+            ServerAuthenticationEntryPoint entryPoint,
+            ServerAccessDeniedHandler accessDeniedHandler,
             ReactivePrincipalContextWebFilter bridgeFilter,
             ObjectProvider<GatewayProofWebFilter> gatewayProofWebFilter) {
         return new SynapseResourceServerServerHttpSecurityConfigurer(

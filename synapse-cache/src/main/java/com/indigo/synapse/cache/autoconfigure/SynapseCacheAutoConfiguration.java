@@ -38,6 +38,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  */
 @AutoConfiguration(after = RedisAutoConfiguration.class)
 @ConditionalOnClass(StringRedisTemplate.class)
+@ConditionalOnBean(StringRedisTemplate.class)
 @EnableConfigurationProperties(com.indigo.synapse.cache.SynapseCacheProperties.class)
 public class SynapseCacheAutoConfiguration {
 

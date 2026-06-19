@@ -39,6 +39,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
@@ -241,15 +242,15 @@ public class SynapseDatasourceAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnBean({DatasourceInventory.class, TaskScheduler.class})
+    @ConditionalOnMissingBean(ScheduledDataSourceHealthMonitor.class)
+    @ConditionalOnBean(value = DatasourceInventorySynchronizer.class, name = "synapseDatasourceTaskScheduler")
     @ConditionalOnProperty(prefix = "synapse.datasource.health", name = "enabled", havingValue = "true", matchIfMissing = true)
     public ScheduledDataSourceHealthMonitor scheduledDataSourceHealthMonitor(
             SynapseDatasourceProperties properties,
             DatasourceInventorySynchronizer inventorySynchronizer,
             DataSourceDescriptorRegistry descriptorRegistry,
             DataSourceHealthChecker healthChecker,
-            TaskScheduler taskScheduler
+            @Qualifier("synapseDatasourceTaskScheduler") TaskScheduler taskScheduler
     ) {
         return new ScheduledDataSourceHealthMonitor(properties, inventorySynchronizer, descriptorRegistry, healthChecker, taskScheduler);
     }

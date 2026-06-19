@@ -4,10 +4,10 @@ import com.indigo.synapse.oauth2.resource.webflux.autoconfigure.SynapseReactiveR
 import com.indigo.synapse.oauth2.resource.webflux.context.ReactivePrincipalContextWebFilter;
 import com.indigo.synapse.oauth2.resource.webflux.gatewayproof.GatewayProofWebFilter;
 import com.indigo.synapse.oauth2.resource.webflux.jwt.SynapseReactiveJwtAuthenticationConverter;
-import com.indigo.synapse.oauth2.resource.webflux.web.SynapseServerAccessDeniedHandler;
-import com.indigo.synapse.oauth2.resource.webflux.web.SynapseServerAuthenticationEntryPoint;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
+import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
 
 /**
  * Reactive Resource Server 配置器。
@@ -16,16 +16,16 @@ public final class SynapseResourceServerServerHttpSecurityConfigurer {
 
     private final SynapseReactiveResourceServerProperties properties;
     private final SynapseReactiveJwtAuthenticationConverter authenticationConverter;
-    private final SynapseServerAuthenticationEntryPoint entryPoint;
-    private final SynapseServerAccessDeniedHandler accessDeniedHandler;
+    private final ServerAuthenticationEntryPoint entryPoint;
+    private final ServerAccessDeniedHandler accessDeniedHandler;
     private final ReactivePrincipalContextWebFilter bridgeFilter;
     private final GatewayProofWebFilter gatewayProofWebFilter;
 
     public SynapseResourceServerServerHttpSecurityConfigurer(
             SynapseReactiveResourceServerProperties properties,
             SynapseReactiveJwtAuthenticationConverter authenticationConverter,
-            SynapseServerAuthenticationEntryPoint entryPoint,
-            SynapseServerAccessDeniedHandler accessDeniedHandler,
+            ServerAuthenticationEntryPoint entryPoint,
+            ServerAccessDeniedHandler accessDeniedHandler,
             ReactivePrincipalContextWebFilter bridgeFilter) {
         this(properties, authenticationConverter, entryPoint, accessDeniedHandler, bridgeFilter, null);
     }
@@ -33,8 +33,8 @@ public final class SynapseResourceServerServerHttpSecurityConfigurer {
     public SynapseResourceServerServerHttpSecurityConfigurer(
             SynapseReactiveResourceServerProperties properties,
             SynapseReactiveJwtAuthenticationConverter authenticationConverter,
-            SynapseServerAuthenticationEntryPoint entryPoint,
-            SynapseServerAccessDeniedHandler accessDeniedHandler,
+            ServerAuthenticationEntryPoint entryPoint,
+            ServerAccessDeniedHandler accessDeniedHandler,
             ReactivePrincipalContextWebFilter bridgeFilter,
             GatewayProofWebFilter gatewayProofWebFilter) {
         this.properties = properties;

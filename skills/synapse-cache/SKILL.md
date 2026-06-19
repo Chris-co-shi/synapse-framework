@@ -16,6 +16,7 @@
 - key 生成必须可预测、可测试。
 - 锁、限流、幂等必须有失败语义和边界测试。
 - Redis 适配不得引入业务语义。
+- Redis 默认 Bean 必须以 `@ConditionalOnBean(StringRedisTemplate.class)` 为前置条件，缺少 Redis Bean 时正常退让。
 
 ## 验证
 

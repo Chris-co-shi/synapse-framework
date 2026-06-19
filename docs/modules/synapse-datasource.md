@@ -139,6 +139,9 @@ synapse-mybatis-datasource-router
 6. 输出脱敏启动摘要。
 7. 启动定时健康监控。
 
+框架健康监控固定使用名为 `synapseDatasourceTaskScheduler` 的调度器。应用存在其他
+`TaskScheduler` Bean 时不会产生注入歧义；消费方需要替换框架调度器时应使用同一 Bean 名。
+
 运行期定时巡检每轮都会重新同步 inventory。新增数据源会注册描述符和初始 `UNKNOWN` 健康快照；删除数据源会从描述符注册表和健康注册表中移除。
 
 数据库类型识别顺序为：显式配置、JDBC URL、连接 metadata、`UNKNOWN`。
