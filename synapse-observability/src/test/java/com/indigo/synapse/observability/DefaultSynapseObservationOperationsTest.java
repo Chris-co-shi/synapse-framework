@@ -52,6 +52,32 @@ class DefaultSynapseObservationOperationsTest {
     }
 
     @Test
+    void shouldRecordFatalErrorAndRethrowIt() {
+        ObservationRegistry registry = ObservationRegistry.create();
+        AtomicReference<KeyValues> captured = new AtomicReference<>();
+        registry.observationConfig().observationHandler(new ObservationHandler<Observation.Context>() {
+            @Override
+            public void onStop(Observation.Context context) {
+                captured.set(context.getLowCardinalityKeyValues());
+            }
+
+            @Override
+            public boolean supportsContext(Observation.Context context) {
+                return true;
+            }
+        });
+        DefaultSynapseObservationOperations operations = new DefaultSynapseObservationOperations(registry);
+
+        assertThatThrownBy(() -> operations.observe(
+                SynapseObservationNames.RESILIENCE, "resilience", "fatal", () -> {
+                    throw new AssertionError("fatal");
+                }))
+                .isInstanceOf(AssertionError.class)
+                .hasMessage("fatal");
+        assertThat(captured.get().toString()).contains("synapse.outcome=error");
+    }
+
+    @Test
     void shouldRejectHighCardinalityOperationTag() {
         DefaultSynapseObservationOperations operations =
                 new DefaultSynapseObservationOperations(ObservationRegistry.NOOP);
