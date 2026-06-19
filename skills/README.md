@@ -15,6 +15,8 @@
 | `synapse-config` | [synapse-config/SKILL.md](synapse-config/SKILL.md) |
 | `synapse-i18n` | [synapse-i18n/SKILL.md](synapse-i18n/SKILL.md) |
 | `synapse-data` | [synapse-data/SKILL.md](synapse-data/SKILL.md) |
+| `synapse-mybatis-plus` | [synapse-mybatis-plus/SKILL.md](synapse-mybatis-plus/SKILL.md) |
+| `synapse-datasource` | [synapse-datasource/SKILL.md](synapse-datasource/SKILL.md) |
 | `synapse-cache` | [synapse-cache/SKILL.md](synapse-cache/SKILL.md) |
 | `synapse-security` | [synapse-security/SKILL.md](synapse-security/SKILL.md) |
 | `synapse-oauth2-core` | [synapse-oauth2-core/SKILL.md](synapse-oauth2-core/SKILL.md) |

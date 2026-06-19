@@ -60,6 +60,8 @@ synapse-framework
 ├── synapse-config
 ├── synapse-i18n
 ├── synapse-data
+├── synapse-mybatis-plus
+├── synapse-datasource
 ├── synapse-cache
 ├── synapse-security
 ├── synapse-oauth2-core
@@ -81,7 +83,9 @@ synapse-framework
 | `synapse-time` | 时间和时区技术支撑，提供 UTC 查询范围转换 | [查看](docs/modules/synapse-time.md) |
 | `synapse-config` | 配置抽象、运行时读取和类型解析，不是配置中心 | [查看](docs/modules/synapse-config.md) |
 | `synapse-i18n` | 国际化消息解析抽象，不是资源中心 | [查看](docs/modules/synapse-i18n.md) |
-| `synapse-data` | 数据层基础能力，当前聚焦 OperationContext 自动填充 | [查看](docs/modules/synapse-data.md) |
+| `synapse-data` | ORM 无关的数据语义抽象 | [查看](docs/modules/synapse-data.md) |
+| `synapse-mybatis-plus` | MyBatis-Plus 工程增强 | [查看](docs/modules/synapse-mybatis-plus.md) |
+| `synapse-datasource` | 数据源治理、多数据源基础接入和路由治理抽象 | [查看](docs/modules/synapse-datasource.md) |
 | `synapse-cache` | 缓存、锁、限流、幂等基础设施 | [查看](docs/modules/synapse-cache.md) |
 | `synapse-security` | Web 无关安全主体、AuthenticatedUser/Client、PermissionChecker、权限注解适配 | [查看](docs/modules/synapse-security.md) |
 | `synapse-oauth2-core` | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 | [查看](docs/modules/synapse-oauth2-core.md) |
@@ -269,6 +273,9 @@ Synapse Framework
 - `synapse-security` 不依赖 Spring Security Web / Config。
 - `synapse-mq` 不包含真实 MQ / Redis 幂等 / DB / Outbox / 外部渠道 SDK 实现。
 - `synapse-cache` 不包含业务缓存 key 或业务规则。
+- `synapse-data` 只提供 ORM 无关的数据语义抽象，不包含 MyBatis-Plus、DataSource、Flyway 或自动配置。
+- `synapse-mybatis-plus` 只提供 MyBatis-Plus 工程增强，不包含业务 Entity / Mapper。
+- `synapse-datasource` 只提供数据源治理能力，不提供 `@DS` 封装、Seata、MyBatis SQL 自动路由或应用层主库晋升。
 - `synapse-file` 不包含上传下载 API、附件表或文件权限业务。
 - Framework 不提供 starter，也不提供 demo / example / sample application。
 

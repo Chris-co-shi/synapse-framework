@@ -128,6 +128,18 @@
 
             <dependency>
                 <groupId>com.indigo.synapse</groupId>
+                <artifactId>synapse-mybatis-plus</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.indigo.synapse</groupId>
+                <artifactId>synapse-datasource</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.indigo.synapse</groupId>
                 <artifactId>synapse-cache</artifactId>
                 <version>${project.version}</version>
             </dependency>

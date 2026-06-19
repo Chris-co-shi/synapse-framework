@@ -43,6 +43,8 @@ synapse-time
 synapse-config
 synapse-i18n
 synapse-data
+synapse-mybatis-plus
+synapse-datasource
 synapse-cache
 synapse-security
 synapse-oauth2-core
@@ -137,7 +139,9 @@ skills/<module-name>/SKILL.md
 | `synapse-time` | 时间和时区技术支撑 | 时区后台 / 用户资料管理 |
 | `synapse-config` | 配置抽象、运行时读取和类型解析 | config-service / 配置中心后台 |
 | `synapse-i18n` | 国际化消息解析抽象 | i18n-resource-center / 翻译后台 |
-| `synapse-data` | 数据层技术支撑 | 业务 Entity / Mapper / Repository / Service |
+| `synapse-data` | ORM 无关的数据语义抽象 | MyBatis-Plus / DataSource / Flyway / 自动配置 / 业务 Entity |
+| `synapse-mybatis-plus` | MyBatis-Plus 工程增强 | 业务 Entity / Mapper / Repository / Service / DataSource 治理 |
+| `synapse-datasource` | 数据源治理模块 | ORM / MyBatis SQL 自动路由 / Seata / 应用层主库晋升 |
 | `synapse-cache` | 缓存、锁、限流、幂等基础设施 | 业务缓存规则 / 缓存管理后台 |
 | `synapse-security` | Web 无关安全主体、权限检查和安全上下文 | IAM / 登录认证 / 用户角色菜单管理 / Web 认证入口 |
 | `synapse-oauth2-core` | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 | Web / Security / 签发私钥 / Resource Server |

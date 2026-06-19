@@ -2,23 +2,31 @@
 
 ## 职责
 
-`synapse-data` 只提供数据层技术支撑、MyBatis-Plus 配置、技术型基础模型和 OperationContext 自动填充。
+`synapse-data` 只提供 ORM 无关的数据语义抽象。
+
+## 允许内容
+
+- 分页模型。
+- 排序模型。
+- 审计字段名。
+- 通用数据字段名。
+- ORM 无关数据语义接口。
 
 ## 禁止事项
 
-- 不新增业务 Entity、Mapper、Repository、Service。
-- 不新增业务表结构或业务 migration。
-- 不把 Entity 暴露为 API 返回对象。
+- 不引入 MyBatis-Plus。
+- 不引入 dynamic-datasource。
+- 不引入 Flyway。
+- 不新增 Spring Boot AutoConfiguration。
+- 不新增 BaseEntity。
+- 不新增 Mapper、Repository、Service。
+- 不新增 DataSource 配置。
+- 不新增租户字段、数据权限或 SQL 路由。
+- 不新增业务 Entity、业务表结构或业务 migration。
 - 不新增 Controller 或可启动服务。
 - 不创建 starter、demo、example、sample application。
 
-## 标准实现
-
-- 只允许技术型 `BaseEntity`、`AuditableEntity`、`VersionedEntity`。
-- Mapper / Entity 只能用于 framework 技术测试或技术基础设施。
-- 多数据源和事务能力必须保持技术抽象边界。
-
 ## 验证
 
-- 搜索 `@TableName`、`BaseMapper`、`IService`、`ServiceImpl`、`CREATE TABLE`。
-- 确认命中不是业务模型。
+- 搜索 `com.baomidou`、`org.flywaydb`、`AutoConfiguration`。
+- 确认 `synapse-data` 不包含 MyBatis-Plus、Flyway、dynamic-datasource、Spring Boot 自动配置。

@@ -17,6 +17,8 @@ synapse-framework
 ├── synapse-config
 ├── synapse-i18n
 ├── synapse-data
+├── synapse-mybatis-plus
+├── synapse-datasource
 ├── synapse-cache
 ├── synapse-security
 ├── synapse-oauth2-core
@@ -50,6 +52,8 @@ synapse-framework
 ├── synapse-webflux
 ├── synapse-cloud
 ├── synapse-data
+├── synapse-mybatis-plus
+├── synapse-datasource
 ├── synapse-cache
 ├── synapse-security
 ├── synapse-oauth2-core
@@ -84,7 +88,9 @@ sample applications      不创建
 | 新增 | `synapse-webmvc` | Servlet MVC 技术支撑 |
 | 新增 | `synapse-webflux` | WebFlux 技术支撑，不是 gateway |
 | 新增 | `synapse-cloud` | Spring Cloud / Feign / 服务调用上下文传播 |
-| 保持 | `synapse-data` | 数据层技术支撑 |
+| 收紧 | `synapse-data` | ORM 无关的数据语义抽象 |
+| 新增 | `synapse-mybatis-plus` | MyBatis-Plus 工程增强 |
+| 新增 | `synapse-datasource` | 数据源治理模块 |
 | 保持 | `synapse-cache` | 缓存、锁、限流、幂等技术支撑 |
 | 收紧 | `synapse-security` | Web 无关安全主体、上下文、权限检查和密码编码 |
 | 已拆分 | `synapse-oauth2` | 不再作为正式模块 |
@@ -157,13 +163,29 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 ### 3.6 synapse-data
 
-当前状态：正式 reactor module，提供 MyBatis-Plus 基础配置、ID 生成器、自动填充和 OperationContext 读取能力。
+当前状态：正式 reactor module，提供 ORM 无关的数据语义抽象。
 
-允许内容：MyBatis-Plus 插件默认配置、ID 生成器、MetaObjectHandler、OperationContext 自动填充、技术型 `BaseEntity` / `AuditableEntity` / `VersionedEntity`、SQL 拦截器扩展点。
+允许内容：分页模型、排序模型、审计字段名、通用数据字段名、ORM 无关数据语义接口。
 
-禁止内容：业务 Entity、业务 Mapper、业务 Repository、业务 Service、业务数据库 migration、用户/角色/菜单/组织等业务表模型、具体 ABAC / DataScope 业务规则。
+禁止内容：MyBatis-Plus、dynamic-datasource、Flyway、Spring Boot AutoConfiguration、BaseEntity、Mapper、Repository、DataSource 配置、MetaObjectHandler、IdentifierGenerator、租户字段、数据权限、SQL 路由、业务 Entity、业务 Mapper、业务 Repository、业务 Service、业务数据库 migration。
 
-### 3.7 synapse-cache
+### 3.7 synapse-mybatis-plus
+
+当前状态：正式 reactor module，提供 MyBatis-Plus 工程增强。
+
+允许内容：MyBatis-Plus starter 接入、JSqlParser 接入、MyBatis-Plus 自动配置、`MybatisPlusInterceptor`、分页插件、乐观锁插件、防全表 update/delete 插件、非法 SQL 插件开关、自动字段填充、MyBatis-Plus ID 生成适配、分页模型适配。
+
+禁止内容：业务 Entity、业务 Mapper、业务 Repository、业务 Service、业务数据库 migration、DataSource 治理、Seata、SQL 自动读写路由、应用层主库晋升。
+
+### 3.8 synapse-datasource
+
+当前状态：正式 reactor module，提供数据源治理能力。
+
+允许内容：dynamic-datasource 基础接入、数据源命名和分组规范、数据源元信息识别、数据库类型识别、数据源角色识别、数据库连接安全检测、健康检查、健康状态注册表、故障数据源摘除、故障恢复检测、读库 Load Balance、Router 抽象、Failover / Failback 抽象、启动诊断、运行时状态查询基础模型。
+
+禁止内容：`@DS` 封装、`@MasterDS`、`@ReadOnlyDS`、业务显式切换数据源 API、Seata 集成、MyBatis SQL 自动读写路由拦截器、应用层主库晋升、业务 Entity / Mapper / Repository / Service。
+
+### 3.9 synapse-cache
 
 当前状态：正式 reactor module，提供缓存、锁、限流、幂等基础设施。
 
@@ -171,7 +193,7 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 禁止内容：业务缓存 key、用户缓存、菜单缓存、字典缓存业务实现、缓存管理后台。
 
-### 3.8 synapse-security
+### 3.10 synapse-security
 
 当前状态：正式 reactor module，提供 Web 无关安全主体、SecurityContext、密码编码器、PermissionChecker 和权限注解适配。
 
@@ -181,7 +203,7 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 认证主体只能由 OAuth2 Resource Server 等专用适配模块在完成 Token 验证后建立。
 
-### 3.9 synapse-oauth2-core
+### 3.11 synapse-oauth2-core
 
 当前状态：正式 reactor module，作为 OAuth2 / JWT 协议无关基础契约模块。
 
@@ -189,7 +211,7 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 禁止内容：Spring Security、WebMVC、WebFlux、私钥生成、JwtEncoder、Resource Server FilterChain、Authorization Server、登录认证、IAM。
 
-### 3.10 synapse-oauth2-authorization-server-support
+### 3.12 synapse-oauth2-authorization-server-support
 
 当前状态：正式 reactor module，只提供授权服务器侧可复用的 JWT 签发技术支撑。
 
@@ -197,7 +219,7 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 禁止内容：Authorization Server 业务实现、RegisteredClient 管理、授权码流程、登录页、用户认证、客户端管理后台、IAM。
 
-### 3.11 synapse-oauth2-resource-server-webmvc
+### 3.13 synapse-oauth2-resource-server-webmvc
 
 当前状态：正式 reactor module，提供 Servlet OAuth2 Resource Server 技术适配。
 
@@ -205,7 +227,7 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 禁止内容：JWT 签发私钥、JwtEncoder、Authorization Server、登录认证、IAM、用户/角色/菜单管理、WebFlux/Gateway。
 
-### 3.12 synapse-oauth2-resource-server-webflux
+### 3.14 synapse-oauth2-resource-server-webflux
 
 当前状态：正式 reactor module，提供 Reactive OAuth2 Resource Server 技术适配。
 
@@ -213,7 +235,7 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 禁止内容：JWT 签发私钥、JwtEncoder、Authorization Server、登录认证、IAM、Gateway 路由服务、网关业务鉴权。
 
-### 3.13 synapse-audit
+### 3.15 synapse-audit
 
 当前状态：正式 reactor module，提供审计事件契约和基础设施。
 
@@ -221,7 +243,7 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 禁止内容：审计查询 API、审计报表、审计中心后台、强绑定业务审计表、可启动 audit-service。
 
-### 3.14 synapse-file
+### 3.16 synapse-file
 
 当前状态：正式 reactor module，提供文件存储抽象和本地轻量实现。
 
@@ -229,7 +251,7 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 禁止内容：上传下载 Controller、文件管理后台、附件业务表、文件权限业务、文件审批流程、可启动 file-service。
 
-### 3.15 synapse-mq
+### 3.17 synapse-mq
 
 当前状态：正式 reactor module，`synapse-message` 已改为 `synapse-mq`，提供消息外壳、发布 / 消费模板、SPI、上下文传播契约。
 

@@ -44,7 +44,9 @@
 | `synapse-time` | [synapse-time.md](synapse-time.md) | 时间和时区技术支撑，不做时区后台 |
 | `synapse-config` | [synapse-config.md](synapse-config.md) | 配置抽象、运行时读取和类型解析，不是配置中心 |
 | `synapse-i18n` | [synapse-i18n.md](synapse-i18n.md) | 国际化消息解析抽象，不是资源中心 |
-| `synapse-data` | [synapse-data.md](synapse-data.md) | 数据层基础能力，当前聚焦 OperationContext 自动填充 |
+| `synapse-data` | [synapse-data.md](synapse-data.md) | ORM 无关的数据语义抽象 |
+| `synapse-mybatis-plus` | [synapse-mybatis-plus.md](synapse-mybatis-plus.md) | MyBatis-Plus 工程增强 |
+| `synapse-datasource` | [synapse-datasource.md](synapse-datasource.md) | 数据源治理、多数据源基础接入和路由治理抽象 |
 | `synapse-cache` | [synapse-cache.md](synapse-cache.md) | 缓存、锁、限流、幂等基础设施 |
 | `synapse-security` | [synapse-security.md](synapse-security.md) | Web 无关安全主体、权限检查和安全上下文 |
 | `synapse-oauth2-core` | [synapse-oauth2-core.md](synapse-oauth2-core.md) | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 |
@@ -65,6 +67,10 @@
 - [Phase 2 Roadmap](../phase-2/02-phase-2-roadmap.md)
 - [Boundary Checklist](../phase-2/03-boundary-checklist.md)
 - [Cloud Context Propagation](../phase-2/04-cloud-context-propagation.md)
+
+## 迁移文档
+
+- [数据模块边界迁移指南](../migration/data-module-boundary-migration.md)
 
 ## 手册编写规则
 

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 class DataModuleTest {
 
     @Test
-    void shouldDependOnCommonModule() {
-        assertEquals("synapse-core", DataModule.dependsOn());
+    void shouldExposeModuleName() {
+        assertEquals("synapse-data", DataModule.NAME);
     }
 }
