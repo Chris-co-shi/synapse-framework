@@ -61,16 +61,19 @@
 - 测试结果：Cache 缺失 Redis Bean/用户 Bean 覆盖、Datasource 多调度器、Reactive 安全处理器
   接口退让测试通过；全仓条件注解完成扫描；`mvn clean verify` 与 `git diff --check` 通过，
   27 个 reactor project 全部成功。
-- Commit SHA：待提交
+- Commit SHA：`e110ae4`
 - 遗留问题：无。
 
 ## Phase 6：完善 Datasource
 
-- 状态：未开始
-- 修改摘要：待执行。
-- 测试结果：未执行。
+- 状态：已完成
+- 修改摘要：新增不含明文凭据的数据源定义/Provider/Registry、凭据解析端口、显式路由
+  Context/Scope、`@UseDatasource`、可排序 Resolver 与事务内切换保护；复用 dynamic-datasource 官方上下文栈。
+- 测试结果：Provider 顺序/重复定义、路由四级优先级、Scope 嵌套恢复与清理、事务内切换拒绝、
+  注解拦截测试通过；dynamic-datasource/Seata/MyBatis 边界扫描、`mvn clean verify` 和
+  `git diff --check` 通过，27 个 reactor project 全部成功。
 - Commit SHA：待提交
-- 遗留问题：无。
+- 遗留问题：Micrometer Observation 接入按 Phase 7 统一实现，避免 Datasource 单独绑定观测实现。
 
 ## Phase 7：实现 Observability 和 Resilience
 

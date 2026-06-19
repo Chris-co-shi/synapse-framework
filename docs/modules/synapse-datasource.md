@@ -105,19 +105,41 @@ synapse:
       force-master-for-lock-query: true
 ```
 
-## 5. 当前阶段明确不支持
+## 5. 定义、凭据与显式路由
+
+当前提供：
+
+- `DatasourceKey` / `DatasourceDefinition`：不含明文密码的稳定定义。
+- `DatasourceDefinitionProvider` / `DatasourceRegistry`：按顺序加载、原子刷新，重复 key 快速失败。
+- `DatasourceCredentialResolver`：消费方凭据解析端口，Framework 不保存 secret。
+- `DatasourceRouteContext` / `DatasourceRouteScope`：委托 dynamic-datasource 官方上下文栈。
+- `@UseDatasource`：方法或类型级显式选择。
+- `DatasourceRouteResolver` / `DatasourceRouteSelector`：消费方扩展与固定优先级编排。
+
+路由优先级固定为：
+
+```text
+显式 DatasourceRouteScope
+→ @UseDatasource
+→ DatasourceRouteResolver（order 升序）
+→ DatasourceRegistry primary
+```
+
+`@UseDatasource` Advisor 先于 Spring 事务 Advisor 执行。活动本地事务中首次选择或切换到
+其他数据源会抛出 `DatasourceTransactionSwitchException`；嵌套相同 key 可以安全恢复。
+
+## 6. 当前明确不支持
 
 ```text
 当前不提供 `@DS` 封装。
 当前不提供 `@MasterDS`。
 当前不提供 `@ReadOnlyDS`。
-当前不提供业务显式切换数据源 API。
 当前不提供 Seata 集成。
 当前不提供 MyBatis SQL 自动读写路由拦截器。
 当前不做应用层 master 晋升。
 ```
 
-## 6. 后续扩展方向
+## 7. 后续扩展方向
 
 后续 SQL 自动路由应独立设计，例如：
 
@@ -125,9 +147,10 @@ synapse:
 synapse-mybatis-datasource-router
 ```
 
-当前 `synapse-datasource` 只提供 Router 领域模型和数据源治理能力，不绑定 MyBatis，不解析 SQL，不操作 `DynamicDataSourceContextHolder`。
+当前模块不绑定 MyBatis、不解析 SQL。仅 `DatasourceRouteContext` 作为薄适配层调用
+`DynamicDataSourceContextHolder.push/poll/clear`，不会重复代理 DataSource 或实现底层路由引擎。
 
-## 7. 运行时治理闭环
+## 8. 运行时治理闭环
 
 自动配置在存在 dynamic-datasource 运行时或消费方自定义 `DatasourceInventory` 时启用治理生命周期：
 
@@ -146,7 +169,7 @@ synapse-mybatis-datasource-router
 
 数据库类型识别顺序为：显式配置、JDBC URL、连接 metadata、`UNKNOWN`。
 
-## 8. 健康状态机
+## 9. 健康状态机
 
 健康状态包括：
 
@@ -170,7 +193,7 @@ DISABLED
 
 PostgreSQL 使用 `pg_is_in_recovery()` 探测真实角色；MySQL / MariaDB 使用 `@@read_only` 和 `@@super_read_only` 探测真实角色。Oracle 当前只做连通性检查，角色探测保留为扩展点。
 
-## 9. 路由说明
+## 10. 路由说明
 
 `router.enabled=false` 时不注册 `DataSourceRouter`。
 
@@ -184,7 +207,7 @@ PostgreSQL 使用 `pg_is_in_recovery()` 探测真实角色；MySQL / MariaDB 使
 - 读候选为空时，只有 `failover.enabled=true` 且 `read-fallback-to-master=true` 才允许回退到健康 master。
 - master 缺失或存在多个 primary 时 fail-fast。
 
-## 10. 已删除配置项
+## 11. 已删除配置项
 
 以下旧配置已删除，因为它们没有真实控制运行时行为：
 

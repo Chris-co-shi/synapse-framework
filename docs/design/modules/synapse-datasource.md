@@ -18,12 +18,14 @@
 - 启动安全检查和稳定违规码。
 - 读库候选过滤、Load Balance、Failover / Fail-fast。
 - `DataSourceRouter` 决策模型。
+- 数据源定义/凭据 Port、原子刷新注册表。
+- 委托 dynamic-datasource 官方上下文栈的显式 Scope 与注解适配。
 - 启动摘要和定时健康监控。
 
 不负责：
 
 - `@DS`、`@MasterDS`、`@ReadOnlyDS` 封装。
-- `DynamicDataSourceContextHolder` 操作。
+- 自研动态路由引擎或散落的 `DynamicDataSourceContextHolder` 操作。
 - Seata 集成。
 - MyBatis SQL 自动读写路由拦截器。
 - 应用层 master 晋升。
@@ -56,6 +58,9 @@ synapse-mybatis-plus
 - `DataSourceCandidateFilter` / `LoadBalanceSelector`：读库候选过滤和选择。
 - `DataSourceFailoverManager` / `DataSourceRoutingCoordinator`：路由 fail-fast 和 fallback 决策。
 - `ScheduledDataSourceHealthMonitor` / `DatasourceGovernanceLifecycle`：生命周期闭环。
+- `DatasourceDefinitionProvider` / `DatasourceRegistry`：定义加载、排序和原子刷新。
+- `DatasourceRouteContext` / `DatasourceRouteScope`：官方路由栈薄适配与嵌套恢复。
+- `DatasourceRouteSelector`：Scope、注解、Resolver、primary 四级选择。
 
 ## 5. 主链路
 
@@ -80,6 +85,18 @@ DataSourceRouteRequest
   -> candidate filter + load balance for readonly request
   -> require healthy master for write / transaction / lock / fallback
   -> DataSourceRouteDecision or DatasourceUnavailableException
+```
+
+显式选择链路：
+
+```text
+outer DatasourceRouteScope
+  -> @UseDatasource
+  -> ordered DatasourceRouteResolver
+  -> registry primary
+  -> DynamicDataSourceContextHolder.push
+  -> target invocation
+  -> poll and restore outer scope
 ```
 
 ## 6. 生命周期与失败边界
@@ -121,6 +138,7 @@ DISABLED stays unchanged
 - 只读候选为空时，只有 `failover.enabled=true` 且 `read-fallback-to-master=true` 才允许回退到健康 master。
 - master 缺失、重复或非 UP 时抛出 `DatasourceUnavailableException`。
 - 路由器只返回决策，不切换数据源上下文。
+- 显式 Scope/注解只通过官方 context holder 应用已确定 key；活动事务中禁止首次选择或切换。
 
 ## 9. 配置原则
 
@@ -146,8 +164,9 @@ DISABLED stays unchanged
 
 ## 10. 修改检查清单
 
-- 是否新增了 `@DS` 或业务显式切换 API。
-- 是否操作了 `DynamicDataSourceContextHolder`。
+- 是否新增了 `@DS` 包装或绕开统一 Scope 的切换 API。
+- `DynamicDataSourceContextHolder` 是否仅存在于 RouteContext/Scope 薄适配层。
+- 数据源是否在事务开始前选定，活动事务内切换是否明确失败。
 - 是否引入 MyBatis SQL 自动路由。
 - 是否把 DOWN master 当作可用 master 返回。
 - 是否让多个 primary 时随机选择第一个。

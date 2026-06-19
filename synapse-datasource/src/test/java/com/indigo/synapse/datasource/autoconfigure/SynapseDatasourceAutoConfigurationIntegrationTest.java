@@ -8,12 +8,18 @@ import com.indigo.synapse.datasource.lifecycle.ScheduledDataSourceHealthMonitor;
 import com.indigo.synapse.datasource.loadbalance.FirstAvailableLoadBalanceSelector;
 import com.indigo.synapse.datasource.loadbalance.LoadBalanceSelector;
 import com.indigo.synapse.datasource.router.DataSourceRouter;
+import com.indigo.synapse.datasource.routing.DatasourceRouteContext;
+import com.indigo.synapse.datasource.routing.DatasourceRouteSelector;
+import com.indigo.synapse.datasource.routing.UseDatasource;
+import com.indigo.synapse.datasource.routing.UseDatasourceMethodInterceptor;
+import com.indigo.synapse.datasource.definition.DatasourceRegistry;
 import com.indigo.synapse.datasource.testsupport.TestDataSources;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.aop.framework.ProxyFactory;
 
 import javax.sql.DataSource;
 import java.util.Map;
@@ -90,6 +96,33 @@ class SynapseDatasourceAutoConfigurationIntegrationTest {
                     assertThat(context).hasBean("synapseDatasourceTaskScheduler");
                     assertThat(context).hasBean("applicationTaskScheduler");
                 });
+    }
+
+    @Test
+    void shouldApplyUseDatasourceAndClearScopeAfterInvocation() {
+        DatasourceRouteContext routeContext = new DatasourceRouteContext(() -> false);
+        DatasourceRegistry registry = new DatasourceRegistry(java.util.List.of());
+        DatasourceRouteSelector selector = new DatasourceRouteSelector(routeContext, registry, java.util.List.of());
+        ProxyFactory proxyFactory = new ProxyFactory(new AnnotatedDatasourceService(routeContext));
+        proxyFactory.addAdvice(new UseDatasourceMethodInterceptor(selector, routeContext));
+        AnnotatedDatasourceService service = (AnnotatedDatasourceService) proxyFactory.getProxy();
+
+        assertThat(service.currentDatasource()).isEqualTo("report");
+        assertThat(routeContext.current()).isEmpty();
+    }
+
+    static class AnnotatedDatasourceService {
+
+        private final DatasourceRouteContext routeContext;
+
+        AnnotatedDatasourceService(DatasourceRouteContext routeContext) {
+            this.routeContext = routeContext;
+        }
+
+        @UseDatasource("report")
+        public String currentDatasource() {
+            return routeContext.current().orElseThrow().value();
+        }
     }
 
     static class TestDatasourceInventory implements DatasourceInventory {

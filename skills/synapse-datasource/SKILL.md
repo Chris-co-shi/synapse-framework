@@ -19,6 +19,9 @@
 - Failover / Fail-fast 抽象。
 - 启动诊断和运行时状态查询基础模型。
 - 生命周期闭环：发现清单、注册描述符、初始健康快照、安全检查、首轮健康检查、启动摘要、定时健康监控、运行期 inventory 同步。
+- 不含明文凭据的数据源定义、Provider 和原子刷新注册表。
+- 委托 dynamic-datasource 官方上下文栈的显式 Scope 与 `@UseDatasource`。
+- 可排序的 `DatasourceRouteResolver` 和固定四级路由优先级。
 
 ## 运行时规则
 
@@ -30,13 +33,14 @@
 - 健康关闭时不创建定时巡检器，不执行首轮健康检查。
 - 健康监控必须限定注入 `synapseDatasourceTaskScheduler`，不得因应用存在多个 `TaskScheduler` 而歧义。
 - 用户提供 `ScheduledDataSourceHealthMonitor` 时默认实现必须退让。
+- 数据源必须在事务启动前选定；活动事务内首次选择或切换必须失败。
+- Scope 必须通过 try-with-resources 关闭，嵌套关闭后恢复外层 key。
 
 ## 禁止事项
 
 - 不封装 `@DS`。
 - 不新增 `@MasterDS`。
 - 不新增 `@ReadOnlyDS`。
-- 不提供业务显式切换数据源 API。
 - 不集成 Seata。
 - 不实现 MyBatis SQL 自动读写路由拦截器。
 - 不做应用层 master 晋升。
@@ -45,7 +49,8 @@
 
 ## 验证
 
-- 搜索 `DynamicDataSourceContextHolder`，当前阶段不应在生产代码中操作它。
+- `DynamicDataSourceContextHolder` 只能出现在 `DatasourceRouteContext/Scope` 薄适配层，不得散落到业务或治理组件。
 - 搜索 MyBatis 拦截器类型，当前模块不应提供 SQL 自动路由拦截器。
 - 确认 `router.enabled=false` 时不注册 `DataSourceRouter`。
 - 确认 `load-balance.health-first` 和 `failover.exclude-down-read-datasource` 不再作为配置项出现。
+- 测试 Scope 自动恢复、线程状态清理、事务内切换拒绝和 Resolver 顺序。
