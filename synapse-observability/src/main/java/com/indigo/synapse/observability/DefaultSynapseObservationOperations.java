@@ -27,12 +27,19 @@ public final class DefaultSynapseObservationOperations implements SynapseObserva
             T result = action.call();
             observation.lowCardinalityKeyValue("synapse.outcome", "success");
             return result;
-        } catch (Exception ex) {
-            observation.lowCardinalityKeyValue("synapse.outcome", "error");
-            observation.error(ex);
-            throw ex;
+        } catch (Exception exception) {
+            markError(observation, exception);
+            throw exception;
+        } catch (Error error) {
+            markError(observation, error);
+            throw error;
         } finally {
             observation.stop();
         }
+    }
+
+    private static void markError(Observation observation, Throwable failure) {
+        observation.lowCardinalityKeyValue("synapse.outcome", "error");
+        observation.error(failure);
     }
 }
