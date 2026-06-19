@@ -10,11 +10,13 @@ import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerIntercept
 import com.indigo.synapse.core.context.OperationContextProvider;
 import com.indigo.synapse.data.audit.DataAuditorProvider;
 import com.indigo.synapse.mybatisplus.audit.OperationContextDataAuditorProvider;
+import com.indigo.synapse.mybatisplus.interceptor.SynapseInnerInterceptorContributor;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -85,5 +87,46 @@ class SynapseMybatisPlusAutoConfigurationTest {
         contextRunner
                 .withBean(DataAuditorProvider.class, () -> customProvider)
                 .run(context -> assertThat(context.getBean(DataAuditorProvider.class)).isSameAs(customProvider));
+    }
+
+    @Test
+    void shouldAppendContributorInterceptorsByOrder() {
+        TestInnerInterceptor first = new TestInnerInterceptor("first");
+        TestInnerInterceptor second = new TestInnerInterceptor("second");
+
+        contextRunner
+                .withBean("secondContributor", SynapseInnerInterceptorContributor.class,
+                        () -> new TestContributor(20, second))
+                .withBean("firstContributor", SynapseInnerInterceptorContributor.class,
+                        () -> new TestContributor(10, first))
+                .run(context -> {
+                    List<InnerInterceptor> interceptors = context.getBean(MybatisPlusInterceptor.class).getInterceptors();
+
+                    assertThat(interceptors).containsSubsequence(first, second);
+                });
+    }
+
+    @Test
+    void shouldRejectNonPositiveMaxLimit() {
+        contextRunner
+                .withPropertyValues("synapse.mybatis-plus.pagination.max-limit=0")
+                .run(context -> assertThat(context).hasFailed());
+    }
+
+    private record TestContributor(int order, InnerInterceptor interceptor)
+            implements SynapseInnerInterceptorContributor {
+
+        @Override
+        public Optional<InnerInterceptor> contribute() {
+            return Optional.of(interceptor);
+        }
+
+        @Override
+        public int getOrder() {
+            return order;
+        }
+    }
+
+    private record TestInnerInterceptor(String name) implements InnerInterceptor {
     }
 }

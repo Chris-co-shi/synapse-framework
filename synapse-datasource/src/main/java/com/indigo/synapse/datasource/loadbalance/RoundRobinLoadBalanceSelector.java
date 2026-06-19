@@ -1,7 +1,6 @@
 package com.indigo.synapse.datasource.loadbalance;
 
 import com.indigo.synapse.datasource.descriptor.DataSourceDescriptor;
-import com.indigo.synapse.datasource.health.DataSourceHealthRegistry;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,11 +8,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class RoundRobinLoadBalanceSelector implements LoadBalanceSelector {
 
-    private final DataSourceHealthRegistry registry;
     private final AtomicInteger counter = new AtomicInteger();
 
-    public RoundRobinLoadBalanceSelector(DataSourceHealthRegistry registry) {
-        this.registry = registry;
+    public RoundRobinLoadBalanceSelector() {
     }
 
     @Override
@@ -21,13 +18,7 @@ public class RoundRobinLoadBalanceSelector implements LoadBalanceSelector {
         if (candidates == null || candidates.isEmpty()) {
             return Optional.empty();
         }
-        List<DataSourceDescriptor> availableCandidates = candidates.stream()
-                .filter(candidate -> registry.isAvailable(candidate.name()))
-                .toList();
-        if (availableCandidates.isEmpty()) {
-            return Optional.empty();
-        }
-        int index = Math.floorMod(counter.getAndIncrement(), availableCandidates.size());
-        return Optional.of(availableCandidates.get(index));
+        int index = Math.floorMod(counter.getAndIncrement(), candidates.size());
+        return Optional.of(candidates.get(index));
     }
 }

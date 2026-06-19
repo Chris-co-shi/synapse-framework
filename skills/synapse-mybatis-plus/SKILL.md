@@ -11,8 +11,10 @@
 - MyBatis-Plus 自动配置。
 - `MybatisPlusInterceptor`。
 - 分页、乐观锁、防全表更新删除、非法 SQL 插件开关。
-- 自动字段填充。
+- 安全排序字段白名单映射。
+- 自动字段填充，仅填充创建/更新时间和创建/更新人，不填充 `deleted` 与 `version`。
 - OperationContext 到 DataAuditorProvider 的审计适配。
+- `SynapseInnerInterceptorContributor` 插件链扩展点。
 - MyBatis-Plus ID 生成适配。
 - `synapse-data` 分页模型与 MyBatis-Plus `Page` 转换。
 
@@ -30,3 +32,4 @@
 
 - 确认 MyBatis-Plus 相关自动配置只存在于本模块。
 - 确认实体示例只出现在文档或测试中，不作为生产业务模型。
+- 确认分页排序转换必须通过白名单解析器。

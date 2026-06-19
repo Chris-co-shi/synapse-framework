@@ -17,7 +17,7 @@ class ConfigurationMetadataTest {
 
         assertJsonObject(json);
         assertProperty(json, "synapse.datasource.enabled", "java.lang.Boolean");
-        assertProperty(json, "synapse.datasource.convention.required-primary", "java.lang.String");
+        assertProperty(json, "synapse.datasource.convention.master-name", "java.lang.String");
         assertProperty(json, "synapse.datasource.health.interval", "java.time.Duration");
         assertProperty(json, "synapse.datasource.load-balance.default-strategy",
                 "com.indigo.synapse.datasource.loadbalance.LoadBalanceStrategy");

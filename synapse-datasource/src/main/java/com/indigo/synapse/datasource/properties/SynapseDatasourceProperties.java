@@ -1,9 +1,18 @@
 package com.indigo.synapse.datasource.properties;
 
 import com.indigo.synapse.datasource.loadbalance.LoadBalanceStrategy;
+import com.indigo.synapse.datasource.descriptor.SynapseDbType;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Synapse 数据源治理配置项。
@@ -12,6 +21,7 @@ import java.time.Duration;
  * 不提供 ORM 配置、SQL 自动路由或业务数据源切换 API。</p>
  */
 @ConfigurationProperties(prefix = "synapse.datasource")
+@Validated
 public class SynapseDatasourceProperties {
 
     /**
@@ -22,36 +32,43 @@ public class SynapseDatasourceProperties {
     /**
      * 数据源命名和接入约定。
      */
+    @Valid
     private final Convention convention = new Convention();
 
     /**
      * 数据库类型识别配置。
      */
+    @Valid
     private final Detection detection = new Detection();
 
     /**
      * 数据源健康检查配置。
      */
+    @Valid
     private final Health health = new Health();
 
     /**
      * 数据源连接安全检测配置。
      */
+    @Valid
     private final Safety safety = new Safety();
 
     /**
      * 读库负载均衡配置。
      */
+    @Valid
     private final LoadBalance loadBalance = new LoadBalance();
 
     /**
      * 故障转移和恢复配置。
      */
+    @Valid
     private final Failover failover = new Failover();
 
     /**
      * 路由决策配置。当前只生成路由决策，不启用 SQL 自动路由。
      */
+    @Valid
     private final Router router = new Router();
 
     public boolean isEnabled() {
@@ -92,11 +109,6 @@ public class SynapseDatasourceProperties {
 
     public static class Convention {
         /**
-         * dynamic-datasource 的 primary 必须使用的名称。
-         */
-        private String requiredPrimary = "master";
-
-        /**
          * 是否要求 dynamic-datasource 开启 strict 模式。
          */
         private boolean requireStrict = true;
@@ -104,35 +116,32 @@ public class SynapseDatasourceProperties {
         /**
          * 主库数据源名称。
          */
+        @NotBlank
         private String masterName = "master";
 
         /**
          * 读库数据源组名前缀。
          */
+        @NotBlank
         private String slaveGroup = "slave";
 
         /**
          * 报表库数据源组名前缀。
          */
+        @NotBlank
         private String reportGroup = "report";
 
         /**
          * 归档库数据源组名前缀。
          */
+        @NotBlank
         private String archiveGroup = "archive";
 
         /**
          * 外部只读库数据源组名前缀。
          */
+        @NotBlank
         private String externalGroup = "external";
-
-        public String getRequiredPrimary() {
-            return requiredPrimary;
-        }
-
-        public void setRequiredPrimary(String requiredPrimary) {
-            this.requiredPrimary = requiredPrimary;
-        }
 
         public boolean isRequireStrict() {
             return requireStrict;
@@ -199,6 +208,11 @@ public class SynapseDatasourceProperties {
          */
         private boolean preferExplicit = true;
 
+        /**
+         * 按数据源名称显式指定数据库类型。该映射不会保存账号、密码或连接密钥。
+         */
+        private Map<String, SynapseDbType> explicitTypes = new LinkedHashMap<>();
+
         public boolean isEnabled() {
             return enabled;
         }
@@ -222,6 +236,14 @@ public class SynapseDatasourceProperties {
         public void setPreferExplicit(boolean preferExplicit) {
             this.preferExplicit = preferExplicit;
         }
+
+        public Map<String, SynapseDbType> getExplicitTypes() {
+            return explicitTypes;
+        }
+
+        public void setExplicitTypes(Map<String, SynapseDbType> explicitTypes) {
+            this.explicitTypes = explicitTypes == null ? new LinkedHashMap<>() : new LinkedHashMap<>(explicitTypes);
+        }
     }
 
     public static class Health {
@@ -233,26 +255,31 @@ public class SynapseDatasourceProperties {
         /**
          * 健康检查初始延迟。
          */
+        @NotNull
         private Duration initialDelay = Duration.ofSeconds(10);
 
         /**
          * 健康检查间隔。
          */
+        @NotNull
         private Duration interval = Duration.ofSeconds(30);
 
         /**
          * 单次健康检查超时时间。
          */
+        @NotNull
         private Duration timeout = Duration.ofSeconds(2);
 
         /**
          * 连续失败达到该阈值后标记为 DOWN。
          */
+        @Positive
         private int failureThreshold = 3;
 
         /**
          * 故障后连续成功达到该阈值后恢复为 UP。
          */
+        @Positive
         private int recoveryThreshold = 2;
 
         public boolean isEnabled() {
@@ -301,6 +328,21 @@ public class SynapseDatasourceProperties {
 
         public void setRecoveryThreshold(int recoveryThreshold) {
             this.recoveryThreshold = recoveryThreshold;
+        }
+
+        @AssertTrue(message = "initial-delay must be zero or positive")
+        public boolean isInitialDelayValid() {
+            return initialDelay != null && !initialDelay.isNegative();
+        }
+
+        @AssertTrue(message = "interval must be positive")
+        public boolean isIntervalValid() {
+            return interval != null && !interval.isZero() && !interval.isNegative();
+        }
+
+        @AssertTrue(message = "timeout must be positive")
+        public boolean isTimeoutValid() {
+            return timeout != null && !timeout.isZero() && !timeout.isNegative();
         }
     }
 
@@ -374,6 +416,16 @@ public class SynapseDatasourceProperties {
          */
         private boolean healthFirst = true;
 
+        /**
+         * 读库候选选择时是否允许 DEGRADED 状态参与。
+         */
+        private boolean acceptDegraded = false;
+
+        /**
+         * 读库候选选择时是否允许 RECOVERING 状态参与。
+         */
+        private boolean acceptRecovering = false;
+
         public boolean isEnabled() {
             return enabled;
         }
@@ -396,6 +448,22 @@ public class SynapseDatasourceProperties {
 
         public void setHealthFirst(boolean healthFirst) {
             this.healthFirst = healthFirst;
+        }
+
+        public boolean isAcceptDegraded() {
+            return acceptDegraded;
+        }
+
+        public void setAcceptDegraded(boolean acceptDegraded) {
+            this.acceptDegraded = acceptDegraded;
+        }
+
+        public boolean isAcceptRecovering() {
+            return acceptRecovering;
+        }
+
+        public void setAcceptRecovering(boolean acceptRecovering) {
+            this.acceptRecovering = acceptRecovering;
         }
     }
 

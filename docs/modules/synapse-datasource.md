@@ -4,7 +4,7 @@
 
 `synapse-datasource` 是数据源治理模块，不是 ORM 模块。
 
-它覆盖多数据源基础接入、数据源命名和分组规范、数据源元信息识别、数据库类型识别、连接安全检测、健康检查、健康状态注册表、故障数据源摘除、故障恢复检测、读库 Load Balance、Router 抽象、Failover / Failback 抽象、启动诊断和运行时状态查询基础模型。
+它覆盖多数据源运行时清单适配、数据源命名和分组规范、数据源描述符注册表、数据库类型识别、连接安全检测、健康检查、健康状态注册表、故障数据源摘除、故障恢复检测、读库 Load Balance、Router 抽象、Failover / Failback 抽象、启动诊断和运行时状态查询基础模型。
 
 ## 2. 底层依赖
 
@@ -58,7 +58,6 @@ synapse:
     enabled: true
 
     convention:
-      required-primary: master
       require-strict: true
       master-name: master
       slave-group: slave
@@ -70,6 +69,8 @@ synapse:
       enabled: true
       fail-on-unknown: false
       prefer-explicit: true
+      explicit-types:
+        master: POSTGRESQL
 
     health:
       enabled: true
@@ -89,6 +90,8 @@ synapse:
       enabled: true
       default-strategy: ROUND_ROBIN
       health-first: true
+      accept-degraded: false
+      accept-recovering: false
 
     failover:
       enabled: true
@@ -125,3 +128,23 @@ synapse-mybatis-datasource-router
 ```
 
 当前 `synapse-datasource` 只提供 Router 领域模型和数据源治理能力，不绑定 MyBatis，不解析 SQL，不操作 `DynamicDataSourceContextHolder`。
+
+## 7. 运行时治理闭环
+
+自动配置在存在 dynamic-datasource 运行时或消费方自定义 `DatasourceInventory` 时启用治理生命周期：
+
+1. 读取运行时数据源清单。
+2. 解析并注册 `DataSourceDescriptor`。
+3. 为每个数据源登记初始 `UNKNOWN` 健康快照。
+4. 执行 primary 名称和 strict 模式安全检查。
+5. 执行首轮健康检查。
+6. 输出脱敏启动摘要。
+7. 启动定时健康监控。
+
+数据库类型识别顺序为：显式配置、JDBC URL、连接 metadata、`UNKNOWN`。
+
+## 8. 路由说明
+
+`router.enabled=false` 时不注册 `DataSourceRouter`。
+
+`router.enabled=true` 时注册 `DataSourceRoutingCoordinator`，它只生成 `DataSourceRouteDecision`，不会切换 dynamic-datasource 上下文，也不会拦截 SQL。

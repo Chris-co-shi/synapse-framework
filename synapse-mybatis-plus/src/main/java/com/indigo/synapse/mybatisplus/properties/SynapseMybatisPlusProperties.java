@@ -1,7 +1,10 @@
 package com.indigo.synapse.mybatisplus.properties;
 
 import com.baomidou.mybatisplus.annotation.DbType;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Synapse MyBatis-Plus 工程增强配置项。
@@ -10,6 +13,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * 业务 Mapper 或业务 Entity 配置。</p>
  */
 @ConfigurationProperties(prefix = "synapse.mybatis-plus")
+@Validated
 public class SynapseMybatisPlusProperties {
 
     /**
@@ -20,26 +24,31 @@ public class SynapseMybatisPlusProperties {
     /**
      * 分页插件配置。
      */
+    @Valid
     private final Pagination pagination = new Pagination();
 
     /**
      * 乐观锁插件配置。
      */
+    @Valid
     private final OptimisticLock optimisticLock = new OptimisticLock();
 
     /**
      * 防全表更新删除插件配置。
      */
+    @Valid
     private final BlockAttack blockAttack = new BlockAttack();
 
     /**
      * 非法 SQL 插件配置。
      */
+    @Valid
     private final IllegalSql illegalSql = new IllegalSql();
 
     /**
      * 审计字段自动填充配置。
      */
+    @Valid
     private final AuditFill auditFill = new AuditFill();
 
     public boolean isEnabled() {
@@ -84,6 +93,7 @@ public class SynapseMybatisPlusProperties {
         /**
          * 单页最大记录数。
          */
+        @Positive
         private Long maxLimit = 500L;
 
         /**

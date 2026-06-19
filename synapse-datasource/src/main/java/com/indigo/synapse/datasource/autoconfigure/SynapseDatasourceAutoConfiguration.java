@@ -1,23 +1,46 @@
 package com.indigo.synapse.datasource.autoconfigure;
 
+import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
+import com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceProperties;
+import com.indigo.synapse.datasource.descriptor.DataSourceDescriptorRegistry;
+import com.indigo.synapse.datasource.descriptor.DataSourceDescriptorResolver;
 import com.indigo.synapse.datasource.detection.CompositeDbTypeDetector;
 import com.indigo.synapse.datasource.detection.ConnectionMetadataDbTypeDetector;
 import com.indigo.synapse.datasource.detection.JdbcUrlDbTypeDetector;
+import com.indigo.synapse.datasource.dynamic.DatasourceInventory;
+import com.indigo.synapse.datasource.dynamic.DynamicDatasourceInventoryAdapter;
 import com.indigo.synapse.datasource.failover.DataSourceFailoverManager;
 import com.indigo.synapse.datasource.health.DataSourceHealthChecker;
 import com.indigo.synapse.datasource.health.DataSourceHealthRegistry;
+import com.indigo.synapse.datasource.health.DataSourceValidationStrategy;
+import com.indigo.synapse.datasource.health.GenericDataSourceValidationStrategy;
+import com.indigo.synapse.datasource.health.MySqlDataSourceValidationStrategy;
+import com.indigo.synapse.datasource.health.OracleDataSourceValidationStrategy;
+import com.indigo.synapse.datasource.health.PostgreSqlDataSourceValidationStrategy;
+import com.indigo.synapse.datasource.lifecycle.DatasourceGovernanceLifecycle;
+import com.indigo.synapse.datasource.lifecycle.ScheduledDataSourceHealthMonitor;
+import com.indigo.synapse.datasource.loadbalance.DataSourceCandidateFilter;
 import com.indigo.synapse.datasource.loadbalance.LoadBalanceSelector;
-import com.indigo.synapse.datasource.loadbalance.RoundRobinLoadBalanceSelector;
+import com.indigo.synapse.datasource.loadbalance.LoadBalanceSelectorFactory;
 import com.indigo.synapse.datasource.properties.SynapseDatasourceProperties;
 import com.indigo.synapse.datasource.report.DatasourceStartupReporter;
 import com.indigo.synapse.datasource.router.DataSourceRouter;
-import com.indigo.synapse.datasource.router.DefaultDataSourceRouter;
+import com.indigo.synapse.datasource.router.DataSourceRoutingCoordinator;
+import com.indigo.synapse.datasource.router.DataSourceRoutingPolicy;
+import com.indigo.synapse.datasource.router.DefaultDataSourceRoutingPolicy;
 import com.indigo.synapse.datasource.safety.DataSourceSafetyChecker;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+
 
 /**
  * Synapse 数据源治理自动配置。
@@ -27,6 +50,7 @@ import org.springframework.context.annotation.Bean;
  */
 @AutoConfiguration
 @EnableConfigurationProperties(SynapseDatasourceProperties.class)
+@ConditionalOnClass(DynamicRoutingDataSource.class)
 @ConditionalOnProperty(prefix = "synapse.datasource", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class SynapseDatasourceAutoConfiguration {
 
@@ -45,10 +69,26 @@ public class SynapseDatasourceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public CompositeDbTypeDetector compositeDbTypeDetector(
+            SynapseDatasourceProperties properties,
             JdbcUrlDbTypeDetector jdbcUrlDbTypeDetector,
             ConnectionMetadataDbTypeDetector connectionMetadataDbTypeDetector
     ) {
-        return new CompositeDbTypeDetector(jdbcUrlDbTypeDetector, connectionMetadataDbTypeDetector);
+        return new CompositeDbTypeDetector(properties, jdbcUrlDbTypeDetector, connectionMetadataDbTypeDetector);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DataSourceDescriptorRegistry dataSourceDescriptorRegistry() {
+        return new DataSourceDescriptorRegistry();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DataSourceDescriptorResolver dataSourceDescriptorResolver(
+            SynapseDatasourceProperties properties,
+            CompositeDbTypeDetector dbTypeDetector
+    ) {
+        return new DataSourceDescriptorResolver(properties, dbTypeDetector);
     }
 
     @Bean
@@ -61,9 +101,35 @@ public class SynapseDatasourceAutoConfiguration {
     @ConditionalOnMissingBean
     public DataSourceHealthChecker dataSourceHealthChecker(
             SynapseDatasourceProperties properties,
-            DataSourceHealthRegistry registry
+            DataSourceHealthRegistry registry,
+            ObjectProvider<DataSourceValidationStrategy> strategies,
+            ApplicationEventPublisher eventPublisher
     ) {
-        return new DataSourceHealthChecker(properties, registry);
+        return new DataSourceHealthChecker(properties, registry, strategies.orderedStream().toList(), eventPublisher);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PostgreSqlDataSourceValidationStrategy postgreSqlDataSourceValidationStrategy() {
+        return new PostgreSqlDataSourceValidationStrategy();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public MySqlDataSourceValidationStrategy mySqlDataSourceValidationStrategy() {
+        return new MySqlDataSourceValidationStrategy();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public OracleDataSourceValidationStrategy oracleDataSourceValidationStrategy() {
+        return new OracleDataSourceValidationStrategy();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public GenericDataSourceValidationStrategy genericDataSourceValidationStrategy() {
+        return new GenericDataSourceValidationStrategy();
     }
 
     @Bean
@@ -74,25 +140,127 @@ public class SynapseDatasourceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public LoadBalanceSelector loadBalanceSelector(DataSourceHealthRegistry registry) {
-        return new RoundRobinLoadBalanceSelector(registry);
+    public DataSourceCandidateFilter dataSourceCandidateFilter(
+            SynapseDatasourceProperties properties,
+            DataSourceHealthRegistry registry
+    ) {
+        return new DataSourceCandidateFilter(properties, registry);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public DataSourceRouter dataSourceRouter(SynapseDatasourceProperties properties) {
-        return new DefaultDataSourceRouter(properties);
+    public LoadBalanceSelectorFactory loadBalanceSelectorFactory(DataSourceHealthRegistry registry) {
+        return new LoadBalanceSelectorFactory(registry);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public DataSourceFailoverManager dataSourceFailoverManager(SynapseDatasourceProperties properties) {
-        return new DataSourceFailoverManager(properties);
+    public LoadBalanceSelector loadBalanceSelector(
+            SynapseDatasourceProperties properties,
+            LoadBalanceSelectorFactory factory
+    ) {
+        return factory.create(properties.getLoadBalance().getDefaultStrategy());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DataSourceRoutingPolicy dataSourceRoutingPolicy(SynapseDatasourceProperties properties) {
+        return new DefaultDataSourceRoutingPolicy(properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "synapse.datasource.router", name = "enabled", havingValue = "true")
+    public DataSourceRouter dataSourceRouter(
+            DataSourceRoutingPolicy routingPolicy,
+            DataSourceDescriptorRegistry descriptorRegistry,
+            DataSourceCandidateFilter candidateFilter,
+            LoadBalanceSelector loadBalanceSelector,
+            DataSourceFailoverManager failoverManager
+    ) {
+        return new DataSourceRoutingCoordinator(
+                routingPolicy,
+                descriptorRegistry,
+                candidateFilter,
+                loadBalanceSelector,
+                failoverManager
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DataSourceFailoverManager dataSourceFailoverManager(
+            SynapseDatasourceProperties properties,
+            DataSourceDescriptorRegistry descriptorRegistry,
+            DataSourceHealthRegistry healthRegistry
+    ) {
+        return new DataSourceFailoverManager(properties, descriptorRegistry, healthRegistry);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public DatasourceStartupReporter datasourceStartupReporter(SynapseDatasourceProperties properties) {
         return new DatasourceStartupReporter(properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnBean({DynamicRoutingDataSource.class, DynamicDataSourceProperties.class})
+    public DatasourceInventory datasourceInventory(
+            DynamicRoutingDataSource routingDataSource,
+            DynamicDataSourceProperties properties
+    ) {
+        return new DynamicDatasourceInventoryAdapter(routingDataSource, properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "synapseDatasourceTaskScheduler")
+    @ConditionalOnBean(DatasourceInventory.class)
+    public TaskScheduler synapseDatasourceTaskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setThreadNamePrefix("synapse-datasource-health-");
+        scheduler.setPoolSize(1);
+        scheduler.initialize();
+        return scheduler;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnBean(DatasourceInventory.class)
+    public ScheduledDataSourceHealthMonitor scheduledDataSourceHealthMonitor(
+            SynapseDatasourceProperties properties,
+            DatasourceInventory inventory,
+            DataSourceDescriptorRegistry descriptorRegistry,
+            DataSourceHealthChecker healthChecker,
+            TaskScheduler taskScheduler
+    ) {
+        return new ScheduledDataSourceHealthMonitor(properties, inventory, descriptorRegistry, healthChecker, taskScheduler);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnBean(DatasourceInventory.class)
+    public DatasourceGovernanceLifecycle datasourceGovernanceLifecycle(
+            SynapseDatasourceProperties properties,
+            DatasourceInventory inventory,
+            DataSourceDescriptorResolver descriptorResolver,
+            DataSourceDescriptorRegistry descriptorRegistry,
+            DataSourceHealthRegistry healthRegistry,
+            DataSourceHealthChecker healthChecker,
+            DataSourceSafetyChecker safetyChecker,
+            ScheduledDataSourceHealthMonitor healthMonitor,
+            DatasourceStartupReporter reporter
+    ) {
+        return new DatasourceGovernanceLifecycle(
+                properties,
+                inventory,
+                descriptorResolver,
+                descriptorRegistry,
+                healthRegistry,
+                healthChecker,
+                safetyChecker,
+                healthMonitor,
+                reporter
+        );
     }
 }

@@ -13,14 +13,18 @@ import com.indigo.synapse.data.audit.DataAuditorProvider;
 import com.indigo.synapse.mybatisplus.audit.OperationContextDataAuditorProvider;
 import com.indigo.synapse.mybatisplus.fill.SynapseMetaObjectHandler;
 import com.indigo.synapse.mybatisplus.id.SynapseMybatisPlusIdentifierGenerator;
+import com.indigo.synapse.mybatisplus.interceptor.SynapseInnerInterceptorContributor;
 import com.indigo.synapse.mybatisplus.properties.SynapseMybatisPlusProperties;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.context.annotation.Bean;
 
 import java.time.Clock;
+import java.util.List;
 
 /**
  * Synapse MyBatis-Plus 自动配置。
@@ -35,7 +39,10 @@ public class SynapseMybatisPlusAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public MybatisPlusInterceptor synapseMybatisPlusInterceptor(SynapseMybatisPlusProperties properties) {
+    public MybatisPlusInterceptor synapseMybatisPlusInterceptor(
+            SynapseMybatisPlusProperties properties,
+            ObjectProvider<SynapseInnerInterceptorContributor> contributors
+    ) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
 
         if (properties.getPagination().isEnabled()) {
@@ -58,6 +65,14 @@ public class SynapseMybatisPlusAutoConfiguration {
         if (properties.getBlockAttack().isEnabled()) {
             interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
         }
+
+        List<SynapseInnerInterceptorContributor> orderedContributors = contributors.orderedStream()
+                .sorted(AnnotationAwareOrderComparator.INSTANCE)
+                .toList();
+        orderedContributors.stream()
+                .map(SynapseInnerInterceptorContributor::contribute)
+                .flatMap(java.util.Optional::stream)
+                .forEach(interceptor::addInnerInterceptor);
 
         return interceptor;
     }

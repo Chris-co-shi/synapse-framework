@@ -1,13 +1,12 @@
 package com.indigo.synapse.datasource.report;
 
 import com.indigo.synapse.datasource.properties.SynapseDatasourceProperties;
-import org.springframework.beans.factory.InitializingBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.logging.Logger;
+public class DatasourceStartupReporter {
 
-public class DatasourceStartupReporter implements InitializingBean {
-
-    private static final Logger LOGGER = Logger.getLogger(DatasourceStartupReporter.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatasourceStartupReporter.class);
 
     private final SynapseDatasourceProperties properties;
 
@@ -19,7 +18,7 @@ public class DatasourceStartupReporter implements InitializingBean {
         String report = """
                 Synapse Datasource:
                   enabled: %s
-                  requiredPrimary: %s
+                  masterName: %s
                   requireStrict: %s
                   dbDetection: %s
                   healthCheck: %s
@@ -29,7 +28,7 @@ public class DatasourceStartupReporter implements InitializingBean {
                   sqlAutoRouting: %s
                 """.formatted(
                 properties.isEnabled(),
-                properties.getConvention().getRequiredPrimary(),
+                properties.getConvention().getMasterName(),
                 properties.getConvention().isRequireStrict(),
                 enabledText(properties.getDetection().isEnabled()),
                 enabledText(properties.getHealth().isEnabled()),
@@ -44,10 +43,5 @@ public class DatasourceStartupReporter implements InitializingBean {
 
     private static String enabledText(boolean enabled) {
         return enabled ? "enabled" : "disabled";
-    }
-
-    @Override
-    public void afterPropertiesSet() {
-        report();
     }
 }

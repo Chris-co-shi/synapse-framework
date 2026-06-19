@@ -4,7 +4,7 @@
 
 `synapse-data` 是 ORM 无关的数据语义抽象模块。
 
-它只提供分页模型、排序模型、审计字段名、通用数据字段名等基础概念。
+它只提供分页模型、排序模型、审计人提供者和通用数据字段名等基础概念。
 
 ## 2. 当前事实
 
@@ -15,7 +15,6 @@
 - `SortItem`
 - `SortDirection`
 - `DataAuditorProvider`
-- `DataAuditFields`
 - `DataFieldNames`
 
 ## 3. 明确不提供

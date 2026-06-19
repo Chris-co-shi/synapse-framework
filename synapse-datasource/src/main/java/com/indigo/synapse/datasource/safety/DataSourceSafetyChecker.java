@@ -11,22 +11,28 @@ public class DataSourceSafetyChecker {
     }
 
     public DataSourceSafetyReport checkPrimary(String primary) {
-        String required = properties.getConvention().getRequiredPrimary();
+        String required = properties.getConvention().getMasterName();
         boolean safe = required.equals(primary);
-        return new DataSourceSafetyReport(
-                safe,
-                primary,
-                safe ? "Primary datasource is valid." : "Primary datasource must be " + required
-        );
+        return safe
+                ? DataSourceSafetyReport.safe(primary, "Primary datasource is valid.")
+                : DataSourceSafetyReport.violation(primary, "Primary datasource must be " + required, "PRIMARY_NAME_MISMATCH");
     }
 
     public DataSourceSafetyReport checkStrict(boolean strict) {
         boolean required = properties.getConvention().isRequireStrict();
         boolean safe = !required || strict;
-        return new DataSourceSafetyReport(
-                safe,
-                "dynamic-datasource",
-                safe ? "Dynamic datasource strict mode is valid." : "spring.datasource.dynamic.strict must be true"
-        );
+        return safe
+                ? DataSourceSafetyReport.safe("dynamic-datasource", "Dynamic datasource strict mode is valid.")
+                : DataSourceSafetyReport.violation(
+                        "dynamic-datasource",
+                        "spring.datasource.dynamic.strict must be true",
+                        "STRICT_MODE_REQUIRED"
+                );
+    }
+
+    public void assertSafe(DataSourceSafetyReport report) {
+        if (!report.safe()) {
+            throw new DatasourceSafetyException(report);
+        }
     }
 }

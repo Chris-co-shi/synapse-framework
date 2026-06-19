@@ -6,6 +6,7 @@ import com.indigo.synapse.datasource.descriptor.SynapseDbType;
 import com.indigo.synapse.datasource.health.DataSourceHealthRegistry;
 import com.indigo.synapse.datasource.health.DataSourceHealthSnapshot;
 import com.indigo.synapse.datasource.health.DataSourceHealthStatus;
+import com.indigo.synapse.datasource.properties.SynapseDatasourceProperties;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -17,23 +18,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RoundRobinLoadBalanceSelectorTest {
 
     @Test
-    void shouldSkipDownDatasource() {
-        DataSourceHealthRegistry registry = new DataSourceHealthRegistry();
-        registry.update(snapshot("slave_1", DataSourceHealthStatus.DOWN));
-        registry.update(snapshot("slave_2", DataSourceHealthStatus.UP));
-        RoundRobinLoadBalanceSelector selector = new RoundRobinLoadBalanceSelector(registry);
+    void shouldSelectCandidatesByRoundRobin() {
+        RoundRobinLoadBalanceSelector selector = new RoundRobinLoadBalanceSelector();
 
+        assertThat(selector.select(List.of(descriptor("slave_1"), descriptor("slave_2"))))
+                .contains(descriptor("slave_1"));
         assertThat(selector.select(List.of(descriptor("slave_1"), descriptor("slave_2"))))
                 .contains(descriptor("slave_2"));
     }
 
     @Test
-    void shouldReturnEmptyWhenNoCandidateAvailable() {
+    void shouldFilterDownDatasourceBeforeSelection() {
         DataSourceHealthRegistry registry = new DataSourceHealthRegistry();
         registry.update(snapshot("slave_1", DataSourceHealthStatus.DOWN));
-        RoundRobinLoadBalanceSelector selector = new RoundRobinLoadBalanceSelector(registry);
+        registry.update(snapshot("slave_2", DataSourceHealthStatus.UP));
+        DataSourceCandidateFilter filter = new DataSourceCandidateFilter(new SynapseDatasourceProperties(), registry);
+        RoundRobinLoadBalanceSelector selector = new RoundRobinLoadBalanceSelector();
 
-        assertThat(selector.select(List.of(descriptor("slave_1")))).isEmpty();
+        List<DataSourceDescriptor> candidates = filter.filter(
+                "slave",
+                DataSourceRole.SLAVE,
+                List.of(descriptor("slave_1"), descriptor("slave_2"))
+        );
+
+        assertThat(selector.select(candidates)).contains(descriptor("slave_2"));
     }
 
     private static DataSourceDescriptor descriptor(String name) {

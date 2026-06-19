@@ -9,11 +9,36 @@
         },
         {
           "value": "RANDOM",
-          "description": "预留随机选择策略。"
+          "description": "从可用读库候选中随机选择。"
         },
         {
           "value": "HEALTH_FIRST",
-          "description": "预留健康优先选择策略。"
+          "description": "优先选择健康状态更好的读库候选。"
+        }
+      ]
+    },
+    {
+      "name": "synapse.datasource.detection.explicit-types",
+      "values": [
+        {
+          "value": "POSTGRESQL",
+          "description": "显式声明 PostgreSQL 数据库类型。"
+        },
+        {
+          "value": "MYSQL",
+          "description": "显式声明 MySQL 数据库类型。"
+        },
+        {
+          "value": "MARIADB",
+          "description": "显式声明 MariaDB 数据库类型。"
+        },
+        {
+          "value": "ORACLE",
+          "description": "显式声明 Oracle 数据库类型。"
+        },
+        {
+          "value": "H2",
+          "description": "显式声明 H2 数据库类型。"
         }
       ]
     },
