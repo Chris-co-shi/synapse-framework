@@ -38,6 +38,7 @@
 | TASK-206 | MQ / File / Audit / OAuth2 边界复查 | P2 | 收敛 | 已复查风险模块边界并补齐 Skill |
 | TASK-207 | Docs / Skills / Boundary 收口 | P2 | 收尾 | 已完成文档、Skill、边界检查和模块状态校准 |
 | TASK-208 | Spring Boot Configuration Metadata 收口 | P2 | 封板补丁 | 已完成公开配置项 metadata 生成、测试和文档收口 |
+| TASK-209 | GatewayProof 可信入口证明 | P1 | 安全增强 | 已新增 Web 无关 GatewayProof 协议、Servlet/Reactive Resource Server 前置校验和文档 |
 
 ## 3. TASK-201：Framework Boundary 固化
 
@@ -284,12 +285,38 @@
 
 验收标准：`mvn package` 后相关 jar 包含 `META-INF/spring-configuration-metadata.json`，metadata JSON 可解析，且包含真实公开配置项。
 
-## 11. 推荐执行顺序
+## 11. TASK-209：GatewayProof 可信入口证明
+
+目标：
+
+- 在不信任身份 Header 的前提下，证明请求确实经过可信 Platform Gateway。
+- Resource Server 必须同时校验 GatewayProof 和 JWT。
+- 固定 GatewayProof v1 Header、canonical string、HMAC-SHA256 签名、时间戳窗口和 nonce replay store SPI。
+
+完成说明：
+
+- `synapse-security` 已新增 `com.indigo.synapse.security.gatewayproof` 包，提供 Web 无关协议模型、canonicalizer、signer、verifier、token hash、nonce generator 和 replay store SPI。
+- `synapse-oauth2-resource-server-webmvc` 已在 `BearerTokenAuthenticationFilter` 之前插入 GatewayProof Filter。
+- `synapse-oauth2-resource-server-webflux` 已在 OAuth2 Authentication 之前插入 GatewayProof WebFilter。
+- GatewayProof 配置纳入 `synapse.security.gateway-proof`，并生成 Spring Boot Configuration Metadata。
+- 已新增 GatewayProof 专项文档：[05-GatewayProof 可信入口证明](05-gateway-proof.md)。
+
+不做内容：
+
+- 不做 Gateway 可启动服务。
+- 不做 RouteLocator / GlobalFilter / GatewayFilter 业务逻辑。
+- 不做登录认证、IAM、用户角色权限管理。
+- 不把 GatewayProof 当作 JWT 替代品。
+- 不把 GatewayProof 与 `synapse-cloud` 出站服务间调用签名混用。
+
+验收标准：GatewayProof 缺失、版本不支持、未知 Gateway、过期、签名非法、重放、配置非法均有稳定错误码；Resource Server 仍独立验证 Bearer Token；`synapse-security` 不依赖 Servlet/WebFlux/Spring Security FilterChain。
+
+## 12. 推荐执行顺序
 
 推荐顺序：
 
 ```text
-TASK-201 -> TASK-202 -> TASK-203 -> TASK-204 -> TASK-205 -> TASK-206 -> TASK-207 -> TASK-208
+TASK-201 -> TASK-202 -> TASK-203 -> TASK-204 -> TASK-205 -> TASK-206 -> TASK-207 -> TASK-208 -> TASK-209
 ```
 
 理由：
@@ -301,9 +328,10 @@ TASK-201 -> TASK-202 -> TASK-203 -> TASK-204 -> TASK-205 -> TASK-206 -> TASK-207
 5. 再补 Time / Config / I18n，作为 Platform 后续 runtime 基础。
 6. 再复查 MQ / File / Audit / OAuth2，防止已有模块膨胀。
 7. 再做 Docs / Skills / Boundary 收口，不做 starter 或 demo。
-8. 最后执行 TASK-208 metadata 封板补丁，保证发布产物具备 IDE 配置索引条件。
+8. 再执行 TASK-208 metadata 封板补丁，保证发布产物具备 IDE 配置索引条件。
+9. 最后执行 TASK-209 GatewayProof，补齐可信 Gateway 入口证明，同时保持 JWT 独立验证。
 
-## 12. 当前结论
+## 13. 当前结论
 
 二阶段后续继续推进时，必须遵守：
 

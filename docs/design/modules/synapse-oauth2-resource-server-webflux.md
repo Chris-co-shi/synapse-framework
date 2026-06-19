@@ -18,6 +18,7 @@ Reactive 链路可能跨线程，Servlet ThreadLocal 不能作为唯一上下文
 - `SynapseReactiveSecurityContext`。
 - `SynapseReactiveOperationContext`。
 - Security WebFilter 与 Reactor Context 写入。
+- GatewayProof 前置校验 WebFilter。
 - Reactive 401/403 Result 写出。
 - 默认 `SecurityWebFilterChain` 技术配置。
 
@@ -39,7 +40,8 @@ Reactive 链路可能跨线程，Servlet ThreadLocal 不能作为唯一上下文
 ## 5. 主链路
 
 ```text
-Bearer token
+Bearer token + GatewayProof Headers
+  -> GatewayProofWebFilter
   -> AuthenticationWebFilter / ReactiveJwtDecoder
   -> validators
   -> SynapseReactiveJwtAuthenticationConverter
@@ -66,7 +68,8 @@ Reactive Port 允许非阻塞 Redis/远程检查。实现不得在 event-loop �
 
 - 使用 `contextWrite` 建立下游可见的 Context。
 - 不把主体保存为全局变量或静态 ThreadLocal。
-- WebFilter 顺序必须在认证后建立 Synapse Context。
+- GatewayProof WebFilter 必须在 OAuth2 Authentication 之前执行，只校验可信入口证明。
+- Synapse Context WebFilter 顺序必须在认证后建立 Synapse Context。
 - response committed 后不得重复写 401/403。
 - 错误消息不得泄露 token 和验证细节。
 - Reactive 流取消也不能产生全局上下文残留，因为 Context 随订阅绑定。
@@ -74,6 +77,7 @@ Reactive Port 允许非阻塞 Redis/远程检查。实现不得在 event-loop �
 ## 8. 扩展原则
 
 - Gateway 可以增加业务鉴权 Filter，但放在 Platform Gateway。
+- GatewayProof 入口证明可以复用 security 协议能力，但不能写成 Gateway 路由或业务鉴权。
 - 自定义 Reactive denylist 实现 OAuth2 core 语义的 reactive adapter。
 - Servlet 与 Reactive 可以共享 claim 规则，但不要共享 ThreadLocal bridge 实现。
 - 如提取共享 mapper，应保持它不依赖 Servlet/WebFlux。

@@ -15,6 +15,7 @@
 - 安全主体到 core `OperationContext` 的单向适配。
 - `PermissionChecker` 与 `@RequirePermission` 轻量适配。
 - 密码编码器工厂。
+- GatewayProof Web 无关协议、canonical string、HMAC-SHA256 signer/verifier、nonce replay store SPI。
 
 不负责：
 
@@ -23,6 +24,7 @@
 - 身份 Header 认证协议或 Header 解析。
 - Servlet Filter / WebFilter。
 - Spring Security FilterChain。
+- Gateway 可启动服务、RouteLocator、GlobalFilter 或网关业务鉴权。
 - ABAC、DataScope 和多租户授权规则。
 
 ## 3. 两类主体必须分开
@@ -85,6 +87,7 @@ Validated OAuth2 Resource Server adapter
 - Gateway 与下游只传播 Bearer Token。
 - 用户、角色、权限等 Header 不能作为认证依据。
 - `synapse-security` 不提供第二套身份恢复协议。
+- GatewayProof 只证明可信入口，不携带身份快照；Servlet/WebFlux 入口校验由 OAuth2 Resource Server 适配模块完成。
 
 ## 7. 生命周期与失败边界
 
@@ -99,6 +102,7 @@ Validated OAuth2 Resource Server adapter
 
 - ABAC / 远程权限校验：替换 `PermissionChecker`。
 - Web 认证入口属于 OAuth2 Resource Server 适配模块，不在 security 中新增 Filter。
+- GatewayProof 可以由 Platform Gateway 复用 signer 生成 proof，由 Resource Server 复用 verifier 校验 proof。
 - security 不向 data 暴露 LoginUser；data 只读取 OperationContext。
 - 新主体类型必须同步定义其 OperationActor 映射和审计语义。
 
@@ -107,6 +111,7 @@ Validated OAuth2 Resource Server adapter
 ```text
 AuthenticatedPrincipal
   -> AuthenticatedUser / AuthenticatedClient
+  -> gatewayproof/*
   -> SecurityContextScope
   -> SecurityContext
   -> SecurityOperationContextAdapter
@@ -133,3 +138,4 @@ AuthenticatedPrincipal
 - 是否把 AOP 当成唯一安全边界。
 - 是否重新引入用户、角色或权限身份 Header。
 - 是否让 security 自己解析或验证 Bearer Token。
+- 是否把 GatewayProof 写成身份 Header 恢复协议或 Gateway 服务。

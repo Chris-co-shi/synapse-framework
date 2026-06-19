@@ -13,6 +13,7 @@
 - `SynapseReactiveSecurityContext`
 - `SynapseReactiveOperationContext`
 - `SynapseReactiveSecurityContextWebFilter`
+- `GatewayProofWebFilter`
 - reactive 401/403 `Result` 写出
 - 默认 `ReactiveJwtDecoder`
 - 默认 `SecurityWebFilterChain`
@@ -82,6 +83,9 @@ SynapseReactiveOperationContext.currentOperationContext();
 
 用户自定义 `SecurityWebFilterChain` 后，默认链退让。复杂网关或平台鉴权应显式调用 `SynapseResourceServerServerHttpSecurityConfigurer`，但 Gateway 路由和网关业务鉴权不进入 Framework。
 
+启用 GatewayProof 时，`GatewayProofWebFilter` 会插入到 OAuth2 Authentication 之前。它只校验可信 Gateway proof，不建立 Reactor 安全上下文；JWT 仍由后续 Reactive Resource Server 独立验证。
+
 ## 6. 边界
 
 该模块不是 Gateway 服务，不提供 RouteLocator、Gateway Filter 业务逻辑、网关鉴权后台或启动服务，也不创建私钥、`RSAKey` 或 `JwtEncoder`。
+GatewayProof 复用 `synapse.security.gateway-proof.*` 配置，详见 [synapse-security](synapse-security.md) 和 [GatewayProof 可信入口证明](../phase-2/05-gateway-proof.md)。

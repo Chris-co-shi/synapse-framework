@@ -12,6 +12,7 @@
 - `SynapseJwtPrincipalMapper`
 - `SynapseJwtGrantedAuthoritiesConverter`
 - `SynapseSecurityContextBridgeFilter`
+- `GatewayProofVerificationFilter`
 - 默认 `SecurityFilterChain`
 - `SynapseResourceServerConfigurer`
 - 统一 401/403 `Result` 写出
@@ -52,6 +53,8 @@ synapse:
 
 用户自定义 `SecurityFilterChain` 后，默认链退让。复杂应用应显式调用 `SynapseResourceServerConfigurer`。
 
+启用 GatewayProof 时，`GatewayProofVerificationFilter` 会插入到 `BearerTokenAuthenticationFilter` 之前。它只校验可信 Gateway proof，不建立认证主体；JWT 仍由后续 Resource Server 过滤器独立验证。
+
 配置项：
 
 | 配置 | 默认值 | 说明 |
@@ -73,6 +76,9 @@ synapse:
 
 发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，并为上述配置项提供 IDE 可读说明；`accepted-token-types` 当前只暴露 `ACCESS_TOKEN` 候选值。
 
+GatewayProof 复用 `synapse.security.gateway-proof.*` 配置，详见 [synapse-security](synapse-security.md) 和 [GatewayProof 可信入口证明](../phase-2/05-gateway-proof.md)。
+
 ## 5. 边界
 
 Resource Server 不创建私钥、`RSAKey` 或 `JwtEncoder`，也不实现登录、客户端管理或 IAM。
+GatewayProof Filter 不做 Gateway 服务、路由、网关鉴权业务或身份 Header 恢复。

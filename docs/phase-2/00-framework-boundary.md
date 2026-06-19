@@ -124,6 +124,7 @@ OAuth2 能力已拆分为 `synapse-oauth2-core`、`synapse-oauth2-authorization-
 - `synapse-oauth2-authorization-server-support` 只允许提供 JWT 签发、RSAKey、JWKSource、JwtEncoder 等授权服务器侧技术支撑，不实现 Authorization Server 业务流程。
 - `synapse-oauth2-resource-server-webmvc` 只允许提供 Servlet Resource Server 技术适配。
 - `synapse-oauth2-resource-server-webflux` 只允许提供 Reactive Resource Server 技术适配。
+- GatewayProof 只允许作为可信入口证明：协议模型在 `synapse-security`，Servlet/Reactive 前置校验分别在 Resource Server 适配模块；它不恢复身份 Header，也不替代 JWT 验证。
 
 以上模块都不能提供登录接口、用户认证业务、客户端管理后台、授权记录管理或 IAM 服务。
 

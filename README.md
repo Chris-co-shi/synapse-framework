@@ -87,7 +87,7 @@ synapse-framework
 | `synapse-mybatis-plus` | MyBatis-Plus 工程增强 | [查看](docs/modules/synapse-mybatis-plus.md) |
 | `synapse-datasource` | 数据源治理、多数据源基础接入和路由治理抽象 | [查看](docs/modules/synapse-datasource.md) |
 | `synapse-cache` | 缓存、锁、限流、幂等基础设施 | [查看](docs/modules/synapse-cache.md) |
-| `synapse-security` | Web 无关安全主体、AuthenticatedUser/Client、PermissionChecker、权限注解适配 | [查看](docs/modules/synapse-security.md) |
+| `synapse-security` | Web 无关安全主体、PermissionChecker、权限注解适配、GatewayProof 协议基础 | [查看](docs/modules/synapse-security.md) |
 | `synapse-oauth2-core` | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 | [查看](docs/modules/synapse-oauth2-core.md) |
 | `synapse-oauth2-authorization-server-support` | JWT 签发、RSAKey、JWKSource、JwtEncoder 技术支持 | [查看](docs/modules/synapse-oauth2-authorization-server-support.md) |
 | `synapse-oauth2-resource-server-webmvc` | Servlet OAuth2 Resource Server 技术适配 | [查看](docs/modules/synapse-oauth2-resource-server-webmvc.md) |
@@ -267,7 +267,7 @@ Synapse Framework
 - `synapse-webmvc` 承接原 Servlet MVC Web 能力。
 - `synapse-webflux` 提供 WebFlux 最小技术闭环，不包含 Gateway 服务。
 - `synapse-cloud` 提供 OpenFeign 出站 OperationContext Header 编码、RequestInterceptor、ErrorDecoder 和自动配置，不包含 Gateway、Nacos、Seata、RocketMQ、IAM 或业务鉴权。
-- `synapse-security` 是 Web 无关安全基础模块；认证主体由 OAuth2 Resource Server 适配模块从经过验证的 Bearer Token 建立。
+- `synapse-security` 是 Web 无关安全基础模块；认证主体由 OAuth2 Resource Server 适配模块从经过验证的 Bearer Token 建立；GatewayProof 只证明可信入口。
 - OAuth2 当前以 `synapse-oauth2-core`、`synapse-oauth2-authorization-server-support`、`synapse-oauth2-resource-server-webmvc`、`synapse-oauth2-resource-server-webflux` 四个正式模块交付。
 - Web 当前以 `synapse-webmvc` 和 `synapse-webflux` 两个正式模块交付。
 - `synapse-security` 不依赖 Spring Security Web / Config。

@@ -294,6 +294,18 @@ rg -n "IAM|登录认证|业务鉴权|注册中心|配置中心|服务治理后�
 - manual additional metadata 只能补充自动生成不足的信息。
 - 发布前必须验证 jar 中存在 `META-INF/spring-configuration-metadata.json`。
 
+### TASK-209
+
+- GatewayProof 只证明请求经过可信 Gateway，不替代 JWT。
+- `synapse-security` 只能提供 Web 无关协议、signer/verifier、canonicalizer、nonce replay store SPI 和配置。
+- Servlet GatewayProof Filter 必须位于 `BearerTokenAuthenticationFilter` 之前。
+- Reactive GatewayProof WebFilter 必须位于 OAuth2 Authentication 之前。
+- 不创建 Gateway 服务、RouteLocator、GlobalFilter、GatewayFilter 业务逻辑。
+- 不传播或信任用户、角色、权限身份 Header。
+- 启用 replay protection 时不得提供 noop store。
+- 配置非法必须根据 fail-fast 启动失败或请求期拒绝。
+- 不把 GatewayProof 与 `synapse-cloud` 出站服务间调用签名混用。
+
 ## 6. 最小验收命令
 
 ```bash
@@ -302,6 +314,8 @@ rg -n "@RestController\b|@Controller\b|@RequestMapping\b|@GetMapping\b|@PostMapp
 rg -n "@TableName\b|BaseMapper\b|IService\b|ServiceImpl\b|CREATE TABLE|create table" '*/src/main'
 rg -n "file-service|message-service|config-service|audit-service|用户中心|配置中心|文件中心|消息中心|审计中心" README.md AGENTS.md docs
 rg -n "spring-cloud-starter-gateway|nacos|seata|rocketmq" .
+rg -n "RouteLocator|GatewayFilter|GlobalFilter|spring-cloud-starter-gateway" synapse-security synapse-oauth2-resource-server-webmvc synapse-oauth2-resource-server-webflux
+rg -n "roles|permissions|menu|organization|raw token|password" synapse-security/src/main/java/com/indigo/synapse/security/gatewayproof
 rg -n "synapse-webmvc|synapse-webflux" synapse-cloud || true
 rg -n "starter|demo|example|sample" README.md AGENTS.md docs pom.xml synapse-bom/pom.xml
 find . -path "*/target/classes/META-INF/spring-configuration-metadata.json" -print

@@ -4,6 +4,11 @@ import com.indigo.synapse.security.password.SynapsePasswordEncoderFactory;
 import com.indigo.synapse.security.permission.DefaultPermissionChecker;
 import com.indigo.synapse.security.permission.PermissionChecker;
 import com.indigo.synapse.security.permission.RequirePermissionAspect;
+import com.indigo.synapse.security.gatewayproof.GatewayProofNonceGenerator;
+import com.indigo.synapse.security.gatewayproof.GatewayProofSecretValidator;
+import com.indigo.synapse.security.gatewayproof.GatewayProofSigner;
+import com.indigo.synapse.security.gatewayproof.GatewayProofTokenHasher;
+import com.indigo.synapse.security.gatewayproof.HmacSha256GatewayProofSigner;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.ObjectProvider;
@@ -38,6 +43,55 @@ public class SynapseSecurityAutoConfiguration {
     @ConditionalOnMissingBean
     public PasswordEncoder synapsePasswordEncoder() {
         return SynapsePasswordEncoderFactory.bcrypt();
+    }
+
+    /**
+     * GatewayProof HMAC-SHA256 签名器。
+     *
+     * <p>该 Bean Web 无关，可被 Platform Gateway 直接复用；它不验证 JWT，也不写入 Web 过滤链。</p>
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public GatewayProofSigner gatewayProofSigner() {
+        return new HmacSha256GatewayProofSigner();
+    }
+
+    /**
+     * GatewayProof Bearer Token 指纹工具。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public GatewayProofTokenHasher gatewayProofTokenHasher() {
+        return new GatewayProofTokenHasher();
+    }
+
+    /**
+     * GatewayProof nonce 生成器。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public GatewayProofNonceGenerator gatewayProofNonceGenerator() {
+        return new GatewayProofNonceGenerator();
+    }
+
+    /**
+     * GatewayProof 启动期配置校验。
+     *
+     * <p>只有开启且 fail-fast=true 时校验 secret，避免默认关闭状态影响本地开发。</p>
+     */
+    @Bean
+    @ConditionalOnProperty(
+            prefix = "synapse.security.gateway-proof",
+            name = {"enabled", "fail-fast"},
+            havingValue = "true"
+    )
+    public Object gatewayProofConfigurationValidator(SynapseSecurityProperties properties) {
+        GatewayProofSecretValidator.requireValid(properties.getGatewayProof().getSecret());
+        if (properties.getGatewayProof().getGatewayId() == null
+                || properties.getGatewayProof().getGatewayId().isBlank()) {
+            throw new IllegalArgumentException("GatewayProof gateway-id must not be blank");
+        }
+        return new Object();
     }
 
     /**

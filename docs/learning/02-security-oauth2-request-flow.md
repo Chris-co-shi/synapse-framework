@@ -37,7 +37,8 @@ Synapse SecurityContext
 
 ```mermaid
 flowchart TD
-    A[HTTP Request<br/>Authorization: Bearer token] --> B[BearerTokenAuthenticationFilter]
+    A[HTTP Request<br/>Authorization + GatewayProof Headers] --> GP[GatewayProofVerificationFilter]
+    GP --> B[BearerTokenAuthenticationFilter]
     B --> C[JwtDecoder and validators]
     C --> D[SynapseJwtAuthenticationConverter]
     D --> E[SynapseJwtPrincipalMapper]
@@ -59,7 +60,24 @@ flowchart TD
 
 ## 3. 每一步具体做什么
 
-### 3.1 `BearerTokenAuthenticationFilter`
+### 3.1 `GatewayProofVerificationFilter`
+
+该 Filter 来自 `synapse-oauth2-resource-server-webmvc`，位于 Bearer Token 认证之前。
+
+它负责：
+
+- 从固定 `X-Synapse-Gateway-Proof-*` Header 读取 proof。
+- 按 v1 canonical string 绑定 method、path、query 和 Bearer Token hash。
+- 调用 `synapse-security` 中 Web 无关 verifier 校验 HMAC-SHA256 签名、时间窗口和 nonce 重放。
+
+需要记住：
+
+- GatewayProof 只证明请求经过可信 Gateway。
+- GatewayProof 不建立用户或客户端主体。
+- JWT 仍必须由后续 Resource Server 独立验证。
+- 缺少 proof 和 token 缺失是两类错误：前者是 403 GatewayProof 错误，后者是 401 认证错误。
+
+### 3.2 `BearerTokenAuthenticationFilter`
 
 这是 Spring Security Resource Server 的过滤器，不属于 Synapse Framework 自定义实现。
 
@@ -70,7 +88,7 @@ flowchart TD
 - Synapse 不应该自己再写一套 Bearer Token 解析器替代 Spring Security。
 - 认证失败仍处在 Filter 链阶段，不会进入 Controller。
 
-### 3.2 `JwtDecoder` 与 validators
+### 3.3 `JwtDecoder` 与 validators
 
 JWT 在这里完成密码学和协议校验，例如：
 
@@ -83,7 +101,7 @@ JWT 在这里完成密码学和协议校验，例如：
 
 校验通过只表示 token 可以信任，还没有完成 Synapse 主体模型转换。
 
-### 3.3 `SynapseJwtAuthenticationConverter`
+### 3.4 `SynapseJwtAuthenticationConverter`
 
 该类是 Spring Security 与 Synapse 安全模型之间的第一个核心适配器。
 
@@ -107,7 +125,7 @@ SynapseJwtAuthenticationToken
 
 它不负责签名校验，也不负责把主体写入 Synapse `SecurityContext`。
 
-### 3.4 `SynapseJwtPrincipalMapper`
+### 3.5 `SynapseJwtPrincipalMapper`
 
 该类负责把 JWT claims 映射为稳定的 Synapse 安全主体。
 
@@ -147,7 +165,7 @@ permissions -> permissions snapshot
 - roles 和 permissions 是当前 token 携带的快照，不在 Framework 中查询数据库。
 - mapper 不做业务授权推导。
 
-### 3.5 `SynapseJwtAuthenticationToken`
+### 3.6 `SynapseJwtAuthenticationToken`
 
 它仍然是 Spring Security `Authentication` 体系中的对象，但额外持有：
 
@@ -156,7 +174,7 @@ permissions -> permissions snapshot
 
 它的作用是让后续 Bridge Filter 能从 Spring Authentication 中取出 Synapse 主体，而不需要再次解析 JWT claims。
 
-### 3.6 `SynapseSecurityContextBridgeFilter`
+### 3.7 `SynapseSecurityContextBridgeFilter`
 
 该 Filter 位于 `BearerTokenAuthenticationFilter` 之后。
 
@@ -174,7 +192,7 @@ Filter 的核心行为：
 
 这个 try-with-resources 是上下文安全的关键点。无论后续请求成功还是抛异常，作用域都必须关闭，避免线程池复用时污染下一次请求。
 
-### 3.7 `SecurityContextBinder.bind`
+### 3.8 `SecurityContextBinder.bind`
 
 它会同时建立两个作用域：
 
@@ -189,7 +207,7 @@ AuthenticatedPrincipal
 
 因此业务代码可以读取当前认证主体，而 data、audit、mq 等模块可以读取当前操作人。
 
-### 3.8 `SecurityOperationContextAdapter`
+### 3.9 `SecurityOperationContextAdapter`
 
 它只做安全主体到操作主体的单向转换。
 
@@ -205,7 +223,7 @@ AuthenticatedClient
 
 roles 和 permissions 不进入 `OperationContext`，因为 `OperationContext` 表达“谁在执行操作”，不承担完整授权快照。
 
-### 3.9 `PermissionChecker`
+### 3.10 `PermissionChecker`
 
 业务方法可以显式调用：
 

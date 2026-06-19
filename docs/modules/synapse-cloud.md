@@ -229,7 +229,7 @@ NoopInternalCallSigner
 
 默认 `NoopInternalCallSigner` 不写任何 Header，避免 framework 默认建立伪认证体系。
 
-签名扩展点只用于出站服务间调用技术签名，不代表 IAM、登录认证、业务鉴权或 Gateway 鉴权。
+签名扩展点只用于出站服务间调用技术签名，不代表 IAM、登录认证、业务鉴权或 Gateway 鉴权。GatewayProof 是入站可信入口证明，定义在 `synapse-security` 并由 OAuth2 Resource Server 适配模块前置校验；它不属于 `synapse-cloud` 的 Feign 出站签名能力。
 
 ## 7. 自动配置
 

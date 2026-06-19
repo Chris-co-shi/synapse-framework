@@ -143,7 +143,7 @@ skills/<module-name>/SKILL.md
 | `synapse-mybatis-plus` | MyBatis-Plus 工程增强 | 业务 Entity / Mapper / Repository / Service / DataSource 治理 |
 | `synapse-datasource` | 数据源治理模块 | ORM / MyBatis SQL 自动路由 / Seata / 应用层主库晋升 |
 | `synapse-cache` | 缓存、锁、限流、幂等基础设施 | 业务缓存规则 / 缓存管理后台 |
-| `synapse-security` | Web 无关安全主体、权限检查和安全上下文 | IAM / 登录认证 / 用户角色菜单管理 / Web 认证入口 |
+| `synapse-security` | Web 无关安全主体、权限检查、安全上下文和 GatewayProof 协议基础 | IAM / 登录认证 / 用户角色菜单管理 / Web 认证入口 |
 | `synapse-oauth2-core` | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 | Web / Security / 签发私钥 / Resource Server |
 | `synapse-oauth2-authorization-server-support` | JWT 签发、RSAKey、JWKSource、JwtEncoder 技术支持 | 登录 / RegisteredClient / Authorization Code / IAM |
 | `synapse-oauth2-resource-server-webmvc` | Servlet OAuth2 Resource Server 技术适配 | 签发私钥 / Authorization Server / IAM |

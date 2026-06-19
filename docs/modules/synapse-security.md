@@ -13,6 +13,7 @@
 - `PermissionChecker`：显式权限检查入口。
 - `@RequirePermission`：声明式权限适配。
 - 安全主体到 core `OperationContext` 的单向适配。
+- GatewayProof Web 无关协议、签名、验签和 nonce replay store SPI。
 - 默认 `PasswordEncoder`。
 
 本模块不负责从 HTTP 请求、Header 或 Token 中建立认证主体。Servlet 和 Reactive 请求的认证入口分别由 OAuth2 Resource Server 适配模块承担。
@@ -34,7 +35,8 @@ Authorization: Bearer <token>
 - Gateway 可以验证 Token，但下游服务仍必须独立验证。
 - Gateway 与下游服务之间只传播 Bearer Token。
 - 不传播或信任用户、角色、权限等身份 Header。
-- `synapse-security` 不提供身份 Header 协议、HMAC Header 签名或 Servlet Filter。
+- `synapse-security` 不提供身份 Header 恢复协议或 Servlet Filter。
+- GatewayProof 只证明可信入口，不携带用户、角色或权限，不替代 Resource Server 的 JWT 验证。
 - `synapse-security` 不依赖 Spring Security Web / Config。
 
 Web 认证适配模块：
@@ -50,6 +52,7 @@ Web 认证适配模块：
 - 通过 `PermissionChecker` 显式校验权限。
 - 通过 `@RequirePermission` 对 Spring Bean 方法执行轻量权限检查。
 - 将当前安全主体同步为 `OperationContext`，供 data、audit、mq 等模块读取。
+- 为 Platform Gateway 和 Resource Server 复用 GatewayProof v1 canonical string、HMAC-SHA256 签名和验签逻辑。
 - 使用默认 BCrypt 密码编码器。
 
 ## 4. 不适用场景
@@ -63,6 +66,7 @@ Web 认证适配模块：
 - Spring Security `SecurityFilterChain`。
 - Servlet Filter 或 WebFlux WebFilter。
 - Gateway 身份 Header 注入。
+- Gateway 可启动服务、RouteLocator、GlobalFilter 或网关业务鉴权。
 - ABAC、DataScope 或多租户权限模型。
 
 完整 IAM / RBAC / ABAC 属于 Synapse Platform。
@@ -222,7 +226,56 @@ PasswordEncoder passwordEncoder() {
 }
 ```
 
-## 11. 配置项
+## 11. GatewayProof
+
+GatewayProof 用于证明请求经过可信 Platform Gateway。它不建立 `SecurityContext`，不解析 JWT claims，不携带身份快照。
+
+固定 Header：
+
+```text
+X-Synapse-Gateway-Proof-Version
+X-Synapse-Gateway-Id
+X-Synapse-Gateway-Timestamp
+X-Synapse-Gateway-Nonce
+X-Synapse-Gateway-Signature
+```
+
+v1 canonical string：
+
+```text
+version
+gatewayId
+timestamp
+nonce
+HTTP_METHOD
+normalized_path
+normalized_query
+bearer_token_sha256
+```
+
+核心类型：
+
+```java
+GatewayProof
+GatewayProofCanonicalRequest
+GatewayProofCanonicalizer
+GatewayProofSigner
+GatewayProofVerifier
+GatewayProofReplayStore
+GatewayProofTokenHasher
+HmacSha256GatewayProofSigner
+HmacSha256GatewayProofVerifier
+```
+
+重放保护端口：
+
+```java
+boolean markIfAbsent(String gatewayId, String nonce, Duration ttl);
+```
+
+启用重放保护后必须提供真实 store。Framework 不提供 noop 默认实现。
+
+## 12. 配置项
 
 前缀：
 
@@ -245,7 +298,24 @@ synapse:
 
 关闭后仍可显式调用 `PermissionChecker`。
 
-## 12. 扩展 PermissionChecker
+GatewayProof 配置前缀：
+
+```yaml
+synapse.security.gateway-proof
+```
+
+| 配置 | 默认值 | 说明 |
+| --- | --- | --- |
+| `enabled` | `false` | 是否启用 GatewayProof 入站校验 |
+| `required` | `true` | 启用后是否要求非 permit path 请求必须携带有效 GatewayProof |
+| `gateway-id` | `synapse-gateway` | 当前服务信任的 Gateway 标识 |
+| `secret` | `""` | HMAC secret，至少 32 bytes，必须安全注入 |
+| `timestamp-skew` | `60s` | 时间戳允许偏移 |
+| `replay-protection-enabled` | `false` | 是否启用 nonce 重放保护 |
+| `fail-fast` | `true` | 配置非法时是否启动失败 |
+| `permit-paths` | `/actuator/health`, `/error` | 跳过 GatewayProof 校验的技术路径 |
+
+## 13. 扩展 PermissionChecker
 
 业务系统可以提供自定义 Bean：
 
@@ -258,14 +328,16 @@ PermissionChecker permissionChecker() {
 
 可以用于远程 IAM 权限校验、角色到权限映射或业务侧 ABAC 前置判断，但这些业务规则不应反向写入 Framework。
 
-## 13. 注意事项
+## 14. 注意事项
 
 - `synapse-security` 不处理用户名密码登录、不签发 Token、不维护 Session。
 - 默认 `PermissionChecker` 只检查当前主体快照中的 permissions。
 - `@RequirePermission` 只适合 Spring Bean 方法。
 - 异步任务不能假设 ThreadLocal 自动存在，应显式传播 `OperationContextSnapshot`。
 - `OperationContext` 不承载角色和权限。
+- GatewayProof secret 不得写入日志、配置样例仓库或错误响应。
+- GatewayProof 只能与 Bearer Token 独立校验配合使用，不能单独作为身份凭证。
 
-## 14. Configuration Metadata
+## 15. Configuration Metadata
 
-`synapse-security` 发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，当前只公开 `synapse.security.permission.*` 配置。
+`synapse-security` 发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，当前公开 `synapse.security.permission.*` 和 `synapse.security.gateway-proof.*` 配置。

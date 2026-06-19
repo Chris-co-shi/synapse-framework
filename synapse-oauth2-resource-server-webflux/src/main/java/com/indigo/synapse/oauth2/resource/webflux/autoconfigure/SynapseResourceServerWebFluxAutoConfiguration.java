@@ -2,11 +2,19 @@ package com.indigo.synapse.oauth2.resource.webflux.autoconfigure;
 
 import com.indigo.synapse.oauth2.resource.webflux.config.SynapseResourceServerServerHttpSecurityConfigurer;
 import com.indigo.synapse.oauth2.resource.webflux.context.SynapseReactiveSecurityContextWebFilter;
+import com.indigo.synapse.oauth2.resource.webflux.gatewayproof.GatewayProofServerAccessDeniedHandler;
+import com.indigo.synapse.oauth2.resource.webflux.gatewayproof.GatewayProofWebFilter;
 import com.indigo.synapse.oauth2.resource.webflux.jwt.SynapseReactiveJwtAuthenticationConverter;
 import com.indigo.synapse.oauth2.resource.webflux.web.SynapseServerAccessDeniedHandler;
 import com.indigo.synapse.oauth2.resource.webflux.web.SynapseServerAuthenticationEntryPoint;
 import com.indigo.synapse.webflux.exception.ReactiveWebErrorResponseWriter;
 import com.indigo.synapse.webflux.exception.WebFluxExceptionResponseFactory;
+import com.indigo.synapse.security.autoconfigure.SynapseSecurityProperties;
+import com.indigo.synapse.security.gatewayproof.GatewayProofReplayStore;
+import com.indigo.synapse.security.gatewayproof.GatewayProofTokenHasher;
+import com.indigo.synapse.security.gatewayproof.GatewayProofVerifier;
+import com.indigo.synapse.security.gatewayproof.HmacSha256GatewayProofVerifier;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -19,6 +27,8 @@ import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoders;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import java.time.Clock;
+import java.util.Map;
 
 /**
  * Reactive OAuth2 Resource Server 自动配置。
@@ -59,6 +69,48 @@ public class SynapseResourceServerWebFluxAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "synapse.security.gateway-proof", name = "enabled", havingValue = "true")
+    public GatewayProofServerAccessDeniedHandler gatewayProofServerAccessDeniedHandler(
+            WebFluxExceptionResponseFactory responseFactory,
+            ReactiveWebErrorResponseWriter responseWriter) {
+        return new GatewayProofServerAccessDeniedHandler(responseFactory, responseWriter);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "synapse.security.gateway-proof", name = "enabled", havingValue = "true")
+    public GatewayProofVerifier gatewayProofVerifier(
+            SynapseSecurityProperties securityProperties,
+            ObjectProvider<GatewayProofReplayStore> replayStoreProvider) {
+        SynapseSecurityProperties.GatewayProof gatewayProof = securityProperties.getGatewayProof();
+        return new HmacSha256GatewayProofVerifier(
+                Map.of(gatewayProof.getGatewayId(), gatewayProof.getSecret()),
+                gatewayProof.getTimestampSkew(),
+                Clock.systemUTC(),
+                replayStoreProvider.getIfAvailable(),
+                gatewayProof.isReplayProtectionEnabled(),
+                gatewayProof.isFailFast()
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "synapse.security.gateway-proof", name = "enabled", havingValue = "true")
+    public GatewayProofWebFilter gatewayProofWebFilter(
+            SynapseSecurityProperties securityProperties,
+            GatewayProofVerifier gatewayProofVerifier,
+            GatewayProofTokenHasher tokenHasher,
+            GatewayProofServerAccessDeniedHandler accessDeniedHandler) {
+        return new GatewayProofWebFilter(
+                securityProperties.getGatewayProof(),
+                gatewayProofVerifier,
+                tokenHasher,
+                accessDeniedHandler
+        );
+    }
+
+    @Bean
     @ConditionalOnMissingBean(ReactiveJwtDecoder.class)
     public ReactiveJwtDecoder synapseReactiveJwtDecoder(SynapseReactiveResourceServerProperties properties) {
         if (properties.getJwkSetUri() != null && !properties.getJwkSetUri().isBlank()) {
@@ -77,13 +129,15 @@ public class SynapseResourceServerWebFluxAutoConfiguration {
             SynapseReactiveJwtAuthenticationConverter authenticationConverter,
             SynapseServerAuthenticationEntryPoint entryPoint,
             SynapseServerAccessDeniedHandler accessDeniedHandler,
-            SynapseReactiveSecurityContextWebFilter bridgeFilter) {
+            SynapseReactiveSecurityContextWebFilter bridgeFilter,
+            ObjectProvider<GatewayProofWebFilter> gatewayProofWebFilter) {
         return new SynapseResourceServerServerHttpSecurityConfigurer(
                 properties,
                 authenticationConverter,
                 entryPoint,
                 accessDeniedHandler,
-                bridgeFilter
+                bridgeFilter,
+                gatewayProofWebFilter.getIfAvailable()
         );
     }
 

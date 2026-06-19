@@ -18,7 +18,41 @@ public enum SecurityErrorCode implements ErrorCode {
     /**
      * 当前主体没有访问目标资源所需权限。
      */
-    SECURITY_PERMISSION_DENIED("SECURITY_PERMISSION_DENIED", "无权限");
+    SECURITY_PERMISSION_DENIED("SECURITY_PERMISSION_DENIED", "无权限"),
+    /**
+     * 请求缺少 GatewayProof Header。
+     */
+    SECURITY_GATEWAY_PROOF_MISSING("SECURITY_GATEWAY_PROOF_MISSING", "缺少 GatewayProof"),
+    /**
+     * GatewayProof 协议版本不受支持。
+     */
+    SECURITY_GATEWAY_PROOF_UNSUPPORTED_VERSION(
+            "SECURITY_GATEWAY_PROOF_UNSUPPORTED_VERSION",
+            "GatewayProof 协议版本不受支持"
+    ),
+    /**
+     * GatewayProof 中的 Gateway 标识不在信任列表。
+     */
+    SECURITY_GATEWAY_PROOF_UNKNOWN_GATEWAY("SECURITY_GATEWAY_PROOF_UNKNOWN_GATEWAY", "未知 Gateway"),
+    /**
+     * GatewayProof 时间戳已超过允许窗口。
+     */
+    SECURITY_GATEWAY_PROOF_EXPIRED("SECURITY_GATEWAY_PROOF_EXPIRED", "GatewayProof 已过期"),
+    /**
+     * GatewayProof 签名或请求绑定校验失败。
+     */
+    SECURITY_GATEWAY_PROOF_INVALID("SECURITY_GATEWAY_PROOF_INVALID", "GatewayProof 无效"),
+    /**
+     * GatewayProof nonce 已被使用。
+     */
+    SECURITY_GATEWAY_PROOF_REPLAYED("SECURITY_GATEWAY_PROOF_REPLAYED", "GatewayProof 已重放"),
+    /**
+     * GatewayProof 配置无效。
+     */
+    SECURITY_GATEWAY_PROOF_CONFIGURATION_INVALID(
+            "SECURITY_GATEWAY_PROOF_CONFIGURATION_INVALID",
+            "GatewayProof 配置无效"
+    );
 
     private final String code;
     private final String message;

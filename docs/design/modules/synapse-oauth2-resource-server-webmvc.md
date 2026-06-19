@@ -12,6 +12,7 @@
 - JWT claims 到 Spring Authentication 的转换。
 - JWT claims 到 USER / CLIENT 主体的映射。
 - Spring SecurityContext 到 Synapse SecurityContext 的 Bridge Filter。
+- GatewayProof 前置校验 Filter。
 - 401 entry point 与 403 access denied handler。
 - 默认 `SecurityFilterChain` 或可复用 configurer。
 
@@ -48,7 +49,8 @@ Bridge 不是重复认证，而是把框架外部认证对象转换为内部稳�
 ## 5. 主链路
 
 ```text
-Authorization: Bearer token
+Authorization: Bearer token + GatewayProof Headers
+  -> GatewayProofVerificationFilter
   -> BearerTokenAuthenticationFilter
   -> JwtDecoder + signature/time/issuer/audience validators
   -> SynapseJwtAuthenticationConverter
@@ -85,6 +87,8 @@ roles / permissions 是 token 快照；mapper 不查询数据库，也不根据 
 错误响应应统一 Result，但不得暴露 token、签名细节或内部验证堆栈。
 
 ## 8. Filter 顺序与生命周期
+
+GatewayProof Filter 必须位于 Bearer Token Filter 之前，只校验可信入口证明，不建立认证主体。
 
 Bridge Filter 必须位于 Bearer Token Filter 之后，否则读取不到已认证的 Synapse token。Bridge 使用 try-with-resources，确保 Controller 或后续 Filter 抛异常时仍恢复旧 SecurityContext / OperationContext。
 

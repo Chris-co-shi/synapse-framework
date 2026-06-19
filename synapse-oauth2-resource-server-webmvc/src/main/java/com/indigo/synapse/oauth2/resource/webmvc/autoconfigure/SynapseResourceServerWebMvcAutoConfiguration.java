@@ -12,12 +12,19 @@ import com.indigo.synapse.oauth2.core.validation.SynapseJwtValidatorFactory;
 import com.indigo.synapse.oauth2.core.validation.TokenTypeValidator;
 import com.indigo.synapse.oauth2.resource.webmvc.config.SynapseResourceServerConfigurer;
 import com.indigo.synapse.oauth2.resource.webmvc.context.SynapseSecurityContextBridgeFilter;
+import com.indigo.synapse.oauth2.resource.webmvc.gatewayproof.GatewayProofAccessDeniedHandler;
+import com.indigo.synapse.oauth2.resource.webmvc.gatewayproof.GatewayProofVerificationFilter;
 import com.indigo.synapse.oauth2.resource.webmvc.jwt.SynapseJwtAuthenticationConverter;
 import com.indigo.synapse.oauth2.resource.webmvc.jwt.SynapseSpringJwtValidatorAdapter;
 import com.indigo.synapse.oauth2.resource.webmvc.web.SynapseAccessDeniedHandler;
 import com.indigo.synapse.oauth2.resource.webmvc.web.SynapseBearerAuthenticationEntryPoint;
 import com.indigo.synapse.webmvc.exception.WebErrorResponseWriter;
 import com.indigo.synapse.webmvc.exception.WebExceptionResponseFactory;
+import com.indigo.synapse.security.autoconfigure.SynapseSecurityProperties;
+import com.indigo.synapse.security.gatewayproof.GatewayProofReplayStore;
+import com.indigo.synapse.security.gatewayproof.GatewayProofTokenHasher;
+import com.indigo.synapse.security.gatewayproof.GatewayProofVerifier;
+import com.indigo.synapse.security.gatewayproof.HmacSha256GatewayProofVerifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -26,6 +33,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.converter.RsaKeyConverters;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
@@ -44,6 +52,8 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.Clock;
+import java.util.Map;
 
 /**
  * Servlet OAuth2 Resource Server 自动配置。
@@ -81,6 +91,48 @@ public class SynapseResourceServerWebMvcAutoConfiguration {
             WebExceptionResponseFactory responseFactory,
             WebErrorResponseWriter responseWriter) {
         return new SynapseAccessDeniedHandler(responseFactory, responseWriter);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "synapse.security.gateway-proof", name = "enabled", havingValue = "true")
+    public GatewayProofAccessDeniedHandler gatewayProofAccessDeniedHandler(
+            WebExceptionResponseFactory responseFactory,
+            WebErrorResponseWriter responseWriter) {
+        return new GatewayProofAccessDeniedHandler(responseFactory, responseWriter);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "synapse.security.gateway-proof", name = "enabled", havingValue = "true")
+    public GatewayProofVerifier gatewayProofVerifier(
+            SynapseSecurityProperties securityProperties,
+            ObjectProvider<GatewayProofReplayStore> replayStoreProvider) {
+        SynapseSecurityProperties.GatewayProof gatewayProof = securityProperties.getGatewayProof();
+        return new HmacSha256GatewayProofVerifier(
+                Map.of(gatewayProof.getGatewayId(), gatewayProof.getSecret()),
+                gatewayProof.getTimestampSkew(),
+                Clock.systemUTC(),
+                replayStoreProvider.getIfAvailable(),
+                gatewayProof.isReplayProtectionEnabled(),
+                gatewayProof.isFailFast()
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "synapse.security.gateway-proof", name = "enabled", havingValue = "true")
+    public GatewayProofVerificationFilter gatewayProofVerificationFilter(
+            SynapseSecurityProperties securityProperties,
+            GatewayProofVerifier gatewayProofVerifier,
+            GatewayProofTokenHasher tokenHasher,
+            GatewayProofAccessDeniedHandler accessDeniedHandler) {
+        return new GatewayProofVerificationFilter(
+                securityProperties.getGatewayProof(),
+                gatewayProofVerifier,
+                tokenHasher,
+                accessDeniedHandler
+        );
     }
 
     @Bean
@@ -151,13 +203,15 @@ public class SynapseResourceServerWebMvcAutoConfiguration {
             SynapseJwtAuthenticationConverter authenticationConverter,
             SynapseBearerAuthenticationEntryPoint entryPoint,
             SynapseAccessDeniedHandler accessDeniedHandler,
-            SynapseSecurityContextBridgeFilter bridgeFilter) {
+            SynapseSecurityContextBridgeFilter bridgeFilter,
+            ObjectProvider<GatewayProofVerificationFilter> gatewayProofFilter) {
         return new SynapseResourceServerConfigurer(
                 properties,
                 authenticationConverter,
                 entryPoint,
                 accessDeniedHandler,
-                bridgeFilter
+                bridgeFilter,
+                gatewayProofFilter.getIfAvailable()
         );
     }
 

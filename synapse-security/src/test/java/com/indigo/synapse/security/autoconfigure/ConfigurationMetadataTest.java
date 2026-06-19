@@ -17,6 +17,14 @@ class ConfigurationMetadataTest {
 
         assertJsonObject(json);
         assertProperty(json, "synapse.security.permission.annotation-enabled", "java.lang.Boolean");
+        assertProperty(json, "synapse.security.gateway-proof.enabled", "java.lang.Boolean");
+        assertProperty(json, "synapse.security.gateway-proof.required", "java.lang.Boolean");
+        assertProperty(json, "synapse.security.gateway-proof.gateway-id", "java.lang.String");
+        assertProperty(json, "synapse.security.gateway-proof.secret", "java.lang.String");
+        assertProperty(json, "synapse.security.gateway-proof.timestamp-skew", "java.time.Duration");
+        assertProperty(json, "synapse.security.gateway-proof.replay-protection-enabled", "java.lang.Boolean");
+        assertProperty(json, "synapse.security.gateway-proof.fail-fast", "java.lang.Boolean");
+        assertProperty(json, "synapse.security.gateway-proof.permit-paths", "java.util.List<java.lang.String>");
         assertFalse(json.contains("synapse.security.trusted-header"));
     }
 

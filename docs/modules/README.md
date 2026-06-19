@@ -22,7 +22,7 @@
 - 本项目不提供 demo / example / sample application。
 - 业务系统按需直接引用具体 module。
 - 后续文档不得再把 starter 或 demo 作为正向规划。
-- 身份认证只信任经过 Resource Server 验证的 Bearer Token，不提供身份 Header 适配模块。
+- 身份认证只信任经过 Resource Server 验证的 Bearer Token；GatewayProof 只证明可信入口，不恢复身份 Header。
 
 模块文档必须明确区分：
 
@@ -67,6 +67,7 @@
 - [Phase 2 Roadmap](../phase-2/02-phase-2-roadmap.md)
 - [Boundary Checklist](../phase-2/03-boundary-checklist.md)
 - [Cloud Context Propagation](../phase-2/04-cloud-context-propagation.md)
+- [GatewayProof 可信入口证明](../phase-2/05-gateway-proof.md)
 
 ## 迁移文档
 

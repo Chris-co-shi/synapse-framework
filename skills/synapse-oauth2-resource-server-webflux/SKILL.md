@@ -2,7 +2,7 @@
 
 ## 职责
 
-提供 Reactive OAuth2 Resource Server 技术适配、Reactor Context 安全/操作上下文读取和统一 401/403。
+提供 Reactive OAuth2 Resource Server 技术适配、GatewayProof 前置校验、Reactor Context 安全/操作上下文读取和统一 401/403。
 
 ## Claim 规则
 
@@ -16,6 +16,7 @@
 
 - 配置前缀：`synapse.security.resource-server`。
 - WebFlux 当前支持 enabled、issuer-uri、jwk-set-uri、permit-paths、csrf-enabled。
+- GatewayProof 复用 `synapse.security.gateway-proof`，WebFilter 必须位于 OAuth2 Authentication 之前。
 - 公开配置项必须生成 Spring Boot Configuration Metadata。
 - WebFlux 不提供 WebMVC 的本地公钥、audience、token type、required claims、denylist 和 fail fast 配置，除非代码真实实现。
 
@@ -33,4 +34,5 @@
 - roles、permissions、scope 覆盖空白过滤、去重、前缀和顺序。
 - Reactor Context 读取 principal 和 OperationContext。
 - 401/403 复用 synapse-webflux writer。
+- GatewayProof valid/missing/permit path/malformed Authorization 必须覆盖。
 - metadata 测试应覆盖配置项说明。
