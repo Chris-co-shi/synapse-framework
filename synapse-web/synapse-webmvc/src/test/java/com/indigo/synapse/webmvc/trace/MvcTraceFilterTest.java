@@ -1,5 +1,6 @@
 package com.indigo.synapse.webmvc.trace;
 
+import com.indigo.synapse.web.core.trace.TraceHeaders;
 import com.indigo.synapse.webmvc.context.RequestContextHolder;
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.AfterEach;

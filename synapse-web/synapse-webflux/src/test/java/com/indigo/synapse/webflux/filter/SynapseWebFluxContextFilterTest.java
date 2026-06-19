@@ -6,7 +6,7 @@ import com.indigo.synapse.webflux.context.OperationContextHeaders;
 import com.indigo.synapse.webflux.context.OperationContextWebFluxCodec;
 import com.indigo.synapse.webflux.context.ReactiveRequestContext;
 import com.indigo.synapse.webflux.context.RequestContext;
-import com.indigo.synapse.webflux.trace.TraceHeaders;
+import com.indigo.synapse.web.core.trace.TraceHeaders;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;

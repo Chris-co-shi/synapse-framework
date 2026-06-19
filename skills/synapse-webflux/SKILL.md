@@ -13,6 +13,7 @@
 - WebFlux 异常响应适配。
 - OperationContext 恢复为 reactive 上下文。
 - WebFlux `Result` 写出工具。
+- 复用 `synapse-web-core` 的响应模型、状态解析和 Jackson 定制。
 
 禁止提供：
 
@@ -37,6 +38,7 @@
 - 自动配置必须只在 Reactive Web Application 下生效。
 - 缺少 WebFlux 类时不得误装配。
 - 消费方自定义 Bean 时默认 Bean 不覆盖。
+- 不得创建全局 `ObjectMapper` Bean。
 - 上下文传递以 Reactor Context 为主，不能依赖 Servlet ThreadLocal。
 - Header 恢复只做技术上下文恢复，不做认证、授权或 Gateway 业务判定。
 

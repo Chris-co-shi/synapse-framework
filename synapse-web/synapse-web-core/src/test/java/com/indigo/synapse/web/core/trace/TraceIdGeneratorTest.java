@@ -1,4 +1,4 @@
-package com.indigo.synapse.webmvc.trace;
+package com.indigo.synapse.web.core.trace;
 
 import org.junit.jupiter.api.Test;
 

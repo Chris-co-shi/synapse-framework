@@ -1,11 +1,13 @@
 package com.indigo.synapse.webflux.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.indigo.synapse.web.core.autoconfigure.SynapseWebCoreAutoConfiguration;
 import com.indigo.synapse.webflux.context.OperationContextWebFluxCodec;
 import com.indigo.synapse.webflux.exception.SynapseWebFluxExceptionHandler;
 import com.indigo.synapse.webflux.filter.SynapseWebFluxContextFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ReactiveWebApplicationContextRunner;
 
@@ -16,7 +18,11 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 class SynapseWebFluxAutoConfigurationTest {
 
     private final ReactiveWebApplicationContextRunner contextRunner = new ReactiveWebApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(SynapseWebFluxAutoConfiguration.class));
+            .withConfiguration(AutoConfigurations.of(
+                    SynapseWebCoreAutoConfiguration.class,
+                    SynapseWebFluxAutoConfiguration.class,
+                    JacksonAutoConfiguration.class
+            ));
 
     @Test
     void shouldCreateWebFluxFoundationBeans() {

@@ -10,8 +10,8 @@
 - Reactor Context 中的请求上下文。
 - OperationContext Header 恢复为 `OperationContextSnapshot`。
 - WebFlux 异常响应适配。
-- 默认 JSON 序列化规则。
-- 统一 `Result` 响应结构。
+- 复用 `synapse-web-core` 的 JSON Builder 定制。
+- 复用 `synapse-web-core` 的统一 `Result` 响应结构。
 
 `synapse-webflux` 不是 Gateway 服务，不提供路由、鉴权业务、限流后台或可启动应用。
 
@@ -26,8 +26,8 @@
 - `OperationContextWebFluxCodec`
 - `SynapseWebFluxExceptionHandler`
 - `WebFluxExceptionResponseFactory`
-- `Result`
-- `SynapseObjectMapperFactory`
+- `com.indigo.synapse.web.core.response.Result`
+- `SynapseWebCoreAutoConfiguration`
 - `SynapseWebFluxAutoConfiguration`
 
 ## 3. 适用场景
@@ -131,6 +131,7 @@ WebFlux 场景不要依赖 Servlet ThreadLocal。请求上下文、traceId、req
 
 可以。`synapse-gateway` 属于 Synapse Platform，可引用 `synapse-webflux` 的技术能力。但 Gateway 路由、鉴权和启动服务不得进入 Framework。
 
-### Q2：为什么不复用 `synapse-webmvc` 的 `Result`？
+### Q2：MVC 和 WebFlux 是否共用 `Result`？
 
-为了避免 WebFlux 模块间接依赖 MVC / Servlet。当前两个模块各自拥有响应结构，后续如果重复成本变高，再评估独立公共模块。
+是。两者都依赖 `synapse-web-core` 的 `com.indigo.synapse.web.core.response.Result`，
+因此 WebFlux 不需要依赖 MVC 或 Servlet。

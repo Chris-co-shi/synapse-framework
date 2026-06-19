@@ -1,6 +1,6 @@
 package com.indigo.synapse.webflux.exception;
 
-import com.indigo.synapse.webflux.response.Result;
+import com.indigo.synapse.web.core.response.Result;
 
 public record WebFluxErrorResponse(int status, Result<Void> body) {
 

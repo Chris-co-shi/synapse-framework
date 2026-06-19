@@ -25,7 +25,7 @@
 - 需要将常见 MVC 请求错误映射为 400 / 404 / 405 / 415 / 500。
 - 需要 Filter 阶段的 `SynapseException` 返回统一 JSON 响应。
 - 需要请求 traceId 头、MDC 和响应体 traceId 保持一致。
-- 需要一个默认 ObjectMapper 规则。
+- 需要在 Spring Boot Jackson 构建链上应用 Framework 默认规则。
 
 ## 3. 不适用场景
 
@@ -238,12 +238,13 @@ HTTP Request
 - 如果请求头 traceId 格式不合法，会自动生成。
 - 请求结束后会清理 `TraceContext`、`TraceMdc`、`RequestContextHolder`。
 
-### 5.6 默认 ObjectMapper
+### 5.6 Jackson 定制
 
 核心类型：
 
 ```java
-SynapseObjectMapperFactory
+SynapseWebCoreAutoConfiguration
+SynapseWebJacksonCustomizer
 ```
 
 默认规则：
@@ -255,7 +256,9 @@ SynapseObjectMapperFactory
 - 保留 null 字段。
 - 使用 UTC 时区。
 
-消费方提供自己的 `ObjectMapper` Bean 时，默认 Bean 不覆盖。
+这些能力由 `synapse-web-core` 提供。Framework 不创建全局 `ObjectMapper` Bean；
+Boot `spring.jackson.*`、用户 `ObjectMapper`、用户 `Module` 和用户 Builder Customizer
+均保留标准优先级。
 
 ### 5.7 OpenAPI 可见性策略
 
@@ -332,7 +335,7 @@ ObjectMapper objectMapper() {
 }
 ```
 
-提供自定义 Bean 后，`synapse-webmvc` 默认 ObjectMapper 不会覆盖。
+提供自定义 Bean 后，`synapse-webmvc` 不会创建第二个 ObjectMapper。
 
 ### 7.2 替换 Filter 阶段异常桥接
 

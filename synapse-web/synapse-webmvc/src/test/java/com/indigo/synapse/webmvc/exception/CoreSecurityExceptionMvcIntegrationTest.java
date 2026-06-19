@@ -6,6 +6,8 @@ import com.indigo.synapse.core.error.CommonErrorCode;
 import com.indigo.synapse.core.error.ErrorCode;
 import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
 import com.indigo.synapse.core.exception.SynapseAuthenticationException;
+import com.indigo.synapse.web.core.error.CommonErrorHttpStatusResolver;
+import com.indigo.synapse.web.core.error.CompositeErrorHttpStatusResolver;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;

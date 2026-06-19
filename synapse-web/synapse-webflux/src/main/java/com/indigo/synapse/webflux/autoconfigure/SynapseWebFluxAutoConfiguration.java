@@ -2,14 +2,13 @@ package com.indigo.synapse.webflux.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indigo.synapse.webflux.context.OperationContextWebFluxCodec;
-import com.indigo.synapse.webflux.exception.CommonErrorHttpStatusResolver;
-import com.indigo.synapse.webflux.exception.CompositeErrorHttpStatusResolver;
-import com.indigo.synapse.webflux.exception.ErrorHttpStatusResolver;
+import com.indigo.synapse.web.core.error.CommonErrorHttpStatusResolver;
+import com.indigo.synapse.web.core.error.CompositeErrorHttpStatusResolver;
+import com.indigo.synapse.web.core.error.ErrorHttpStatusResolver;
 import com.indigo.synapse.webflux.exception.SynapseWebFluxExceptionHandler;
 import com.indigo.synapse.webflux.exception.ReactiveWebErrorResponseWriter;
 import com.indigo.synapse.webflux.exception.WebFluxExceptionResponseFactory;
 import com.indigo.synapse.webflux.filter.SynapseWebFluxContextFilter;
-import com.indigo.synapse.webflux.json.SynapseObjectMapperFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -29,12 +28,6 @@ import java.util.List;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 @ConditionalOnClass({ServerWebExchange.class, WebFilter.class})
 public class SynapseWebFluxAutoConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean
-    public ObjectMapper synapseWebFluxObjectMapper() {
-        return SynapseObjectMapperFactory.create();
-    }
 
     @Bean
     @ConditionalOnMissingBean(CommonErrorHttpStatusResolver.class)

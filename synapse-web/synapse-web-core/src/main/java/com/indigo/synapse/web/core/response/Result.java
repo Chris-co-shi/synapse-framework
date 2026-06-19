@@ -1,9 +1,8 @@
-package com.indigo.synapse.webmvc.response;
+package com.indigo.synapse.web.core.response;
 
 import com.indigo.synapse.core.error.CommonErrorCode;
 import com.indigo.synapse.core.error.ErrorCode;
-import com.indigo.synapse.webmvc.trace.TraceContext;
-import com.indigo.synapse.webmvc.trace.TraceIdGenerator;
+import com.indigo.synapse.web.core.trace.TraceIdGenerator;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -27,7 +26,7 @@ import java.util.Objects;
  * @param code      业务状态码，不能为空
  * @param message   响应消息，为空时默认转为空字符串
  * @param data      响应数据，允许为空
- * @param traceId   链路追踪 ID，为空时从当前上下文获取，若上下文不存在则自动生成
+ * @param traceId   链路追踪 ID，为空时自动生成；Web 适配器应优先显式传入当前请求 traceId
  * @param timestamp 响应创建时间，为空时默认使用当前时间
  * @param <T>       响应数据类型
  */
@@ -77,11 +76,23 @@ public record Result<T>(
      * @return 成功响应
      */
     public static <T> Result<T> success(T data) {
+        return success(data, TraceIdGenerator.generate());
+    }
+
+    /**
+     * 使用指定 traceId 创建成功结果。
+     *
+     * @param data 响应数据
+     * @param traceId 当前技术栈解析出的 traceId
+     * @param <T> 响应数据类型
+     * @return 成功响应
+     */
+    public static <T> Result<T> success(T data, String traceId) {
         return new Result<>(
                 CommonErrorCode.SUCCESS.code(),
                 CommonErrorCode.SUCCESS.message(),
                 data,
-                resolveTraceId(),
+                traceId,
                 Instant.now()
         );
     }
@@ -107,13 +118,29 @@ public record Result<T>(
      * @return 失败响应
      */
     public static Result<Void> fail(ErrorCode errorCode, String message) {
+        return fail(errorCode, message, TraceIdGenerator.generate());
+    }
+
+    /**
+     * 使用指定 traceId 创建失败结果。
+     *
+     * @param errorCode 错误码
+     * @param message 响应消息
+     * @param traceId 当前技术栈解析出的 traceId
+     * @return 失败响应
+     */
+    public static Result<Void> fail(
+            ErrorCode errorCode,
+            String message,
+            String traceId
+    ) {
         ErrorCode checkedErrorCode = requireErrorCode(errorCode);
 
         return new Result<>(
                 checkedErrorCode.code(),
                 Objects.requireNonNullElse(message, checkedErrorCode.message()),
                 null,
-                resolveTraceId(),
+                traceId,
                 Instant.now()
         );
     }
@@ -165,17 +192,11 @@ public record Result<T>(
     }
 
     /**
-     * 获取当前链路追踪 ID。
+     * 生成未显式传入 traceId 时使用的兜底标识。
      *
-     * <p>优先从当前 TraceContext 中获取 traceId；如果当前上下文不存在 traceId，
-     * 则生成一个新的 traceId，保证每个响应都具备可追踪性。</p>
-     *
-     * <p>注意：不能命名为 {@code traceId()}，因为 record 组件 {@code traceId}
-     * 会自动生成同名访问器方法 {@code traceId()}。</p>
-     *
-     * @return 当前链路追踪 ID
+     * @return 新生成的链路追踪 ID
      */
     private static String resolveTraceId() {
-        return TraceContext.currentTraceId().orElseGet(TraceIdGenerator::generate);
+        return TraceIdGenerator.generate();
     }
 }

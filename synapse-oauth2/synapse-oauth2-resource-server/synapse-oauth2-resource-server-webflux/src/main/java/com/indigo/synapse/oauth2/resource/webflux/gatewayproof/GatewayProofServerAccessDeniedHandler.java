@@ -7,7 +7,7 @@ import com.indigo.synapse.security.gatewayproof.GatewayProofVerificationResult;
 import com.indigo.synapse.security.gatewayproof.GatewayProofVerificationStatus;
 import com.indigo.synapse.webflux.exception.ReactiveWebErrorResponseWriter;
 import com.indigo.synapse.webflux.exception.WebFluxExceptionResponseFactory;
-import com.indigo.synapse.webflux.trace.TraceIdGenerator;
+import com.indigo.synapse.web.core.trace.TraceIdGenerator;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 

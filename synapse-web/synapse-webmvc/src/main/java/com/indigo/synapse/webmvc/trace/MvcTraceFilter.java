@@ -1,5 +1,6 @@
 package com.indigo.synapse.webmvc.trace;
 
+import com.indigo.synapse.web.core.trace.TraceHeaders;
 import com.indigo.synapse.webmvc.context.RequestContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -2,6 +2,8 @@ package com.indigo.synapse.webmvc.exception;
 
 import com.indigo.synapse.core.error.CommonErrorCode;
 import com.indigo.synapse.core.exception.SynapseException;
+import com.indigo.synapse.web.core.error.CommonErrorHttpStatusResolver;
+import com.indigo.synapse.web.core.error.CompositeErrorHttpStatusResolver;
 import com.indigo.synapse.webmvc.trace.TraceContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

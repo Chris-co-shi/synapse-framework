@@ -37,7 +37,7 @@ synapse-audit
 | 维度 | 当前事实 |
 | --- | --- |
 | 定位 | Servlet MVC 技术支撑 |
-| 公开能力 | Result、GlobalExceptionHandler、Filter 异常桥接、ErrorHttpStatusResolver、TraceContext、RequestContext、MvcTraceFilter、MvcOperationContextFilter、默认 ObjectMapper、OpenAPI 可见性策略 |
+| 公开能力 | 复用 web-core Result/ErrorHttpStatusResolver/Jackson 定制；GlobalExceptionHandler、Filter 异常桥接、TraceContext、RequestContext、MvcTraceFilter、MvcOperationContextFilter、OpenAPI 可见性策略 |
 | 自动配置 | 已提供 WebMVC 自动配置，核心 Bean 支持消费方覆盖 |
 | Framework 依赖 | `synapse-core` |
 | 主要外部依赖 | Jackson、Spring Web、Spring WebMVC、Servlet API、Validation |
@@ -49,12 +49,12 @@ synapse-audit
 | 维度 | 当前事实 |
 | --- | --- |
 | 定位 | WebFlux 技术支撑，不是 Gateway 服务 |
-| 公开能力 | Result、ReactiveRequestContext、SynapseWebFluxContextFilter、OperationContextWebFluxCodec、异常处理器、默认 ObjectMapper |
+| 公开能力 | 复用 web-core Result/ErrorHttpStatusResolver/Jackson 定制；ReactiveRequestContext、SynapseWebFluxContextFilter、OperationContextWebFluxCodec、异常处理器 |
 | 自动配置 | `SynapseWebFluxAutoConfiguration` |
 | Framework 依赖 | `synapse-core` |
 | 主要外部依赖 | Jackson、Spring Web、Spring WebFlux、Reactor |
 | 当前优势 | POM 未引入 MVC 或 Servlet；Reactor Context 是请求上下文主通道 |
-| 已知缺口 | WebMVC 与 WebFlux 各自维护 Result/ObjectMapper/异常工厂，需要冻结一致性契约；需要验证 cancel、error、empty publisher 等路径的上下文清理和响应行为 |
+| 已知缺口 | Result、状态解析和 Jackson 默认规则已统一到 web-core；仍需持续验证 cancel、error、empty publisher 等路径的上下文清理和响应行为 |
 
 ### 2.4 synapse-security
 
@@ -127,7 +127,7 @@ OperationContext snapshot
 
 ### 3.2 当前关键一致性问题
 
-1. WebMVC 与 WebFlux 各自维护 Result、ObjectMapper 和异常响应工厂，尚未形成明确的跨技术栈兼容测试。
+1. WebMVC 与 WebFlux 仍保留各自技术栈异常工厂，但共享 Result、状态解析器和 Jackson Builder 定制。
 2. WebMVC 同时存在 TraceContext、RequestContext 和 OperationContext，需要冻结建立、覆盖和清理顺序。
 3. CurrentPrincipalContext 管理 OperationContextScope，嵌套安全上下文的行为需要明确。
 4. Data 模块生产依赖与文档边界不完全一致。

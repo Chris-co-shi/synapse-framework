@@ -108,7 +108,8 @@ core 的 ErrorCode 不携带 HTTP status。webmvc 通过 resolver 完成映射�
 ## 8. 扩展原则
 
 - 自定义业务错误到 HTTP 映射：新增 `ErrorHttpStatusResolver`。
-- 自定义 JSON：提供 `ObjectMapper` Bean。
+- 自定义 JSON：优先提供 Jackson `Module` 或 `Jackson2ObjectMapperBuilderCustomizer`；
+  需要完全接管时仍可提供自定义 `ObjectMapper` Bean。
 - 自定义 Filter 时保持异常桥接和上下文清理顺序。
 - 不通过覆盖整个模块来增加一个业务 Controller。
 

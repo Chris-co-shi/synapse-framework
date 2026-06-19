@@ -1,8 +1,8 @@
 package com.indigo.synapse.webflux.exception;
 
 import com.indigo.synapse.webflux.context.ReactiveRequestContext;
-import com.indigo.synapse.webflux.trace.TraceHeaders;
-import com.indigo.synapse.webflux.trace.TraceIdGenerator;
+import com.indigo.synapse.web.core.trace.TraceHeaders;
+import com.indigo.synapse.web.core.trace.TraceIdGenerator;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;

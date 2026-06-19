@@ -1,7 +1,7 @@
 package com.indigo.synapse.webmvc.exception;
 
 import com.indigo.synapse.core.exception.SynapseException;
-import com.indigo.synapse.webmvc.response.Result;
+import com.indigo.synapse.web.core.response.Result;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;

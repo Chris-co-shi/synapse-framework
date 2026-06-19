@@ -4,7 +4,7 @@ import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import com.indigo.synapse.oauth2.core.exception.OAuth2ErrorCode;
 import com.indigo.synapse.webflux.exception.ReactiveWebErrorResponseWriter;
 import com.indigo.synapse.webflux.exception.WebFluxExceptionResponseFactory;
-import com.indigo.synapse.webflux.trace.TraceIdGenerator;
+import com.indigo.synapse.web.core.trace.TraceIdGenerator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;

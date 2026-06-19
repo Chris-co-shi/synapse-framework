@@ -1,4 +1,4 @@
-package com.indigo.synapse.webmvc.exception;
+package com.indigo.synapse.web.core.error;
 
 import com.indigo.synapse.core.error.ErrorCode;
 

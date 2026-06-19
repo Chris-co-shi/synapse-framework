@@ -3,7 +3,7 @@ package com.indigo.synapse.oauth2.resource.webflux.web;
 import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
 import com.indigo.synapse.webflux.exception.ReactiveWebErrorResponseWriter;
 import com.indigo.synapse.webflux.exception.WebFluxExceptionResponseFactory;
-import com.indigo.synapse.webflux.trace.TraceIdGenerator;
+import com.indigo.synapse.web.core.trace.TraceIdGenerator;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
 import org.springframework.web.server.ServerWebExchange;

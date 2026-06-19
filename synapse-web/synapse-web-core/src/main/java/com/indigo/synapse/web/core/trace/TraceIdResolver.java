@@ -1,4 +1,10 @@
-package com.indigo.synapse.webflux.trace;
+package com.indigo.synapse.web.core.trace;
+
+/**
+ * 解析和校验外部传入的 traceId。
+ *
+ * <p>该规则不依赖 Servlet 或 Reactor，MVC 与 WebFlux 必须共享同一字符集和长度约束。</p>
+ */
 
 public final class TraceIdResolver {
 

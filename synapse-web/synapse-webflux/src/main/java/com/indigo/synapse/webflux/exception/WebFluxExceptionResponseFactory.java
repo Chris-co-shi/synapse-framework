@@ -5,7 +5,8 @@ import com.indigo.synapse.core.error.ErrorCode;
 import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
 import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import com.indigo.synapse.core.exception.SynapseException;
-import com.indigo.synapse.webflux.response.Result;
+import com.indigo.synapse.web.core.error.CompositeErrorHttpStatusResolver;
+import com.indigo.synapse.web.core.response.Result;
 
 /**
  * WebFlux 异常响应工厂。

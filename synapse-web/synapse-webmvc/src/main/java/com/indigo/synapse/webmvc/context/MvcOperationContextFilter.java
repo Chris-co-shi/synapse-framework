@@ -5,7 +5,7 @@ import com.indigo.synapse.core.context.OperationContextPropagationKeys;
 import com.indigo.synapse.core.context.OperationContextScope;
 import com.indigo.synapse.core.context.OperationContextSnapshotCarrier;
 import com.indigo.synapse.core.context.OperationContextSnapshotCodec;
-import com.indigo.synapse.webmvc.trace.TraceHeaders;
+import com.indigo.synapse.web.core.trace.TraceHeaders;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

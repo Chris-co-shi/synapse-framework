@@ -3,6 +3,7 @@ package com.indigo.synapse.webmvc.autoconfigure;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.indigo.synapse.web.core.autoconfigure.SynapseWebCoreAutoConfiguration;
 import com.indigo.synapse.webmvc.context.MvcOperationContextFilter;
 import com.indigo.synapse.webmvc.openapi.OpenApiProperties;
 import com.indigo.synapse.webmvc.openapi.OpenApiVisibilityPolicy;
@@ -13,6 +14,7 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.mock.env.MockEnvironment;
 
@@ -27,11 +29,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SynapseWebAutoConfigurationTest {
 
     private final SynapseWebAutoConfiguration configuration = new SynapseWebAutoConfiguration();
-    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+    private final WebApplicationContextRunner contextRunner = new WebApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(
                     SynapseWebErrorAutoConfiguration.class,
+                    SynapseWebCoreAutoConfiguration.class,
                     SynapseWebAutoConfiguration.class,
-                    SynapseWebMvcAutoConfiguration.class
+                    SynapseWebMvcAutoConfiguration.class,
+                    JacksonAutoConfiguration.class
             ));
 
     @Test
@@ -98,18 +102,29 @@ class SynapseWebAutoConfigurationTest {
     }
 
     @Test
-    void shouldProvideObjectMapperBeforeBootJacksonAutoConfiguration() {
+    void shouldLetBootCreateObjectMapper() {
         new ApplicationContextRunner()
-                .withConfiguration(AutoConfigurations.of(SynapseWebAutoConfiguration.class, JacksonAutoConfiguration.class))
+                .withConfiguration(AutoConfigurations.of(
+                        SynapseWebCoreAutoConfiguration.class,
+                        SynapseWebAutoConfiguration.class,
+                        JacksonAutoConfiguration.class
+                ))
                 .run(context -> {
-                    assertTrue(context.containsBean("synapseObjectMapper"));
-                    assertSame(context.getBean("synapseObjectMapper"), context.getBean(ObjectMapper.class));
+                    assertFalse(context.containsBean("synapseObjectMapper"));
+                    assertNotNull(context.getBean(ObjectMapper.class));
                 });
     }
 
     @Test
     void shouldNotLoadMvcTraceWhenServletStackIsMissing() {
-        contextRunner
+        new ApplicationContextRunner()
+                .withConfiguration(AutoConfigurations.of(
+                        SynapseWebCoreAutoConfiguration.class,
+                        SynapseWebAutoConfiguration.class,
+                        SynapseWebErrorAutoConfiguration.class,
+                        SynapseWebMvcAutoConfiguration.class,
+                        JacksonAutoConfiguration.class
+                ))
                 .withClassLoader(new FilteredClassLoader("jakarta.servlet"))
                 .run(context -> {
                     assertNotNull(context.getBean(OpenApiProperties.class));

@@ -52,8 +52,8 @@
 
 ### 重点检查
 
-- Result 是否需要提取为无 Web 依赖的公共契约，或通过契约测试维持双实现。
-- ObjectMapper 默认规则是否一致。
+- Result 已提取到无 Servlet/Reactor 依赖的 `synapse-web-core`。
+- Jackson 默认规则由 web-core Module/Builder Customizer 统一，Framework 不创建全局 ObjectMapper。
 - 未认证、无权限、参数错误、404、405、415、未知异常响应是否一致。
 - traceId header、MDC 或 Reactor Context、Result.traceId 是否一致。
 - MvcOperationContextFilter 与认证桥接 Filter 的顺序。

@@ -27,17 +27,19 @@
   Servlet 适配器使用严格可关闭 Scope，Reactive 适配器使用 Reactor Context，并补充并发和线程切换测试。
 - 测试结果：相关模块测试、OAuth2 依赖边界检查、`mvn clean verify` 和 `git diff --check` 均通过，
   27 个 reactor project 全部成功。
-- Commit SHA：待提交
+- Commit SHA：`682bfff`
 - 遗留问题：保留 Spring Security 自身的 SecurityContext/Holder 术语；Reactive 主体门面当前位于
   Resource Server WebFlux 适配模块，后续 Web/OAuth2 拆分阶段继续评估共享位置。
 
 ## Phase 3：完成 Web 模块拆分和 JSON 修复
 
-- 状态：未开始
-- 修改摘要：待执行。
-- 测试结果：未执行。
+- 状态：已完成
+- 修改摘要：将 Result、HTTP 状态解析器、traceId 基础规则和 Jackson 定制迁入 web-core；
+  MVC/WebFlux 删除重复实现和全局 ObjectMapper Bean，改为复用 Boot Jackson 构建链。
+- 测试结果：三个 Web JAR 相关测试、web-core 禁止依赖检查、`mvn clean verify` 和
+  `git diff --check` 均通过，27 个 reactor project 全部成功。
 - Commit SHA：待提交
-- 遗留问题：无。
+- 遗留问题：保留现有 WebFlux 测试中 Spring 待删除 API 的编译告警，后续自动配置契约阶段处理。
 
 ## Phase 4：重构 OAuth2
 

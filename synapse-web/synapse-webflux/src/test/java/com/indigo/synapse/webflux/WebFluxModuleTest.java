@@ -9,6 +9,6 @@ class WebFluxModuleTest {
     @Test
     void shouldExposeModuleNameAndDependency() {
         assertEquals("synapse-webflux", WebFluxModule.NAME);
-        assertEquals("synapse-core", WebFluxModule.dependsOn());
+        assertEquals("synapse-web-core", WebFluxModule.dependsOn());
     }
 }

@@ -1,18 +1,23 @@
 package com.indigo.synapse.webmvc.autoconfigure;
 
-import com.indigo.synapse.webmvc.exception.CommonErrorHttpStatusResolver;
-import com.indigo.synapse.webmvc.exception.CompositeErrorHttpStatusResolver;
-import com.indigo.synapse.webmvc.exception.ErrorHttpStatusResolver;
+import com.indigo.synapse.web.core.error.CommonErrorHttpStatusResolver;
+import com.indigo.synapse.web.core.error.CompositeErrorHttpStatusResolver;
+import com.indigo.synapse.web.core.error.ErrorHttpStatusResolver;
 import com.indigo.synapse.webmvc.exception.WebExceptionResponseFactory;
 import com.indigo.synapse.webmvc.exception.WebErrorResponseWriter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @AutoConfiguration
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@ConditionalOnClass(HttpServletResponse.class)
 public class SynapseWebErrorAutoConfiguration {
 
     @Bean

@@ -2,7 +2,7 @@ package com.indigo.synapse.webflux.exception;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.indigo.synapse.webflux.trace.TraceHeaders;
+import com.indigo.synapse.web.core.trace.TraceHeaders;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;

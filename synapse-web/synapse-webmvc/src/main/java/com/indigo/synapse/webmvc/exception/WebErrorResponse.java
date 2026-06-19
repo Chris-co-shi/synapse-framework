@@ -1,6 +1,6 @@
 package com.indigo.synapse.webmvc.exception;
 
-import com.indigo.synapse.webmvc.response.Result;
+import com.indigo.synapse.web.core.response.Result;
 
 /**
  * Web 异常转换后的标准响应描述。

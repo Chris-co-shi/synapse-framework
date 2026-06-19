@@ -8,6 +8,7 @@ import com.indigo.synapse.webmvc.trace.MvcTraceFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Bean;
  * 和 Filter 阶段异常桥接 filter。一阶段不在 synapse-webmvc 中提供 WebFlux / Gateway 自动配置。</p>
  */
 @AutoConfiguration
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass(name = {
         "jakarta.servlet.Filter",
         "org.springframework.web.servlet.DispatcherServlet"

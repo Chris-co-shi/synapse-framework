@@ -83,7 +83,7 @@ synapse-framework
 | --- | --- | --- |
 | `synapse-bom` | 统一依赖版本管理 | [查看](docs/modules/synapse-bom.md) |
 | `synapse-core` | 错误码、异常、ID、OperationContext 等核心契约 | [查看](docs/modules/synapse-core.md) |
-| `synapse-web-core` | Web 技术栈无关契约骨架 | [查看](docs/modules/synapse-web-core.md) |
+| `synapse-web-core` | 统一响应、错误映射、traceId 与 Jackson 定制 | [查看](docs/modules/synapse-web-core.md) |
 | `synapse-webmvc` | Servlet MVC 响应、异常处理、Filter 异常桥接 | [查看](docs/modules/synapse-webmvc.md) |
 | `synapse-webflux` | WebFlux Trace、异常响应、Reactor Context / OperationContext 恢复 | [查看](docs/modules/synapse-webflux.md) |
 | `synapse-time` | 时间和时区技术支撑，提供 UTC 查询范围转换 | [查看](docs/modules/synapse-time.md) |
@@ -265,7 +265,7 @@ Synapse Framework
 ## 当前状态
 
 - `synapse-web` 和 `synapse-oauth2` 只做 Maven 聚合，不供应用直接依赖。
-- `synapse-web-core`、`synapse-oauth2-client`、`synapse-oauth2-resource-server-core` 当前是可编译边界骨架，完整能力在后续阶段实现。
+- `synapse-oauth2-client`、`synapse-oauth2-resource-server-core` 当前是可编译边界骨架，完整能力在后续阶段实现。
 - `synapse-webmvc` 承接 Servlet MVC Web 能力；`synapse-webflux` 提供 Reactive 技术支撑，不包含 Gateway 服务。
 - `synapse-security` 是 Web 无关安全基础模块；认证主体由 OAuth2 Resource Server 适配模块从经过验证的 Bearer Token 建立；GatewayProof 只证明可信入口。
 - OAuth2 当前通过聚合层组织 core、authorization support、client 和 resource server 子模块。

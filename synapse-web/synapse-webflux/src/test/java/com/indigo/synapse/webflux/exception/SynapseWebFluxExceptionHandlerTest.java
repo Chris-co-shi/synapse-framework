@@ -2,11 +2,13 @@ package com.indigo.synapse.webflux.exception;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.indigo.synapse.core.error.CommonErrorCode;
 import com.indigo.synapse.core.exception.SynapseAuthenticationException;
+import com.indigo.synapse.web.core.error.CommonErrorHttpStatusResolver;
+import com.indigo.synapse.web.core.error.CompositeErrorHttpStatusResolver;
+import com.indigo.synapse.web.core.trace.TraceHeaders;
 import com.indigo.synapse.webflux.context.ReactiveRequestContext;
-import com.indigo.synapse.webflux.json.SynapseObjectMapperFactory;
-import com.indigo.synapse.webflux.trace.TraceHeaders;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
@@ -21,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SynapseWebFluxExceptionHandlerTest {
 
-    private final ObjectMapper objectMapper = SynapseObjectMapperFactory.create();
+    private final ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
 
     private final SynapseWebFluxExceptionHandler handler = new SynapseWebFluxExceptionHandler(
             new ReactiveWebErrorResponseWriter(objectMapper),

@@ -1,4 +1,4 @@
-package com.indigo.synapse.webflux.exception;
+package com.indigo.synapse.web.core.error;
 
 import com.indigo.synapse.core.error.CommonErrorCode;
 import com.indigo.synapse.core.error.ErrorCode;
@@ -8,6 +8,9 @@ import java.util.OptionalInt;
 
 /**
  * core 通用错误码到 HTTP 状态码的默认映射。
+ *
+ * <p>该实现只处理 {@link CommonErrorCode} 中的通用错误语义，不处理 security、oauth2、message 等
+ * 模块自己的细分错误码。细分错误码可以通过额外的 {@link ErrorHttpStatusResolver} 扩展。</p>
  */
 public final class CommonErrorHttpStatusResolver implements ErrorHttpStatusResolver {
 
@@ -28,6 +31,7 @@ public final class CommonErrorHttpStatusResolver implements ErrorHttpStatusResol
         if (errorCode == null) {
             return OptionalInt.empty();
         }
+
         Integer status = STATUS_MAPPINGS.get(errorCode.code());
         return status == null ? OptionalInt.empty() : OptionalInt.of(status);
     }

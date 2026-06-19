@@ -38,7 +38,7 @@
 | 模块 | 手册 | 说明 |
 | --- | --- | --- |
 | `synapse-core` | [synapse-core.md](synapse-core.md) | 错误码、异常、ID、OperationContext 等核心契约 |
-| `synapse-web-core` | [synapse-web-core.md](synapse-web-core.md) | Web 技术栈无关契约骨架 |
+| `synapse-web-core` | [synapse-web-core.md](synapse-web-core.md) | 统一响应、错误映射、traceId 与 Jackson 定制 |
 | `synapse-webmvc` | [synapse-webmvc.md](synapse-webmvc.md) | Servlet MVC 响应、异常处理、Filter 异常桥接 |
 | `synapse-webflux` | [synapse-webflux.md](synapse-webflux.md) | WebFlux Trace、异常响应、Reactor Context / OperationContext 恢复 |
 | `synapse-time` | [synapse-time.md](synapse-time.md) | 时间和时区技术支撑，不做时区后台 |

@@ -1,9 +1,12 @@
 package com.indigo.synapse.webmvc.exception;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.indigo.synapse.core.error.ErrorCode;
 import com.indigo.synapse.core.exception.SynapseAuthenticationException;
-import com.indigo.synapse.webmvc.json.SynapseObjectMapperFactory;
+import com.indigo.synapse.web.core.error.CommonErrorHttpStatusResolver;
+import com.indigo.synapse.web.core.error.CompositeErrorHttpStatusResolver;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -20,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SynapseExceptionBridgeFilterTest {
 
     private final SynapseExceptionBridgeFilter filter = new SynapseExceptionBridgeFilter(
-            new WebErrorResponseWriter(SynapseObjectMapperFactory.create()),
+            new WebErrorResponseWriter(objectMapper()),
             new WebExceptionResponseFactory(
                     new CompositeErrorHttpStatusResolver(
                             List.of(new CommonErrorHttpStatusResolver())
@@ -38,7 +41,7 @@ class SynapseExceptionBridgeFilterTest {
                 chainThrowing(new SynapseAuthenticationException(TestErrorCode.SECURITY_INVALID_TRUSTED_HEADER))
         );
 
-        JsonNode body = SynapseObjectMapperFactory.create().readTree(response.getContentAsString());
+        JsonNode body = objectMapper().readTree(response.getContentAsString());
 
         assertEquals(401, response.getStatus());
         assertTrue(MediaType.APPLICATION_JSON.isCompatibleWith(MediaType.parseMediaType(response.getContentType())));
@@ -100,6 +103,10 @@ class SynapseExceptionBridgeFilterTest {
         return (request, response) -> {
             throw exception;
         };
+    }
+
+    private static ObjectMapper objectMapper() {
+        return JsonMapper.builder().findAndAddModules().build();
     }
 
     private enum TestErrorCode implements ErrorCode {

@@ -5,7 +5,10 @@ import com.indigo.synapse.core.error.ErrorCode;
 import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
 import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import com.indigo.synapse.core.exception.SynapseException;
-import com.indigo.synapse.webmvc.response.Result;
+import com.indigo.synapse.web.core.error.CompositeErrorHttpStatusResolver;
+import com.indigo.synapse.web.core.response.Result;
+import com.indigo.synapse.web.core.trace.TraceIdGenerator;
+import com.indigo.synapse.webmvc.trace.TraceContext;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -99,7 +102,7 @@ public final class WebExceptionResponseFactory {
             return new WebErrorResponse(
                     stack,
                     401,
-                    Result.fail(errorCode, exception.getMessage())
+                    Result.fail(errorCode, exception.getMessage(), currentTraceId())
             );
         }
 
@@ -107,7 +110,7 @@ public final class WebExceptionResponseFactory {
             return new WebErrorResponse(
                     stack,
                     403,
-                    Result.fail(errorCode, exception.getMessage())
+                    Result.fail(errorCode, exception.getMessage(), currentTraceId())
             );
         }
 
@@ -118,7 +121,11 @@ public final class WebExceptionResponseFactory {
         return new WebErrorResponse(
                 stack,
                 statusResolver.resolve(errorCode),
-                Result.fail(errorCode, message)
+                Result.fail(errorCode, message, currentTraceId())
         );
+    }
+
+    private static String currentTraceId() {
+        return TraceContext.currentTraceId().orElseGet(TraceIdGenerator::generate);
     }
 }

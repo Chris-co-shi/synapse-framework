@@ -1,5 +1,6 @@
 package com.indigo.synapse.webmvc.trace;
 
+import com.indigo.synapse.web.core.trace.TraceIdResolver;
 import com.indigo.synapse.webmvc.context.RequestContext;
 import com.indigo.synapse.webmvc.context.RequestContextHolder;
 

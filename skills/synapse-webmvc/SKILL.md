@@ -6,11 +6,11 @@
 
 允许提供：
 
-- `Result` 响应结构。
+- 复用 `synapse-web-core` 的 `Result` 响应结构。
 - MVC 全局异常处理。
 - Servlet Filter 阶段异常桥接。
 - MVC traceId / RequestContext。
-- MVC Jackson 默认规则。
+- 复用 `synapse-web-core` 的 Jackson Module 和 Builder Customizer。
 - OpenAPI visibility 策略。
 - MVC OperationContext 恢复扩展。
 
@@ -33,6 +33,7 @@
 ## 标准实现模式
 
 - 自动配置必须使用条件装配，不能覆盖消费方 Bean。
+- 不得创建全局 `ObjectMapper` Bean。
 - Servlet 相关能力必须只在 Servlet Web Application 下生效。
 - Filter 阶段异常桥接必须早于安全 Filter。
 - `synapse-webmvc` 不依赖 `synapse-security`。

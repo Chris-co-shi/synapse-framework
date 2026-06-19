@@ -1,6 +1,6 @@
 package com.indigo.synapse.webflux;
 
-import com.indigo.synapse.core.CoreModule;
+import com.indigo.synapse.web.core.WebCoreModule;
 
 public final class WebFluxModule {
 
@@ -10,6 +10,6 @@ public final class WebFluxModule {
     }
 
     public static String dependsOn() {
-        return CoreModule.NAME;
+        return WebCoreModule.NAME;
     }
 }
