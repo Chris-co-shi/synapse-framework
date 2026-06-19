@@ -15,11 +15,10 @@
 4. [synapse-config](synapse-config.md)
 5. [synapse-i18n](synapse-i18n.md)
 
-### 第二组：Web 与调用链
+### 第二组：Web
 
 6. [synapse-webmvc](synapse-webmvc.md)
 7. [synapse-webflux](synapse-webflux.md)
-8. [synapse-cloud](synapse-cloud.md)
 
 ### 第三组：安全与 OAuth2
 
@@ -39,8 +38,7 @@
 
 17. [synapse-cache](synapse-cache.md)
 18. [synapse-audit](synapse-audit.md)
-19. [synapse-file](synapse-file.md)
-20. [synapse-mq](synapse-mq.md)
+19. [synapse-messaging](synapse-messaging.md)
 
 ## 每份设计文档的固定结构
 

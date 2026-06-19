@@ -8,16 +8,17 @@
 - 状态：已完成
 - 修改摘要：新增当前仓库事实基线、10 项架构决策记录和本进度文件。
 - 测试结果：`mvn clean test`、`mvn clean verify`、`git diff --check` 均通过。
-- Commit SHA：待提交
+- Commit SHA：`e8e4077`
 - 遗留问题：保留现有 deprecated API 编译告警，后续在对应代码阶段处理。
 
 ## Phase 1：调整 Maven 模块结构与 BOM
 
-- 状态：未开始
-- 修改摘要：待执行。
-- 测试结果：未执行。
+- 状态：已完成
+- 修改摘要：新增 Web/OAuth2 聚合与共享 core 骨架；删除 cloud/file；将 mq 完整更名为 messaging；
+  新增 observability/resilience 骨架；根 Parent 接管内部版本，BOM 移除 Alibaba 和已删除模块。
+- 测试结果：`mvn -q validate`、`mvn clean verify` 通过，27 个 reactor project 全部成功。
 - Commit SHA：待提交
-- 遗留问题：无。
+- 遗留问题：新增骨架模块的运行时能力按后续阶段实现；历史 phase 文档保留旧模块背景并已标注历史状态。
 
 ## Phase 2：重构 Security 当前主体上下文
 

@@ -38,9 +38,9 @@
 | 模块 | 手册 | 说明 |
 | --- | --- | --- |
 | `synapse-core` | [synapse-core.md](synapse-core.md) | 错误码、异常、ID、OperationContext 等核心契约 |
+| `synapse-web-core` | [synapse-web-core.md](synapse-web-core.md) | Web 技术栈无关契约骨架 |
 | `synapse-webmvc` | [synapse-webmvc.md](synapse-webmvc.md) | Servlet MVC 响应、异常处理、Filter 异常桥接 |
 | `synapse-webflux` | [synapse-webflux.md](synapse-webflux.md) | WebFlux Trace、异常响应、Reactor Context / OperationContext 恢复 |
-| `synapse-cloud` | [synapse-cloud.md](synapse-cloud.md) | Spring Cloud / OpenFeign 服务间调用上下文传播，不是 Gateway |
 | `synapse-time` | [synapse-time.md](synapse-time.md) | 时间和时区技术支撑，不做时区后台 |
 | `synapse-config` | [synapse-config.md](synapse-config.md) | 配置抽象、运行时读取和类型解析，不是配置中心 |
 | `synapse-i18n` | [synapse-i18n.md](synapse-i18n.md) | 国际化消息解析抽象，不是资源中心 |
@@ -51,11 +51,14 @@
 | `synapse-security` | [synapse-security.md](synapse-security.md) | Web 无关安全主体、权限检查和安全上下文 |
 | `synapse-oauth2-core` | [synapse-oauth2-core.md](synapse-oauth2-core.md) | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 |
 | `synapse-oauth2-authorization-server-support` | [synapse-oauth2-authorization-server-support.md](synapse-oauth2-authorization-server-support.md) | JWT 签发与 JWK 技术支持 |
+| `synapse-oauth2-client` | [synapse-oauth2-client.md](synapse-oauth2-client.md) | OAuth2 出站客户端边界骨架 |
+| `synapse-oauth2-resource-server-core` | [synapse-oauth2-resource-server-core.md](synapse-oauth2-resource-server-core.md) | Resource Server 共享验证语义骨架 |
 | `synapse-oauth2-resource-server-webmvc` | [synapse-oauth2-resource-server-webmvc.md](synapse-oauth2-resource-server-webmvc.md) | Servlet OAuth2 Resource Server 技术适配 |
 | `synapse-oauth2-resource-server-webflux` | [synapse-oauth2-resource-server-webflux.md](synapse-oauth2-resource-server-webflux.md) | Reactive OAuth2 Resource Server 技术适配 |
 | `synapse-audit` | [synapse-audit.md](synapse-audit.md) | 审计事件契约，不是审计中心 |
-| `synapse-file` | [synapse-file.md](synapse-file.md) | 文件存储抽象与本地轻量实现，不是文件中心 |
-| `synapse-mq` | [synapse-mq.md](synapse-mq.md) | MQ 消息外壳、发布/消费模板、异常分类、上下文传播契约，不是消息中心 |
+| `synapse-messaging` | [synapse-messaging.md](synapse-messaging.md) | MQ 消息外壳、发布/消费模板、异常分类、上下文传播契约，不是消息中心 |
+| `synapse-observability` | [synapse-observability.md](synapse-observability.md) | Micrometer Observation 观测边界骨架 |
+| `synapse-resilience` | [synapse-resilience.md](synapse-resilience.md) | 超时、重试、熔断和隔离边界骨架 |
 | `synapse-bom` | [synapse-bom.md](synapse-bom.md) | 依赖版本管理 |
 
 ## 二阶段文档入口
@@ -66,7 +69,7 @@
 - [Module Boundary](../phase-2/01-module-boundary.md)
 - [Phase 2 Roadmap](../phase-2/02-phase-2-roadmap.md)
 - [Boundary Checklist](../phase-2/03-boundary-checklist.md)
-- [Cloud Context Propagation](../phase-2/04-cloud-context-propagation.md)
+- [Cloud Context Propagation（已删除模块的历史设计）](../phase-2/04-cloud-context-propagation.md)
 - [GatewayProof 可信入口证明](../phase-2/05-gateway-proof.md)
 
 ## 迁移文档

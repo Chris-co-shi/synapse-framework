@@ -1,5 +1,8 @@
 # Framework 架构阅读指南
 
+> 更新提示：本文部分源码阅读路径仍基于重构前目录。当前模块树请先查阅根 README，
+> cloud/file 相关段落仅作为历史背景，不代表当前模块。
+
 ## 1. 先建立三层边界
 
 Synapse 的代码不能只按 Maven module 理解，还要先区分三个产品层级：
@@ -73,7 +76,7 @@ synapse-data
 synapse-cache
 synapse-audit
 synapse-file
-synapse-mq
+synapse-messaging
 ```
 
 这一层提供数据自动填充、缓存并发、审计事件、文件存储和消息传播的技术能力。

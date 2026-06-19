@@ -2,12 +2,12 @@
 
 面向 Java 企业级业务系统的通用技术基座。
 
-Synapse Framework 不做业务系统、不做后台管理端、不做平台服务，而是沉淀可复用的框架契约、自动配置、上下文传播、安全基础、缓存并发能力、文件存储抽象、MQ 消息契约和审计事件模型。
+Synapse Framework 不做业务系统、不做后台管理端、不做平台服务，而是沉淀可复用的框架契约、自动配置、上下文传播、安全基础、数据访问支撑、缓存、消息和审计技术能力。
 
 ## 快速了解
 
 - **定位**：Java 企业应用技术支持框架。
-- **阶段**：二阶段已完成 WebMVC / WebFlux 技术栈拆分，并新增 Cloud / Feign 上下文传播技术支撑。
+- **阶段**：整体架构重构进行中，模块聚合结构与 BOM 边界已经对齐。
 - **JDK**：Java 21。
 - **主栈**：Spring Boot 3.x / Maven 多模块。
 - **Web 边界**：`synapse-webmvc` 支撑 Servlet MVC；`synapse-webflux` 支撑 WebFlux，不是 Gateway 服务。
@@ -53,9 +53,10 @@ Framework 禁止提供：
 synapse-framework
 ├── synapse-bom
 ├── synapse-core
-├── synapse-webmvc
-├── synapse-webflux
-├── synapse-cloud
+├── synapse-web
+│   ├── synapse-web-core
+│   ├── synapse-webmvc
+│   └── synapse-webflux
 ├── synapse-time
 ├── synapse-config
 ├── synapse-i18n
@@ -64,22 +65,27 @@ synapse-framework
 ├── synapse-datasource
 ├── synapse-cache
 ├── synapse-security
-├── synapse-oauth2-core
-├── synapse-oauth2-authorization-server-support
-├── synapse-oauth2-resource-server-webmvc
-├── synapse-oauth2-resource-server-webflux
+├── synapse-oauth2
+│   ├── synapse-oauth2-core
+│   ├── synapse-oauth2-authorization-server-support
+│   ├── synapse-oauth2-client
+│   └── synapse-oauth2-resource-server
+│       ├── synapse-oauth2-resource-server-core
+│       ├── synapse-oauth2-resource-server-webmvc
+│       └── synapse-oauth2-resource-server-webflux
 ├── synapse-audit
-├── synapse-file
-└── synapse-mq
+├── synapse-messaging
+├── synapse-observability
+└── synapse-resilience
 ```
 
 | 模块 | 定位 | 手册 |
 | --- | --- | --- |
 | `synapse-bom` | 统一依赖版本管理 | [查看](docs/modules/synapse-bom.md) |
 | `synapse-core` | 错误码、异常、ID、OperationContext 等核心契约 | [查看](docs/modules/synapse-core.md) |
+| `synapse-web-core` | Web 技术栈无关契约骨架 | [查看](docs/modules/synapse-web-core.md) |
 | `synapse-webmvc` | Servlet MVC 响应、异常处理、Filter 异常桥接 | [查看](docs/modules/synapse-webmvc.md) |
 | `synapse-webflux` | WebFlux Trace、异常响应、Reactor Context / OperationContext 恢复 | [查看](docs/modules/synapse-webflux.md) |
-| `synapse-cloud` | Spring Cloud / OpenFeign 服务间调用上下文传播 | [查看](docs/modules/synapse-cloud.md) |
 | `synapse-time` | 时间和时区技术支撑，提供 UTC 查询范围转换 | [查看](docs/modules/synapse-time.md) |
 | `synapse-config` | 配置抽象、运行时读取和类型解析，不是配置中心 | [查看](docs/modules/synapse-config.md) |
 | `synapse-i18n` | 国际化消息解析抽象，不是资源中心 | [查看](docs/modules/synapse-i18n.md) |
@@ -90,11 +96,14 @@ synapse-framework
 | `synapse-security` | Web 无关安全主体、PermissionChecker、权限注解适配、GatewayProof 协议基础 | [查看](docs/modules/synapse-security.md) |
 | `synapse-oauth2-core` | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 | [查看](docs/modules/synapse-oauth2-core.md) |
 | `synapse-oauth2-authorization-server-support` | JWT 签发、RSAKey、JWKSource、JwtEncoder 技术支持 | [查看](docs/modules/synapse-oauth2-authorization-server-support.md) |
+| `synapse-oauth2-client` | OAuth2 出站客户端技术能力骨架 | [查看](docs/modules/synapse-oauth2-client.md) |
+| `synapse-oauth2-resource-server-core` | Resource Server 共享验证语义骨架 | [查看](docs/modules/synapse-oauth2-resource-server-core.md) |
 | `synapse-oauth2-resource-server-webmvc` | Servlet OAuth2 Resource Server 技术适配 | [查看](docs/modules/synapse-oauth2-resource-server-webmvc.md) |
 | `synapse-oauth2-resource-server-webflux` | Reactive OAuth2 Resource Server 技术适配 | [查看](docs/modules/synapse-oauth2-resource-server-webflux.md) |
 | `synapse-audit` | 审计事件契约 | [查看](docs/modules/synapse-audit.md) |
-| `synapse-file` | 文件存储抽象与本地轻量实现 | [查看](docs/modules/synapse-file.md) |
-| `synapse-mq` | MQ 消息外壳、发布/消费模板、SPI、上下文传播契约 | [查看](docs/modules/synapse-mq.md) |
+| `synapse-messaging` | MQ 消息外壳、发布/消费模板、SPI、上下文传播契约 | [查看](docs/modules/synapse-messaging.md) |
+| `synapse-observability` | Micrometer Observation 观测能力骨架 | [查看](docs/modules/synapse-observability.md) |
+| `synapse-resilience` | 超时、重试、熔断和隔离能力骨架 | [查看](docs/modules/synapse-resilience.md) |
 
 模块手册索引：[docs/modules/README.md](docs/modules/README.md)
 
@@ -120,11 +129,11 @@ synapse-framework
 | [01-Module Boundary](docs/phase-2/01-module-boundary.md) | 当前模块事实、二阶段目标模块形态、模块允许/禁止内容 |
 | [02-Phase 2 Roadmap](docs/phase-2/02-phase-2-roadmap.md) | TASK-201 到 TASK-207 的任务拆分 |
 | [03-Boundary Checklist](docs/phase-2/03-boundary-checklist.md) | 每个 TASK 执行前后的边界检查清单 |
-| [04-Cloud Context Propagation](docs/phase-2/04-cloud-context-propagation.md) | `synapse-cloud` 服务间调用 Header 契约与 Feign 适配边界 |
+| [04-Cloud Context Propagation](docs/phase-2/04-cloud-context-propagation.md) | 已删除 cloud 模块的历史设计记录 |
 
 注意：
 
-- `synapse-webmvc`、`synapse-webflux`、`synapse-cloud`、`synapse-time`、`synapse-config`、`synapse-i18n` 是当前已实现模块。
+- 当前实现事实以根 `pom.xml` 和本页模块树为准；`synapse-cloud`、`synapse-file` 已删除。
 - 本项目不规划、不创建 `synapse-starter-*`。
 - 本项目不规划、不创建 demo / example / sample application。
 - 未进入 root `pom.xml` reactor 前，不能把规划模块描述成已实现能力。
@@ -201,16 +210,7 @@ WebFlux 服务引入：
 
 说明：Gateway 可启动服务属于 Synapse Platform。Platform Gateway 可以引用 `synapse-webflux` 的技术支撑能力，但 Gateway 路由、鉴权业务和启动服务不进入 Framework。
 
-OpenFeign 服务间调用引入：
-
-```xml
-<dependency>
-    <groupId>com.indigo.synapse</groupId>
-    <artifactId>synapse-cloud</artifactId>
-</dependency>
-```
-
-说明：`synapse-cloud` 只提供 Feign 上下文传播、远程错误解码和条件自动配置，不提供 Gateway、注册中心、配置中心、服务治理后台或 IAM。
+OpenFeign 由应用直接使用 Spring Cloud OpenFeign；Framework 不再提供额外包装模块。
 
 ## 文档导航
 
@@ -264,19 +264,20 @@ Synapse Framework
 
 ## 当前状态
 
-- `synapse-webmvc` 承接原 Servlet MVC Web 能力。
-- `synapse-webflux` 提供 WebFlux 最小技术闭环，不包含 Gateway 服务。
-- `synapse-cloud` 提供 OpenFeign 出站 OperationContext Header 编码、RequestInterceptor、ErrorDecoder 和自动配置，不包含 Gateway、Nacos、Seata、RocketMQ、IAM 或业务鉴权。
+- `synapse-web` 和 `synapse-oauth2` 只做 Maven 聚合，不供应用直接依赖。
+- `synapse-web-core`、`synapse-oauth2-client`、`synapse-oauth2-resource-server-core` 当前是可编译边界骨架，完整能力在后续阶段实现。
+- `synapse-webmvc` 承接 Servlet MVC Web 能力；`synapse-webflux` 提供 Reactive 技术支撑，不包含 Gateway 服务。
 - `synapse-security` 是 Web 无关安全基础模块；认证主体由 OAuth2 Resource Server 适配模块从经过验证的 Bearer Token 建立；GatewayProof 只证明可信入口。
-- OAuth2 当前以 `synapse-oauth2-core`、`synapse-oauth2-authorization-server-support`、`synapse-oauth2-resource-server-webmvc`、`synapse-oauth2-resource-server-webflux` 四个正式模块交付。
-- Web 当前以 `synapse-webmvc` 和 `synapse-webflux` 两个正式模块交付。
+- OAuth2 当前通过聚合层组织 core、authorization support、client 和 resource server 子模块。
+- Web 当前通过聚合层组织 web-core、MVC 和 WebFlux 子模块。
 - `synapse-security` 不依赖 Spring Security Web / Config。
-- `synapse-mq` 不包含真实 MQ / Redis 幂等 / DB / Outbox / 外部渠道 SDK 实现。
+- `synapse-messaging` 不包含真实 MQ / Redis 幂等 / DB / Outbox / 外部渠道 SDK 实现。
 - `synapse-cache` 不包含业务缓存 key 或业务规则。
 - `synapse-data` 只提供 ORM 无关的数据语义抽象，不包含 MyBatis-Plus、DataSource、Flyway 或自动配置。
 - `synapse-mybatis-plus` 只提供 MyBatis-Plus 工程增强，不包含业务 Entity / Mapper。
 - `synapse-datasource` 只提供数据源治理能力，不提供 `@DS` 封装、Seata、MyBatis SQL 自动路由或应用层主库晋升。
-- `synapse-file` 不包含上传下载 API、附件表或文件权限业务。
+- 文件能力已移出 Framework，归 Synapse Platform 的可启动文件服务。
+- `synapse-observability`、`synapse-resilience` 当前仅建立边界骨架，尚未提供运行时自动配置。
 - Framework 不提供 starter，也不提供 demo / example / sample application。
 
 ## 许可证

@@ -1,5 +1,8 @@
 # 02-Phase 2 Roadmap
 
+> 历史说明：本路线图已经执行完毕并进入整体架构重构。文中的 cloud/file 和旧目录结构
+> 仅用于解释历史提交，不代表当前模块。
+
 本文档固化 Synapse-Framework 二阶段任务拆分。二阶段目标不是建设平台服务，而是在 Framework 边界内补齐微服务技术基座能力。
 
 ## 1. 二阶段总体目标
@@ -69,7 +72,7 @@
 
 交付物：二阶段边界文档、模块边界文档、roadmap、边界检查清单、README 和 AGENTS 入口更新。
 
-验收标准：文档明确 framework 只做技术支持能力，platform 才做可启动服务，并且明确 `synapse-config`、`synapse-file`、`synapse-mq`、`synapse-oauth2`、`synapse-audit` 的禁止事项。
+验收标准：文档明确 framework 只做技术支持能力，platform 才做可启动服务，并且明确 `synapse-config`、`synapse-file`、`synapse-messaging`、`synapse-oauth2`、`synapse-audit` 的禁止事项。
 
 ## 4. TASK-202：WebMVC / WebFlux 拆分
 
@@ -127,7 +130,7 @@
 
 交付物：`docs/phase-2/04-cloud-context-propagation.md`、`SynapseFeignRequestInterceptor`、`SynapseFeignErrorDecoder`、`SynapseCloudHeaders`、`InternalCallSigner` / `InternalCallVerifier` 扩展点、OperationContext HTTP Header codec、测试用例、模块文档和 Skill。
 
-验收标准：HTTP -> Service A -> Feign -> Service B 链路可透传 traceId / requestId / actor / initiator；Feign 错误解码不绑定业务错误码；服务间签名只作为扩展点；`synapse-cloud` 不依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-mq`。
+验收标准：HTTP -> Service A -> Feign -> Service B 链路可透传 traceId / requestId / actor / initiator；Feign 错误解码不绑定业务错误码；服务间签名只作为扩展点；`synapse-cloud` 不依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-messaging`。
 
 ## 6. TASK-204：OperationContext 全场景恢复
 
@@ -136,7 +139,7 @@
 - 统一 HTTP / Feign / MQ / Async / Job 场景下的 OperationContext 创建、快照、恢复和清理。
 - 避免异步、线程池、MQ 消费、定时任务场景下默认使用不可追溯的 system actor。
 
-修改范围：`synapse-core`、`synapse-security`、`synapse-mq`、`synapse-webmvc`、`synapse-webflux`、`synapse-cloud`、测试和文档。
+修改范围：`synapse-core`、`synapse-security`、`synapse-messaging`、`synapse-webmvc`、`synapse-webflux`、`synapse-cloud`、测试和文档。
 
 完成说明：
 
@@ -146,7 +149,7 @@
 - `synapse-webmvc` 已新增 `MvcOperationContextFilter`，从标准 Header 恢复 OperationContext。
 - `synapse-webflux` 已对齐 core codec 规则，通过 Reactor Context 保存 `OperationContextSnapshot`。
 - `synapse-cloud` HTTP Header codec 已复用 core codec，并保留 Feign 覆盖策略。
-- `synapse-mq` 消息 header codec 已复用 core codec，并保持 MQ 小写 header 契约。
+- `synapse-messaging` 消息 header codec 已复用 core codec，并保持 MQ 小写 header 契约。
 
 不做内容：
 
@@ -194,15 +197,15 @@
 
 目标：复查已有风险模块，防止它们从技术抽象滑向平台服务。
 
-修改范围：`synapse-mq`、`synapse-file`、`synapse-audit`、OAuth2 拆分模块、对应文档、测试和 Skill。
+修改范围：`synapse-messaging`、`synapse-file`、`synapse-audit`、OAuth2 拆分模块、对应文档、测试和 Skill。
 
 完成说明：
 
-- `synapse-mq` 边界复查通过：当前只提供消息外壳、SPI、模板、上下文传播和异常分类，不做 message-service。
+- `synapse-messaging` 边界复查通过：当前只提供消息外壳、SPI、模板、上下文传播和异常分类，不做 message-service。
 - `synapse-file` 边界复查通过：当前只提供文件存储抽象和本地轻量实现，不做 file-service。
 - `synapse-audit` 边界复查通过：当前只提供审计事件、上下文补齐和输出端口，不做 audit-service。
 - OAuth2 边界复查后已拆分为 `synapse-oauth2-core`、`synapse-oauth2-authorization-server-support`、`synapse-oauth2-resource-server-webmvc`、`synapse-oauth2-resource-server-webflux`；分别承载协议契约、签发技术支撑、Servlet Resource Server 适配和 Reactive Resource Server 适配，不做 IAM。
-- 已新增 `skills/synapse-mq`、`skills/synapse-file`、`skills/synapse-audit` 以及拆分后的 OAuth2 模块 Skill。
+- 已新增 `skills/synapse-messaging`、`skills/synapse-file`、`skills/synapse-audit` 以及拆分后的 OAuth2 模块 Skill。
 
 不做内容：
 
@@ -216,7 +219,7 @@
 
 交付物：模块 README 边界复查、Skill 补齐、默认实现边界检查、边界扫描命令记录。
 
-验收标准：`synapse-mq` 无站内信、短信、邮件、消息模板管理；`synapse-file` 无上传下载 Controller、附件表、文件权限业务；`synapse-audit` 无审计查询 API、报表、中心后台；OAuth2 拆分模块无登录、客户端管理、Authorization Server 业务实现，Resource Server 模块无私钥签发能力。
+验收标准：`synapse-messaging` 无站内信、短信、邮件、消息模板管理；`synapse-file` 无上传下载 Controller、附件表、文件权限业务；`synapse-audit` 无审计查询 API、报表、中心后台；OAuth2 拆分模块无登录、客户端管理、Authorization Server 业务实现，Resource Server 模块无私钥签发能力。
 
 ## 9. TASK-207：Docs / Skills / Boundary 收口
 

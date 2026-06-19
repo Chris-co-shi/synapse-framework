@@ -1,5 +1,8 @@
 # Phase 3 Core Contracts
 
+> 历史说明：本文保留 core 契约演进背景，其中模块路径应按当前聚合结构和
+> `synapse-messaging` 名称理解。
+
 本文档冻结第三阶段需要维护的核心技术契约。后续 TASK-302 至 TASK-306 的实现和测试必须以此为基线。
 
 ## 1. 通用原则
@@ -201,7 +204,7 @@ submit thread context
 
 虽然 MQ 和 Job 不是第三阶段目标模块，但 core 契约变更不得破坏：
 
-- `synapse-mq` 对 OperationContextSnapshotCodec 的复用。
+- `synapse-messaging` 对 OperationContextSnapshotCodec 的复用。
 - MQ header 小写 key 约定。
 - Job 入口显式 actor/source 策略。
 - Feign/HTTP carrier 已有字段兼容性。

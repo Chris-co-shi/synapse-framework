@@ -1,5 +1,8 @@
 # 04-Cloud Context Propagation
 
+> 历史设计：`synapse-cloud` 已按 ADR-003 删除。本文仅保留原实现的设计与迁移背景，
+> 不得作为当前依赖或能力说明；应用直接使用 Spring Cloud OpenFeign。
+
 本文档用于冻结 TASK-203 的 `synapse-cloud` 方案、服务间调用 Header 契约和执行边界。TASK-203-A 已完成文档确认，TASK-203 后续实现必须继续遵守本文档。
 
 ## 1. 目标
@@ -86,7 +89,7 @@ synapse-cloud
 - `synapse-webmvc`。
 - `synapse-webflux`。
 - `synapse-security`。
-- `synapse-mq`。
+- `synapse-messaging`。
 - `spring-cloud-starter-gateway`。
 - Nacos。
 - Seata。

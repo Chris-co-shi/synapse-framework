@@ -12,28 +12,14 @@
     <artifactId>synapse-mybatis-plus</artifactId>
     <packaging>jar</packaging>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.indigo.synapse</groupId>
-                <artifactId>synapse-bom</artifactId>
-                <version>0.1.0-SNAPSHOT</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>com.indigo.synapse</groupId>
             <artifactId>synapse-core</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.indigo.synapse</groupId>
             <artifactId>synapse-data</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>

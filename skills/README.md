@@ -10,7 +10,6 @@
 | `synapse-core` | [synapse-core/SKILL.md](synapse-core/SKILL.md) |
 | `synapse-webmvc` | [synapse-webmvc/SKILL.md](synapse-webmvc/SKILL.md) |
 | `synapse-webflux` | [synapse-webflux/SKILL.md](synapse-webflux/SKILL.md) |
-| `synapse-cloud` | [synapse-cloud/SKILL.md](synapse-cloud/SKILL.md) |
 | `synapse-time` | [synapse-time/SKILL.md](synapse-time/SKILL.md) |
 | `synapse-config` | [synapse-config/SKILL.md](synapse-config/SKILL.md) |
 | `synapse-i18n` | [synapse-i18n/SKILL.md](synapse-i18n/SKILL.md) |
@@ -24,8 +23,7 @@
 | `synapse-oauth2-resource-server-webmvc` | [synapse-oauth2-resource-server-webmvc/SKILL.md](synapse-oauth2-resource-server-webmvc/SKILL.md) |
 | `synapse-oauth2-resource-server-webflux` | [synapse-oauth2-resource-server-webflux/SKILL.md](synapse-oauth2-resource-server-webflux/SKILL.md) |
 | `synapse-audit` | [synapse-audit/SKILL.md](synapse-audit/SKILL.md) |
-| `synapse-file` | [synapse-file/SKILL.md](synapse-file/SKILL.md) |
-| `synapse-mq` | [synapse-mq/SKILL.md](synapse-mq/SKILL.md) |
+| `synapse-messaging` | [synapse-messaging/SKILL.md](synapse-messaging/SKILL.md) |
 
 ## 固定约定
 

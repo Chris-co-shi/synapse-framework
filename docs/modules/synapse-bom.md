@@ -80,19 +80,27 @@
 
 ```text
 synapse-core
+synapse-web-core
 synapse-webmvc
 synapse-webflux
-synapse-cloud
+synapse-time
+synapse-config
+synapse-i18n
 synapse-data
+synapse-mybatis-plus
+synapse-datasource
 synapse-cache
 synapse-security
 synapse-oauth2-core
 synapse-oauth2-authorization-server-support
+synapse-oauth2-client
+synapse-oauth2-resource-server-core
 synapse-oauth2-resource-server-webmvc
 synapse-oauth2-resource-server-webflux
 synapse-audit
-synapse-file
-synapse-mq
+synapse-messaging
+synapse-observability
+synapse-resilience
 ```
 
 说明：
@@ -140,7 +148,7 @@ synapse-mq
 ```xml
 <dependency>
     <groupId>com.indigo.synapse</groupId>
-    <artifactId>synapse-mq</artifactId>
+    <artifactId>synapse-messaging</artifactId>
 </dependency>
 ```
 
@@ -237,9 +245,9 @@ synapse-mq
 
 不必须。推荐通过 `dependencyManagement` import BOM，而不是强制继承 parent。
 
-### Q3：BOM 中管理了 `synapse-mq`，是不是业务系统会自动引入 MQ？
+### Q3：BOM 中管理了 `synapse-messaging`，是不是业务系统会自动引入 MQ？
 
-不会。只有显式声明 `synapse-mq` 依赖时才会引入。
+不会。只有显式声明 `synapse-messaging` 依赖时才会引入。
 
 ### Q4：BOM 会管理 starter 吗？
 

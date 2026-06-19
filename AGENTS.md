@@ -36,9 +36,7 @@ Synapse Framework 是面向 Java 企业应用的通用技术支持框架。
 ```text
 synapse-bom
 synapse-core
-synapse-webmvc
-synapse-webflux
-synapse-cloud
+synapse-web
 synapse-time
 synapse-config
 synapse-i18n
@@ -47,21 +45,20 @@ synapse-mybatis-plus
 synapse-datasource
 synapse-cache
 synapse-security
-synapse-oauth2-core
-synapse-oauth2-authorization-server-support
-synapse-oauth2-resource-server-webmvc
-synapse-oauth2-resource-server-webflux
+synapse-oauth2
 synapse-audit
-synapse-file
-synapse-mq
+synapse-messaging
+synapse-observability
+synapse-resilience
 ```
 
 固定结论：
 
-- `synapse-web` 已拆分为 `synapse-webmvc` 和 `synapse-webflux`，不得恢复为正式模块。
-- `synapse-message` 已更名为 `synapse-mq`，不得继续使用旧名称描述正式模块。
+- `synapse-web` 是纯聚合 POM，下设 `synapse-web-core`、`synapse-webmvc`、`synapse-webflux`。
+- `synapse-mq` 已更名为 `synapse-messaging`，不得继续使用旧名称描述正式模块。
 - `synapse-config`、`synapse-i18n`、`synapse-time` 已在 TASK-205 进入 reactor，必须按当前已实现技术模块描述。
-- `synapse-oauth2` 已拆分为 `synapse-oauth2-core`、`synapse-oauth2-authorization-server-support`、`synapse-oauth2-resource-server-webmvc`、`synapse-oauth2-resource-server-webflux`，不得继续作为正式 reactor module 描述。
+- `synapse-oauth2` 是纯聚合 POM，下设 core、authorization support、client 和 resource-server 聚合。
+- `synapse-cloud`、`synapse-file` 已删除；OpenFeign 由应用直接使用，文件能力归 Platform。
 - 身份 Header 恢复协议已移除；认证主体只能由 OAuth2 Resource Server 等验证 Bearer Token 的专用适配模块建立。
 - Gateway 与下游服务之间只传播 Bearer Token，不传播可直接信任的用户、角色或权限 Header；下游服务必须独立验证 token。
 - 本项目不创建 `synapse-starter-*`，不创建 starter 聚合包，不创建 demo / example / sample application。
@@ -76,12 +73,6 @@ synapse-mq
 - `docs/phase-2/02-phase-2-roadmap.md`
 - `docs/phase-2/03-boundary-checklist.md`
 - `docs/modules/README.md`
-
-涉及 `synapse-cloud`、OpenFeign、服务间 Header 或远程错误解码时，必须额外读取：
-
-- `docs/phase-2/04-cloud-context-propagation.md`
-- `docs/modules/synapse-cloud.md`
-- `skills/synapse-cloud/SKILL.md`
 
 涉及 WebMVC / WebFlux 时，如果对应 Skill 存在，必须读取：
 
@@ -133,9 +124,9 @@ skills/<module-name>/SKILL.md
 | --- | --- | --- |
 | `synapse-bom` | 依赖版本管理 | starter / 自动启用能力 |
 | `synapse-core` | 最小核心契约 | Web / Security / Data / MQ 具体技术栈 |
+| `synapse-web-core` | Web 技术栈无关契约 | Servlet / MVC / Reactor / WebFlux |
 | `synapse-webmvc` | Servlet MVC 技术支撑 | WebFlux / Gateway / 业务 Controller |
 | `synapse-webflux` | WebFlux 技术支撑 | Gateway 服务 / 路由管理 / 网关鉴权业务 |
-| `synapse-cloud` | OpenFeign 服务间调用技术适配 | Gateway / 注册中心 / 配置中心 / IAM |
 | `synapse-time` | 时间和时区技术支撑 | 时区后台 / 用户资料管理 |
 | `synapse-config` | 配置抽象、运行时读取和类型解析 | config-service / 配置中心后台 |
 | `synapse-i18n` | 国际化消息解析抽象 | i18n-resource-center / 翻译后台 |
@@ -146,11 +137,14 @@ skills/<module-name>/SKILL.md
 | `synapse-security` | Web 无关安全主体、权限检查、安全上下文和 GatewayProof 协议基础 | IAM / 登录认证 / 用户角色菜单管理 / Web 认证入口 |
 | `synapse-oauth2-core` | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 | Web / Security / 签发私钥 / Resource Server |
 | `synapse-oauth2-authorization-server-support` | JWT 签发、RSAKey、JWKSource、JwtEncoder 技术支持 | 登录 / RegisteredClient / Authorization Code / IAM |
+| `synapse-oauth2-client` | 出站 Token Relay、Client Credentials 和 Token 生命周期 | 当前主体污染 / OpenFeign 包装 |
+| `synapse-oauth2-resource-server-core` | Resource Server 共享验证语义 | Servlet / Reactor |
 | `synapse-oauth2-resource-server-webmvc` | Servlet OAuth2 Resource Server 技术适配 | 签发私钥 / Authorization Server / IAM |
 | `synapse-oauth2-resource-server-webflux` | Reactive OAuth2 Resource Server 技术适配 | Gateway 服务 / 签发私钥 / IAM |
 | `synapse-audit` | 审计事件契约 | 审计中心 / 查询 API / 报表 |
-| `synapse-file` | 文件存储抽象 | 文件中心 / 附件表 / 文件权限业务 |
-| `synapse-mq` | MQ 消息契约和发布消费 SPI | 消息中心 / 站内信 / 短信 / 邮件 / 模板 |
+| `synapse-messaging` | MQ 消息契约和发布消费 SPI | 消息中心 / 站内信 / 短信 / 邮件 / 模板 |
+| `synapse-observability` | Micrometer Observation 约定 | 自研 Tracer / 具体 APM |
+| `synapse-resilience` | 超时、重试、熔断、隔离约定 | Sentinel / 假成功 Fallback |
 
 更详细规则以 `docs/phase-2/01-module-boundary.md` 和各模块手册为准。
 
@@ -159,8 +153,7 @@ skills/<module-name>/SKILL.md
 - 版本基线以 `pom.xml` 和 `synapse-bom/pom.xml` 为准，不在本文件维护版本表。
 - 新增三方依赖前必须说明必要性、替代方案、影响范围和是否会把 Platform 能力带入 Framework。
 - 新增模块必须同时更新 root `pom.xml`、`synapse-bom/pom.xml`、`README.md`、`docs/modules/README.md`、模块手册和必要 Skill。
-- 不得为了复用而让 WebMVC / WebFlux / Cloud / MQ / Security 产生反向依赖或循环依赖。
-- `synapse-cloud` 不得依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-mq`。
+- 不得为了复用而让 WebMVC / WebFlux / Messaging / Security 产生反向依赖或循环依赖。
 - 所有公开 `@ConfigurationProperties` 必须生成 Spring Boot Configuration Metadata，且配置字段必须有可用于 IDE 展示的说明。
 - `spring-boot-configuration-processor` 只能作为编译期 annotation processor 使用，不得成为消费方运行时强依赖。
 - `additional-spring-configuration-metadata.json` 只能补充自动生成不足的信息，不得重复维护全部普通属性。

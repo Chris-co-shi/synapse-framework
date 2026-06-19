@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.indigo.synapse</groupId>
+        <artifactId>synapse-framework</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>synapse-web</artifactId>
+    <packaging>pom</packaging>
+
+    <!-- 仅聚合 Web 子模块；消费方应直接依赖 MVC 或 WebFlux 适配模块。 -->
+    <modules>
+        <module>synapse-web-core</module>
+        <module>synapse-webmvc</module>
+        <module>synapse-webflux</module>
+    </modules>
+</project>

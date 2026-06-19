@@ -1,5 +1,7 @@
 # Phase 3 Core Foundation Boundary
 
+> 历史说明：本文是 Phase 3 开始时的模块快照。当前模块结构以根 `pom.xml` 和 ADR 为准。
+
 本文档固化 Synapse Framework 第三阶段 Core Foundation 的职责边界。第三阶段不是新增平台服务，而是在现有 framework modules 上完成契约一致性、依赖收敛、上下文闭环和可验证性强化。
 
 ## 1. 阶段目标
@@ -29,7 +31,7 @@ synapse-cache
 synapse-audit
 ```
 
-其他已实现模块不在本阶段主动扩展。只有当跨模块契约变更影响 `synapse-cloud`、`synapse-mq`、`synapse-time`、`synapse-config`、`synapse-i18n`、OAuth2 拆分模块或 `synapse-file` 时，才允许做最小兼容修改。
+其他已实现模块不在本阶段主动扩展。只有当跨模块契约变更影响 `synapse-cloud`、`synapse-messaging`、`synapse-time`、`synapse-config`、`synapse-i18n`、OAuth2 拆分模块或 `synapse-file` 时，才允许做最小兼容修改。
 
 ## 3. 允许内容
 
@@ -82,7 +84,7 @@ synapse-core
 额外约束：
 
 - `synapse-data` 不得依赖 `synapse-security`。
-- `synapse-audit` 不得依赖 `synapse-data`、`synapse-cache` 或 `synapse-mq`。
+- `synapse-audit` 不得依赖 `synapse-data`、`synapse-cache` 或 `synapse-messaging`。
 - `synapse-webmvc` 与 `synapse-webflux` 不得互相依赖。
 - `synapse-webflux` 不得引入 `spring-webmvc` 或 `jakarta.servlet`。
 - `synapse-security` 不得实现 IAM、OAuth2 Authorization Server 或业务用户中心。

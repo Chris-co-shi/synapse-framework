@@ -1,5 +1,8 @@
 # 00-Framework Boundary
 
+> 历史说明：本文记录二阶段完成时的边界快照。当前模块事实以根 `pom.xml`、README 和
+> `docs/decisions` 为准；其中 cloud/file 模块描述不再代表当前可用能力。
+
 本文档用于固化 Synapse-Framework 二阶段边界。后续任何 Codex、Agent 或人工开发任务，在修改代码前必须先确认本文件约束。
 
 ## 1. 三层边界
@@ -97,7 +100,7 @@ Synapse-Framework 固定采用“按需引用具体 module”的交付方式：
 | --- | --- | --- |
 | `synapse-gateway` | 统一入口、路由、鉴权前置、Header 注入 | `synapse-webflux` 只提供 WebFlux 技术支撑 |
 | `synapse-iam` | 用户、角色、菜单、资源、登录、授权 | `synapse-security` / 拆分后的 OAuth2 技术模块只提供技术抽象 |
-| `synapse-message-service` | 站内信、短信、邮件、消息模板、消息记录 | `synapse-mq` 只提供 MQ 技术抽象 |
+| `synapse-message-service` | 站内信、短信、邮件、消息模板、消息记录 | `synapse-messaging` 只提供 MQ 技术抽象 |
 | `synapse-file-service` | 文件管理、附件表、权限、预览、下载审计 | `synapse-file` 只提供文件存储抽象 |
 | `synapse-config-service` | 配置管理、发布、审批、历史版本、后台页面 | `synapse-config` 只提供配置抽象和客户端能力 |
 | `synapse-i18n-resource-center` | 国际化资源维护、翻译流程、停用语言管理 | `synapse-i18n` 只提供运行时解析抽象 |
@@ -108,9 +111,9 @@ Synapse-Framework 固定采用“按需引用具体 module”的交付方式：
 
 Framework 中的 `synapse-config` 只能提供配置抽象、配置客户端、解析、缓存和刷新扩展点；不能提供配置管理 API、配置发布流程、配置表或可启动 config-service。
 
-### 6.2 synapse-mq
+### 6.2 synapse-messaging
 
-`synapse-mq` 只能提供 MQ 技术抽象，例如消息模型、Header 规范、发布/消费 SPI、上下文传播、幂等 Key、重试分类、死信和顺序消息扩展点；不能提供站内信、短信、邮件、消息模板、消息中心后台或可启动 message-service。
+`synapse-messaging` 只能提供 MQ 技术抽象，例如消息模型、Header 规范、发布/消费 SPI、上下文传播、幂等 Key、重试分类、死信和顺序消息扩展点；不能提供站内信、短信、邮件、消息模板、消息中心后台或可启动 message-service。
 
 ### 6.3 synapse-file
 

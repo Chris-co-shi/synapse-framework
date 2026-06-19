@@ -1,5 +1,7 @@
 # Phase 3 Acceptance Checklist
 
+> 历史说明：本文是 Phase 3 验收清单，当前架构验收由整体重构进度与 ADR 接管。
+
 本清单用于第三阶段每个任务开始前、提交前和阶段收口时检查。
 
 ## 1. 任务边界
@@ -18,7 +20,7 @@
 - [ ] `synapse-webmvc` 与 `synapse-webflux` 不互相依赖。
 - [ ] `synapse-webflux` 不依赖 `spring-webmvc` 或 `jakarta.servlet`。
 - [ ] `synapse-data` 不依赖 `synapse-security`。
-- [ ] `synapse-audit` 不依赖 `synapse-data`、`synapse-cache` 或 `synapse-mq`。
+- [ ] `synapse-audit` 不依赖 `synapse-data`、`synapse-cache` 或 `synapse-messaging`。
 - [ ] 新增三方依赖有必要性和替代方案说明。
 - [ ] POM 依赖与模块文档定位一致。
 

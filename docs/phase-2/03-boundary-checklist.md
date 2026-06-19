@@ -1,5 +1,8 @@
 # 03-Boundary Checklist
 
+> 历史说明：本清单保留二阶段验收语境。当前删除模块、聚合结构和依赖边界以
+> `docs/decisions` 与根 `pom.xml` 为准。
+
 本文档用于二阶段每个 TASK 执行前后进行边界检查。它不是一次性检查清单，而是后续 Codex、Agent 和人工开发的常规入口。
 
 ## 1. 执行前检查
@@ -185,7 +188,7 @@ rg -n "AuditController|审计报表|审计中心|audit-service|AuditReport|Audit
 
 ```bash
 rg -n "spring-cloud-starter-gateway|RouteLocator|GatewayFilter|GlobalFilter|nacos|seata|rocketmq" .
-rg -n "synapse-webmvc|synapse-webflux|synapse-security|synapse-mq" synapse-cloud || true
+rg -n "synapse-webmvc|synapse-webflux|synapse-security|synapse-messaging" synapse-cloud || true
 rg -n "roles|permissions|menu|organization|raw token|password|credential|Authorization" synapse-cloud docs/phase-2/04-cloud-context-propagation.md || true
 rg -n "IAM|登录认证|业务鉴权|注册中心|配置中心|服务治理后台" synapse-cloud docs/phase-2/04-cloud-context-propagation.md || true
 ```
@@ -193,7 +196,7 @@ rg -n "IAM|登录认证|业务鉴权|注册中心|配置中心|服务治理后�
 判断规则：
 
 - `synapse-cloud` 只能做 Spring Cloud / OpenFeign / 服务间调用技术适配。
-- `synapse-cloud` 不得依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-mq`。
+- `synapse-cloud` 不得依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-messaging`。
 - `synapse-cloud` 不得引入 Gateway、Nacos、Seata、RocketMQ。
 - `synapse-cloud` 不得实现 IAM、登录认证、业务鉴权、注册中心、配置中心或服务治理后台。
 - 服务间 Header 禁止传播 roles、permissions、menu codes、organization tree、raw token、password、credential 和 business data。
@@ -240,7 +243,7 @@ rg -n "IAM|登录认证|业务鉴权|注册中心|配置中心|服务治理后�
 - Feign / LoadBalancer 只作为技术调用能力。
 - TASK-203-A 只允许文档冻结，不新增 module、不修改 POM、不新增 Java。
 - TASK-203-B 才允许新增 `synapse-cloud` module 和修改 root POM / BOM。
-- `synapse-cloud` 不得依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-mq`。
+- `synapse-cloud` 不得依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-messaging`。
 - `synapse-cloud` 不得引入 Gateway、Nacos、Seata、RocketMQ。
 - `synapse-cloud` 不得实现 IAM、登录认证或业务鉴权。
 - 服务间 Header 不得传播 roles / permissions / menu / raw token。
@@ -269,7 +272,7 @@ rg -n "IAM|登录认证|业务鉴权|注册中心|配置中心|服务治理后�
 
 ### TASK-206
 
-- 复查 `synapse-mq`、`synapse-file`、`synapse-audit`、`synapse-oauth2`。
+- 复查 `synapse-messaging`、`synapse-file`、`synapse-audit`、`synapse-oauth2`。
 - 不得为了闭环写入平台业务实现。
 - 不创建 starter 或 demo。
 

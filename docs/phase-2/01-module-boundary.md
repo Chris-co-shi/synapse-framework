@@ -1,5 +1,8 @@
 # 01-Module Boundary
 
+> 历史说明：本文记录二阶段模块快照，已被 2026-06-19 开始的整体架构重构取代。
+> 当前 reactor 和模块职责以根 `pom.xml`、README、模块手册及 ADR 为准。
+
 本文档用于说明 Synapse-Framework 当前 reactor module 事实、二阶段目标模块形态，以及每个模块的允许内容与禁止内容。
 
 ## 1. 当前 reactor modules
@@ -27,7 +30,7 @@ synapse-framework
 ├── synapse-oauth2-resource-server-webflux
 ├── synapse-audit
 ├── synapse-file
-└── synapse-mq
+└── synapse-messaging
 ```
 
 说明：
@@ -62,7 +65,7 @@ synapse-framework
 ├── synapse-oauth2-resource-server-webflux
 ├── synapse-audit
 ├── synapse-file
-├── synapse-mq
+├── synapse-messaging
 ├── synapse-config
 ├── synapse-i18n
 └── synapse-time
@@ -100,7 +103,7 @@ sample applications      不创建
 | 新增 | `synapse-oauth2-resource-server-webflux` | Reactive OAuth2 Resource Server 技术适配 |
 | 保持 | `synapse-audit` | 审计事件和记录端口 |
 | 保持 | `synapse-file` | 文件存储抽象，不做 file-service |
-| 保持 | `synapse-mq` | MQ 技术抽象，不做 message-service |
+| 保持 | `synapse-messaging` | MQ 技术抽象，不做 message-service |
 | 已新增 | `synapse-config` | 配置抽象，不做 config-service |
 | 已新增 | `synapse-i18n` | 国际化运行时抽象，不做资源中心 |
 | 已新增 | `synapse-time` | 时间和时区技术支撑，独立模块，不并入 core |
@@ -155,7 +158,7 @@ Platform 边界：`synapse-gateway` 属于 Platform；Gateway 不能依赖 `syna
 
 禁止内容：注册中心服务、配置中心服务、服务治理后台、Gateway 服务、Gateway RouteLocator、Gateway Filter 业务逻辑、IAM、登录认证、用户/角色/菜单、业务权限判断、Nacos 配置管理、Seata 事务协调、RocketMQ adapter、业务服务 SDK、传播 roles / permissions / menu codes / organization tree / raw token / password / credential / business data。
 
-依赖边界：可以依赖 `synapse-core`、`spring-boot-autoconfigure`、`spring-cloud-openfeign-core` 或 `feign-core`，可以使用 Jackson 解析远程错误响应；禁止依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-mq`、`spring-cloud-starter-gateway`、Nacos、Seata、RocketMQ 或业务模块。
+依赖边界：可以依赖 `synapse-core`、`spring-boot-autoconfigure`、`spring-cloud-openfeign-core` 或 `feign-core`，可以使用 Jackson 解析远程错误响应；禁止依赖 `synapse-webmvc`、`synapse-webflux`、`synapse-security`、`synapse-messaging`、`spring-cloud-starter-gateway`、Nacos、Seata、RocketMQ 或业务模块。
 
 Bearer Token 的服务间转发由 OAuth2 的 `BearerTokenProvider` 与调用方适配负责；不得把 Token 拆成用户、角色或权限 Header。
 
@@ -253,9 +256,9 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 禁止内容：上传下载 Controller、文件管理后台、附件业务表、文件权限业务、文件审批流程、可启动 file-service。
 
-### 3.17 synapse-mq
+### 3.17 synapse-messaging
 
-当前状态：正式 reactor module，`synapse-message` 已改为 `synapse-mq`，提供消息外壳、发布 / 消费模板、SPI、上下文传播契约。
+当前状态：正式 reactor module，`synapse-message` 已改为 `synapse-messaging`，提供消息外壳、发布 / 消费模板、SPI、上下文传播契约。
 
 允许内容：消息模型、Message Header 规范、MessagePublisher / MessageConsumer SPI、OperationContext 透传、TraceId 透传、幂等 Key 规范、消费重试分类、死信扩展点、顺序消息扩展点。
 
