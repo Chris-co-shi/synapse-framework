@@ -1,4 +1,4 @@
-# ADR-007：Datasource 边界
+# ADR-007: Datasource boundary
 
 ## Status
 
@@ -6,26 +6,28 @@ Accepted
 
 ## Context
 
-Framework 需要统一多数据源定义、路由、刷新、健康和观测，但不应重新实现成熟的动态数据源
-引擎或暗含跨库事务。
+Baomidou dynamic-datasource already owns datasource creation, grouping, annotations, context management, and actual switching.
 
 ## Decision
 
-保留单一 `synapse-datasource`，底层使用
-`dynamic-datasource-spring-boot3-starter`。路由必须在事务开始前确定；一个本地事务绑定
-一个数据源，活动事务中切换默认抛错。Framework 不实现跨库事务，不默认依赖 Seata，
-不绑定 Nacos，也不重复代理 DataSource。
+`synapse-datasource` provides discovery, descriptors, type and role detection, health checks, candidate filtering, load-balancing decisions, and failover decisions.
+
+Applications use the official dynamic-datasource configuration and switching model directly.
+
+The framework does not provide `UseDatasource`, custom routing contexts or scopes, route selectors or resolvers, a runtime datasource-definition registry, or its own auto-proxy creator.
+
+`DataSourceRouter` is a decision model only and never changes the dynamic-datasource context.
 
 ## Consequences
 
-路由生命周期和事务边界可预测。业务若需要跨库一致性，应采用本地事务加 Outbox 或由具体
-应用显式引入协调方案。
+There is one datasource switching mechanism. Framework governance cannot conflict with transaction advisors or duplicate the underlying routing engine.
 
-## Rejected Alternatives
+## Rejected alternatives
 
-- 自研动态数据源引擎：维护成本高且重复成熟能力。
-- 事务中透明切库：破坏连接和事务一致性。
-- 默认集成 Seata：把分布式事务策略强加给所有消费方。
+- A second datasource switching annotation.
+- A framework-owned datasource context stack.
+- A framework-owned AOP proxy creator.
+- Default Seata integration.
 
 ## Date
 
