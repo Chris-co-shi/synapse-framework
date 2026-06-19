@@ -6,8 +6,8 @@ import com.indigo.synapse.core.context.OperationContext;
 import com.indigo.synapse.core.context.OperationContextHolder;
 import com.indigo.synapse.core.context.OperationContextScope;
 
-import com.indigo.synapse.security.context.internal.SecurityContextBinder;
-import com.indigo.synapse.security.context.internal.SecurityContextScope;
+import com.indigo.synapse.security.context.internal.PrincipalContextBinder;
+import com.indigo.synapse.security.context.internal.PrincipalContextScope;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -16,11 +16,15 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SecurityContextTest {
+class CurrentPrincipalContextTest {
 
     @Test
     void shouldStoreClientWithoutMappingToUser() {
@@ -32,10 +36,10 @@ class SecurityContextTest {
                 Set.of("message:send")
         );
 
-        try (SecurityContextScope ignored = SecurityContextBinder.bind(client)) {
-            assertEquals(client, SecurityContext.currentPrincipal().orElseThrow());
-            assertEquals(client, SecurityContext.currentClient().orElseThrow());
-            assertTrue(SecurityContext.currentUser().isEmpty());
+        try (PrincipalContextScope ignored = PrincipalContextBinder.bind(client)) {
+            assertEquals(client, CurrentPrincipalContext.currentPrincipal().orElseThrow());
+            assertEquals(client, CurrentPrincipalContext.currentClient().orElseThrow());
+            assertTrue(CurrentPrincipalContext.currentUser().isEmpty());
 
             OperationContext operationContext = OperationContextHolder.current().orElseThrow();
             assertEquals(OperationActorType.SERVICE, operationContext.actor().type());
@@ -44,7 +48,7 @@ class SecurityContextTest {
             assertTrue(operationContext.actor().attributes().isEmpty());
         }
 
-        assertTrue(SecurityContext.currentPrincipal().isEmpty());
+        assertTrue(CurrentPrincipalContext.currentPrincipal().isEmpty());
         assertTrue(OperationContextHolder.current().isEmpty());
     }
 
@@ -53,21 +57,21 @@ class SecurityContextTest {
         AuthenticatedUser user = new AuthenticatedUser("1", "admin", "tenant-a", Set.of(), Set.of("a"));
         AuthenticatedClient client = new AuthenticatedClient("client-a", "client-a", "tenant-b", Set.of(), Set.of("b"));
 
-        try (SecurityContextScope userScope = SecurityContextBinder.bind(user)) {
+        try (PrincipalContextScope userScope = PrincipalContextBinder.bind(user)) {
             assertEquals(OperationActorType.USER, OperationContextHolder.requireCurrent().actor().type());
-            assertEquals(user, SecurityContext.currentUser().orElseThrow());
+            assertEquals(user, CurrentPrincipalContext.currentUser().orElseThrow());
 
-            try (SecurityContextScope clientScope = SecurityContextBinder.bind(client)) {
+            try (PrincipalContextScope clientScope = PrincipalContextBinder.bind(client)) {
                 assertEquals(OperationActorType.SERVICE, OperationContextHolder.requireCurrent().actor().type());
-                assertEquals(client, SecurityContext.currentClient().orElseThrow());
-                assertTrue(SecurityContext.currentUser().isEmpty());
+                assertEquals(client, CurrentPrincipalContext.currentClient().orElseThrow());
+                assertTrue(CurrentPrincipalContext.currentUser().isEmpty());
             }
 
             assertEquals(OperationActorType.USER, OperationContextHolder.requireCurrent().actor().type());
-            assertEquals(user, SecurityContext.currentUser().orElseThrow());
+            assertEquals(user, CurrentPrincipalContext.currentUser().orElseThrow());
         }
 
-        assertTrue(SecurityContext.currentPrincipal().isEmpty());
+        assertTrue(CurrentPrincipalContext.currentPrincipal().isEmpty());
         assertTrue(OperationContextHolder.current().isEmpty());
     }
 
@@ -86,32 +90,32 @@ class SecurityContextTest {
                      OperationContextHolder.scope(jobContext)) {
 
             assertEquals(jobContext, OperationContextHolder.requireCurrent());
-            assertTrue(SecurityContext.currentPrincipal().isEmpty());
+            assertTrue(CurrentPrincipalContext.currentPrincipal().isEmpty());
 
-            try (SecurityContextScope userScope =
-                         SecurityContextBinder.bind(user)) {
+            try (PrincipalContextScope userScope =
+                         PrincipalContextBinder.bind(user)) {
 
-                assertEquals(user, SecurityContext.currentPrincipal().orElseThrow());
+                assertEquals(user, CurrentPrincipalContext.currentPrincipal().orElseThrow());
                 assertEquals(
                         OperationActorType.USER,
                         OperationContextHolder.requireCurrent().actor().type()
                 );
 
-                try (SecurityContextScope emptyScope =
-                             SecurityContextBinder.bind(null)) {
+                try (PrincipalContextScope emptyScope =
+                             PrincipalContextBinder.bind(null)) {
 
-                    assertTrue(SecurityContext.currentPrincipal().isEmpty());
+                    assertTrue(CurrentPrincipalContext.currentPrincipal().isEmpty());
                     assertTrue(OperationContextHolder.current().isEmpty());
                 }
 
-                assertEquals(user, SecurityContext.currentPrincipal().orElseThrow());
+                assertEquals(user, CurrentPrincipalContext.currentPrincipal().orElseThrow());
                 assertEquals(
                         OperationActorType.USER,
                         OperationContextHolder.requireCurrent().actor().type()
                 );
             }
 
-            assertTrue(SecurityContext.currentPrincipal().isEmpty());
+            assertTrue(CurrentPrincipalContext.currentPrincipal().isEmpty());
             assertEquals(jobContext, OperationContextHolder.requireCurrent());
         }
     }
@@ -142,44 +146,44 @@ class SecurityContextTest {
                 Set.of("inner:read")
         );
 
-        try (SecurityContextScope outerScope =
-                     SecurityContextBinder.bind(outerUser)) {
+        try (PrincipalContextScope outerScope =
+                     PrincipalContextBinder.bind(outerUser)) {
 
             assertEquals(
                     outerUser,
-                    SecurityContext.currentPrincipal().orElseThrow()
+                    CurrentPrincipalContext.currentPrincipal().orElseThrow()
             );
 
-            try (SecurityContextScope clientScope =
-                         SecurityContextBinder.bind(client)) {
+            try (PrincipalContextScope clientScope =
+                         PrincipalContextBinder.bind(client)) {
 
                 assertEquals(
                         client,
-                        SecurityContext.currentPrincipal().orElseThrow()
+                        CurrentPrincipalContext.currentPrincipal().orElseThrow()
                 );
 
-                try (SecurityContextScope innerScope =
-                             SecurityContextBinder.bind(innerUser)) {
+                try (PrincipalContextScope innerScope =
+                             PrincipalContextBinder.bind(innerUser)) {
 
                     assertEquals(
                             innerUser,
-                            SecurityContext.currentPrincipal().orElseThrow()
+                            CurrentPrincipalContext.currentPrincipal().orElseThrow()
                     );
                 }
 
                 assertEquals(
                         client,
-                        SecurityContext.currentPrincipal().orElseThrow()
+                        CurrentPrincipalContext.currentPrincipal().orElseThrow()
                 );
             }
 
             assertEquals(
                     outerUser,
-                    SecurityContext.currentPrincipal().orElseThrow()
+                    CurrentPrincipalContext.currentPrincipal().orElseThrow()
             );
         }
 
-        assertTrue(SecurityContext.currentPrincipal().isEmpty());
+        assertTrue(CurrentPrincipalContext.currentPrincipal().isEmpty());
         assertTrue(OperationContextHolder.current().isEmpty());
     }
 
@@ -199,13 +203,13 @@ class SecurityContextTest {
                      OperationContextHolder.scope(jobContext)) {
 
             assertThrows(IllegalStateException.class, () -> {
-                try (SecurityContextScope userScope =
-                             SecurityContextBinder.bind(user)) {
+                try (PrincipalContextScope userScope =
+                             PrincipalContextBinder.bind(user)) {
                     throw new IllegalStateException("failed");
                 }
             });
 
-            assertTrue(SecurityContext.currentPrincipal().isEmpty());
+            assertTrue(CurrentPrincipalContext.currentPrincipal().isEmpty());
             assertEquals(jobContext, OperationContextHolder.requireCurrent());
         }
     }
@@ -220,12 +224,12 @@ class SecurityContextTest {
                 Set.of()
         );
 
-        SecurityContextScope scope = SecurityContextBinder.bind(user);
+        PrincipalContextScope scope = PrincipalContextBinder.bind(user);
 
         scope.close();
         scope.close();
 
-        assertTrue(SecurityContext.currentPrincipal().isEmpty());
+        assertTrue(CurrentPrincipalContext.currentPrincipal().isEmpty());
         assertTrue(OperationContextHolder.current().isEmpty());
     }
 
@@ -239,8 +243,8 @@ class SecurityContextTest {
                 Set.of("system:user:list")
         );
 
-        try (SecurityContextScope ignored =
-                     SecurityContextBinder.bind(user)) {
+        try (PrincipalContextScope ignored =
+                     PrincipalContextBinder.bind(user)) {
 
             OperationContext operationContext =
                     OperationContextHolder.requireCurrent();
@@ -252,7 +256,7 @@ class SecurityContextTest {
     @Test
     void shouldExposeReadOnlyPublicApi() {
         Set<String> publicStaticMethods =
-                Arrays.stream(SecurityContext.class.getDeclaredMethods())
+                Arrays.stream(CurrentPrincipalContext.class.getDeclaredMethods())
                         .filter(method -> Modifier.isPublic(method.getModifiers()))
                         .filter(method -> Modifier.isStatic(method.getModifiers()))
                         .map(Method::getName)
@@ -266,6 +270,48 @@ class SecurityContextTest {
                 ),
                 publicStaticMethods
         );
+    }
+
+    @Test
+    void shouldIsolatePrincipalsAcrossConcurrentThreads() throws Exception {
+        AuthenticatedUser first = new AuthenticatedUser(
+                "user-a", "first", "tenant-a", Set.of(), Set.of()
+        );
+        AuthenticatedUser second = new AuthenticatedUser(
+                "user-b", "second", "tenant-b", Set.of(), Set.of()
+        );
+        CyclicBarrier barrier = new CyclicBarrier(2);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        try {
+            Future<String> firstResult = executor.submit(
+                    () -> readPrincipalWhileConcurrent(first, barrier)
+            );
+            Future<String> secondResult = executor.submit(
+                    () -> readPrincipalWhileConcurrent(second, barrier)
+            );
+
+            assertEquals("user-a", firstResult.get());
+            assertEquals("user-b", secondResult.get());
+        } finally {
+            executor.shutdownNow();
+        }
+
+        assertTrue(CurrentPrincipalContext.currentPrincipal().isEmpty());
+    }
+
+    private static String readPrincipalWhileConcurrent(
+            AuthenticatedUser principal,
+            CyclicBarrier barrier
+    ) throws Exception {
+        try (PrincipalContextScope ignored = PrincipalContextBinder.bind(principal)) {
+            barrier.await();
+            return CurrentPrincipalContext.currentPrincipal()
+                    .orElseThrow()
+                    .principalId();
+        } finally {
+            assertTrue(CurrentPrincipalContext.currentPrincipal().isEmpty());
+        }
     }
 
     private static OperationContext jobContext() {

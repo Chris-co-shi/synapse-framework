@@ -15,7 +15,7 @@ import java.io.IOException;
  * Servlet GatewayProof 403 响应写出器。
  *
  * <p>该类复用 synapse-webmvc 统一 Result 写出规则，不暴露 canonical string、secret 或 token 指纹。
- * 它只处理 GatewayProof 拒绝结果，不参与 JWT 认证和 SecurityContext 建立。</p>
+ * 它只处理 GatewayProof 拒绝结果，不参与 JWT 认证和 CurrentPrincipalContext 建立。</p>
  */
 public final class GatewayProofAccessDeniedHandler {
 

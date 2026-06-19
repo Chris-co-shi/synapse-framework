@@ -20,7 +20,7 @@ import java.io.IOException;
  * Servlet GatewayProof 入站校验 Filter。
  *
  * <p>该 Filter 必须位于 BearerTokenAuthenticationFilter 之前，用于证明请求经过可信 Gateway。
- * 它不解析 JWT claims，不建立认证主体，不写 SecurityContext。JWT 仍由后续 Resource Server Filter 校验。</p>
+ * 它不解析 JWT claims，不建立认证主体，不写 CurrentPrincipalContext。JWT 仍由后续 Resource Server Filter 校验。</p>
  */
 public final class GatewayProofVerificationFilter extends OncePerRequestFilter {
 

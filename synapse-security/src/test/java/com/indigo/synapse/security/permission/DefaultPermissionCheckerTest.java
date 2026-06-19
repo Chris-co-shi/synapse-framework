@@ -3,7 +3,7 @@ package com.indigo.synapse.security.permission;
 import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
 import com.indigo.synapse.core.exception.SynapseAuthenticationException;
 import com.indigo.synapse.security.context.AuthenticatedUser;
-import com.indigo.synapse.security.context.internal.SecurityContextBinder;
+import com.indigo.synapse.security.context.internal.PrincipalContextBinder;
 import com.indigo.synapse.security.exception.SecurityErrorCode;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +23,7 @@ class DefaultPermissionCheckerTest {
     @Test
     void shouldReturnTrueWhenCurrentUserHasPermission() {
         try (var ignored =
-                     SecurityContextBinder.bind(
+                     PrincipalContextBinder.bind(
                              user("system:user:create")
                      )) {
 
@@ -36,7 +36,7 @@ class DefaultPermissionCheckerTest {
     @Test
     void shouldReturnFalseWhenCurrentUserDoesNotHavePermission() {
         try (var ignored =
-                     SecurityContextBinder.bind(
+                     PrincipalContextBinder.bind(
                              user("system:user:list")
                      )) {
 
@@ -56,7 +56,7 @@ class DefaultPermissionCheckerTest {
     @Test
     void shouldReturnFalseForBlankPermission() {
         try (var ignored =
-                     SecurityContextBinder.bind(
+                     PrincipalContextBinder.bind(
                              user("system:user:create")
                      )) {
 
@@ -69,7 +69,7 @@ class DefaultPermissionCheckerTest {
     @Test
     void shouldPassRequireWhenCurrentUserHasPermission() {
         try (var ignored =
-                     SecurityContextBinder.bind(
+                     PrincipalContextBinder.bind(
                              user("system:user:create")
                      )) {
 
@@ -84,7 +84,7 @@ class DefaultPermissionCheckerTest {
     @Test
     void shouldThrowAccessDeniedWhenPermissionMissing() {
         try (var ignored =
-                     SecurityContextBinder.bind(
+                     PrincipalContextBinder.bind(
                              user("system:user:list")
                      )) {
 
@@ -143,7 +143,7 @@ class DefaultPermissionCheckerTest {
                 user("system:user:create");
 
         try (var ignored =
-                     SecurityContextBinder.bind(user)) {
+                     PrincipalContextBinder.bind(user)) {
 
             assertEquals(
                     user,

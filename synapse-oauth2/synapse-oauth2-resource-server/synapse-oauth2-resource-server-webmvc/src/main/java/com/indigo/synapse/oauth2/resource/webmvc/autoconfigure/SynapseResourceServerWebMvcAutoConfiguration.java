@@ -11,7 +11,7 @@ import com.indigo.synapse.oauth2.core.validation.SynapseJwtValidator;
 import com.indigo.synapse.oauth2.core.validation.SynapseJwtValidatorFactory;
 import com.indigo.synapse.oauth2.core.validation.TokenTypeValidator;
 import com.indigo.synapse.oauth2.resource.webmvc.config.SynapseResourceServerConfigurer;
-import com.indigo.synapse.oauth2.resource.webmvc.context.SynapseSecurityContextBridgeFilter;
+import com.indigo.synapse.oauth2.resource.webmvc.context.SynapsePrincipalContextBridgeFilter;
 import com.indigo.synapse.oauth2.resource.webmvc.gatewayproof.GatewayProofAccessDeniedHandler;
 import com.indigo.synapse.oauth2.resource.webmvc.gatewayproof.GatewayProofVerificationFilter;
 import com.indigo.synapse.oauth2.resource.webmvc.jwt.SynapseJwtAuthenticationConverter;
@@ -73,8 +73,8 @@ public class SynapseResourceServerWebMvcAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SynapseSecurityContextBridgeFilter synapseSecurityContextBridgeFilter() {
-        return new SynapseSecurityContextBridgeFilter();
+    public SynapsePrincipalContextBridgeFilter synapsePrincipalContextBridgeFilter() {
+        return new SynapsePrincipalContextBridgeFilter();
     }
 
     @Bean
@@ -203,7 +203,7 @@ public class SynapseResourceServerWebMvcAutoConfiguration {
             SynapseJwtAuthenticationConverter authenticationConverter,
             SynapseBearerAuthenticationEntryPoint entryPoint,
             SynapseAccessDeniedHandler accessDeniedHandler,
-            SynapseSecurityContextBridgeFilter bridgeFilter,
+            SynapsePrincipalContextBridgeFilter bridgeFilter,
             ObjectProvider<GatewayProofVerificationFilter> gatewayProofFilter) {
         return new SynapseResourceServerConfigurer(
                 properties,

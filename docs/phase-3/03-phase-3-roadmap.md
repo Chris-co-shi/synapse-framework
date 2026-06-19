@@ -75,14 +75,14 @@
 
 ### 目标
 
-- 固化 SecurityContext 与 OperationContext 的单向适配。
+- 固化 CurrentPrincipalContext 与 OperationContext 的单向适配。
 - 修复或证明嵌套 set/clear、重复 clear、异常路径和外层 scope 恢复行为。
 - 冻结 OAuth2 Resource Server 认证与技术 carrier 解码的职责边界。
 
 ### 重点检查
 
-- SecurityContext 连续设置不同用户。
-- SecurityContext 嵌套在 Job 或 Async OperationContext scope 中。
+- CurrentPrincipalContext 连续设置不同用户。
+- CurrentPrincipalContext 嵌套在 Job 或 Async OperationContext scope 中。
 - Filter chain 抛异常时的清理。
 - PermissionChecker 显式入口与注解入口的一致性。
 - Token 校验失败、主体映射失败和空权限输入。

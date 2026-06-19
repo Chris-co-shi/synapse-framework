@@ -61,12 +61,12 @@ synapse-audit
 | 维度 | 当前事实 |
 | --- | --- |
 | 定位 | Web 无关安全主体、安全上下文和权限检查基础模块 |
-| 公开能力 | AuthenticatedPrincipal、AuthenticatedUser、AuthenticatedClient、SecurityContext、PermissionChecker、`@RequirePermission`、Security 到 OperationContext 适配、PasswordEncoder |
+| 公开能力 | AuthenticatedPrincipal、AuthenticatedUser、AuthenticatedClient、CurrentPrincipalContext、PermissionChecker、`@RequirePermission`、Security 到 OperationContext 适配、PasswordEncoder |
 | 自动配置 | 安全基础自动配置；不创建 SecurityFilterChain |
 | Framework 依赖 | `synapse-core` |
 | 主要外部依赖 | Spring Boot AutoConfigure、Spring AOP、spring-security-crypto |
 | 当前优势 | data/audit/mq 无需依赖 security；权限检查既有显式入口也有注解适配 |
-| 已知缺口 | SecurityContext 同时维护当前主体 ThreadLocal 与 OperationContextScope，需要重点验证嵌套 set/clear、异常清理和已有 OperationContext 恢复 |
+| 已知缺口 | CurrentPrincipalContext 同时维护当前主体 ThreadLocal 与 OperationContextScope，需要重点验证嵌套 set/clear、异常清理和已有 OperationContext 恢复 |
 
 ### 2.5 synapse-data
 
@@ -129,7 +129,7 @@ OperationContext snapshot
 
 1. WebMVC 与 WebFlux 各自维护 Result、ObjectMapper 和异常响应工厂，尚未形成明确的跨技术栈兼容测试。
 2. WebMVC 同时存在 TraceContext、RequestContext 和 OperationContext，需要冻结建立、覆盖和清理顺序。
-3. SecurityContext 管理 OperationContextScope，嵌套安全上下文的行为需要明确。
+3. CurrentPrincipalContext 管理 OperationContextScope，嵌套安全上下文的行为需要明确。
 4. Data 模块生产依赖与文档边界不完全一致。
 5. Cache 的失败语义与可观测性尚未形成统一契约。
 6. Audit 的多端口失败策略和默认 Noop 行为需要明确。

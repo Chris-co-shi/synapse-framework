@@ -11,7 +11,7 @@
 负责：
 
 - `AuthenticatedPrincipal`、USER 与 CLIENT 主体模型。
-- ThreadLocal `SecurityContext` 与可关闭 Scope。
+- ThreadLocal `CurrentPrincipalContext` 与可关闭 Scope。
 - 安全主体到 core `OperationContext` 的单向适配。
 - `PermissionChecker` 与 `@RequirePermission` 轻量适配。
 - 密码编码器工厂。
@@ -47,11 +47,11 @@ AuthenticatedClient
 
 统一主体契约，提供主体类型、稳定标识、展示名、tenantId、roles 和 permissions 快照。
 
-### 4.2 `SecurityContext`
+### 4.2 `CurrentPrincipalContext`
 
 保存当前线程主体。打开 scope 时同时通过 `SecurityOperationContextAdapter` 建立 core OperationContext。
 
-### 4.3 `SecurityContextScope`
+### 4.3 `PrincipalContextScope`
 
 保存旧主体与旧 OperationContext，close 时恢复。它支持嵌套调用，不应被简单的 `clear()` 逻辑替代。
 
@@ -70,7 +70,7 @@ Service 层稳定权限入口：
 ```text
 Validated OAuth2 Resource Server adapter
   -> AuthenticatedPrincipal
-  -> SecurityContextBinder.bind
+  -> PrincipalContextBinder.bind
   -> SecurityOperationContextAdapter
   -> OperationContext
   -> Service / PermissionChecker / data / audit
@@ -91,7 +91,7 @@ Validated OAuth2 Resource Server adapter
 
 ## 7. 生命周期与失败边界
 
-- Servlet 线程池结束时必须关闭 SecurityContext Scope。
+- Servlet 线程池结束时必须关闭 CurrentPrincipalContext Scope。
 - Async / Task / MQ 不会自动继承 ThreadLocal，应显式恢复上下文。
 - 无主体时 `require` 应抛未认证，而不是权限不足。
 - 有主体但无权限时应抛 403 语义异常。
@@ -112,8 +112,8 @@ Validated OAuth2 Resource Server adapter
 AuthenticatedPrincipal
   -> AuthenticatedUser / AuthenticatedClient
   -> gatewayproof/*
-  -> SecurityContextScope
-  -> SecurityContext
+  -> PrincipalContextScope
+  -> CurrentPrincipalContext
   -> SecurityOperationContextAdapter
   -> PermissionChecker
   -> DefaultPermissionChecker

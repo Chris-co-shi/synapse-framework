@@ -61,7 +61,7 @@
 - `OperationContext`
 - `OperationActor`
 - `OperationContextHolder`
-- `SecurityContext`
+- `CurrentPrincipalContext`
 - `SecurityOperationContextAdapter`
 
 目标是理解为什么 data、audit、mq 不直接依赖 security。
@@ -73,7 +73,7 @@
 - `SynapseExceptionBridgeFilter`
 - Trace / OperationContext 恢复
 - Spring Security Resource Server
-- `SynapseSecurityContextBridgeFilter`
+- `SynapsePrincipalContextBridgeFilter`
 - `GlobalExceptionHandler`
 
 目标是能够解释 Filter 阶段异常与 Controller 阶段异常的处理边界。

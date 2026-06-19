@@ -9,7 +9,7 @@
 - `AuthenticatedPrincipal`：统一安全主体抽象。
 - `AuthenticatedUser`：已认证用户主体。
 - `AuthenticatedClient`：已认证客户端主体。
-- `SecurityContext`：当前线程安全上下文只读门面。
+- `CurrentPrincipalContext`：同步调用链中的当前认证主体只读门面。
 - `PermissionChecker`：显式权限检查入口。
 - `@RequirePermission`：声明式权限适配。
 - 安全主体到 core `OperationContext` 的单向适配。
@@ -27,7 +27,7 @@ Authorization: Bearer <token>
   -> Resource Server 验证签名
   -> 校验 issuer / audience / expiry / token contract
   -> JWT claims 映射为 AuthenticatedUser 或 AuthenticatedClient
-  -> 建立 Synapse SecurityContext
+  -> 建立 Synapse CurrentPrincipalContext
 ```
 
 固定规则：
@@ -51,7 +51,7 @@ Web 认证适配模块：
 - 读取当前已经过认证的用户或客户端。
 - 通过 `PermissionChecker` 显式校验权限。
 - 通过 `@RequirePermission` 对 Spring Bean 方法执行轻量权限检查。
-- 将当前安全主体同步为 `OperationContext`，供 data、audit、mq 等模块读取。
+- 将当前安全主体同步为 `OperationContext`，供 data、audit、messaging 等模块读取。
 - 为 Platform Gateway 和 Resource Server 复用 GatewayProof v1 canonical string、HMAC-SHA256 签名和验签逻辑。
 - 使用默认 BCrypt 密码编码器。
 
@@ -147,16 +147,24 @@ permissions
 - CLIENT 同步到 `OperationContext` 时映射为 `OperationActorType.SERVICE`。
 - roles / permissions 不进入 `OperationContext`。
 
-## 7. SecurityContext
+## 7. CurrentPrincipalContext
 
 ```java
-AuthenticatedUser user = SecurityContext.currentUser()
+AuthenticatedUser user = CurrentPrincipalContext.currentUser()
         .orElseThrow();
 ```
 
-`SecurityContext` 是面向业务代码的只读门面。
+`CurrentPrincipalContext` 是面向业务代码的只读门面。
 
 认证主体只能由 Framework 的认证适配器绑定。业务代码不得直接调用 `com.indigo.synapse.security.context.internal` 包中的 Binder、State 或 Scope。
+
+生命周期规则：
+
+- Servlet 等同步入口通过 `PrincipalContextBinder` 建立 `PrincipalContextScope`。
+- Scope 关闭时恢复外层主体及 `OperationContext`，嵌套 Scope 按进入顺序自动恢复。
+- 请求正常结束或异常退出都必须关闭 Scope；无外层主体时底层 ThreadLocal 使用 `remove()` 清理。
+- ThreadLocal 不传播到异步线程、定时任务、消息消费线程或 Reactive 链路。
+- WebFlux 使用 `ReactiveCurrentPrincipalContext` 从当前订阅链的 Reactor Context 读取主体。
 
 安全主体会单向适配为 core `OperationContext`：
 
@@ -166,7 +174,7 @@ AuthenticatedUser / AuthenticatedClient
   -> OperationContext
 ```
 
-这样 data、audit、mq 可以通过 `OperationContextProvider` 读取当前操作人，不需要依赖 security。
+这样 data、audit、messaging 可以通过 `OperationContextProvider` 读取当前操作人，不需要依赖 security。
 
 ## 8. 权限检查
 
@@ -228,7 +236,7 @@ PasswordEncoder passwordEncoder() {
 
 ## 11. GatewayProof
 
-GatewayProof 用于证明请求经过可信 Platform Gateway。它不建立 `SecurityContext`，不解析 JWT claims，不携带身份快照。
+GatewayProof 用于证明请求经过可信 Platform Gateway。它不建立 `CurrentPrincipalContext`，不解析 JWT claims，不携带身份快照。
 
 固定 Header：
 
@@ -334,6 +342,7 @@ PermissionChecker permissionChecker() {
 - 默认 `PermissionChecker` 只检查当前主体快照中的 permissions。
 - `@RequirePermission` 只适合 Spring Bean 方法。
 - 异步任务不能假设 ThreadLocal 自动存在，应显式传播 `OperationContextSnapshot`。
+- 主体上下文变更必须覆盖嵌套恢复、异常清理、线程池复用和并发隔离测试。
 - `OperationContext` 不承载角色和权限。
 - GatewayProof secret 不得写入日志、配置样例仓库或错误响应。
 - GatewayProof 只能与 Bearer Token 独立校验配合使用，不能单独作为身份凭证。

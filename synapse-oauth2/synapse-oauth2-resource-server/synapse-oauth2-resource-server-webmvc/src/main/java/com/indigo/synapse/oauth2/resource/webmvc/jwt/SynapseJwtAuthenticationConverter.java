@@ -17,7 +17,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
  * <ul>
  *     <li>不解析 HTTP Bearer Header，该职责属于 Spring Security Filter。</li>
  *     <li>不验证 JWT 签名、issuer、audience 或有效期，该职责属于 {@code JwtDecoder} 和 validators。</li>
- *     <li>不把主体写入 Synapse SecurityContext，该职责属于后续 Bridge Filter。</li>
+ *     <li>不把主体写入 Synapse CurrentPrincipalContext，该职责属于后续 Bridge Filter。</li>
  *     <li>不查询用户、角色或权限数据库，claims 被视为当前 token 的安全快照。</li>
  * </ul>
  *

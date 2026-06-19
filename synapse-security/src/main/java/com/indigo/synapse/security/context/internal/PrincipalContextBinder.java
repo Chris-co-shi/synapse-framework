@@ -6,29 +6,30 @@ import com.indigo.synapse.core.context.OperationContextScope;
 import com.indigo.synapse.security.context.AuthenticatedPrincipal;
 
 /**
- * SecurityContext 内部绑定入口。
+ * {@code CurrentPrincipalContext} 内部绑定入口。
  *
  * <p>仅供 Framework 的可信认证适配器使用，业务代码不应直接调用。</p>
  */
-public final class SecurityContextBinder {
+public final class PrincipalContextBinder {
 
-    private SecurityContextBinder() {
+    private PrincipalContextBinder() {
     }
 
     /**
      * 绑定当前已认证主体，并同步建立 OperationContext 作用域。
      *
-     * <p>传入 null 时建立临时空作用域。关闭返回的 Scope 后，
-     * 会恢复进入前的 SecurityContext 和 OperationContext。</p>
+     * <p>传入 null 时建立临时空作用域。关闭返回的 Scope 后，会同时恢复进入前的主体和
+     * OperationContext。若 OperationContext 作用域创建失败，本方法也会恢复此前主体，
+     * 不留下半绑定状态。</p>
      *
      * @param principal 已认证主体；允许为 null
      * @return 可恢复的安全上下文作用域
      */
-    public static SecurityContextScope bind(
+    public static PrincipalContextScope bind(
             AuthenticatedPrincipal principal
     ) {
         AuthenticatedPrincipal previousPrincipal =
-                SecurityContextState.currentPrincipal();
+                PrincipalContextState.currentPrincipal();
 
         OperationContext operationContext =
                 principal == null
@@ -36,18 +37,18 @@ public final class SecurityContextBinder {
                         : SecurityOperationContextAdapter
                           .toOperationContext(principal);
 
-        SecurityContextState.setPrincipal(principal);
+        PrincipalContextState.setPrincipal(principal);
 
         try {
             OperationContextScope operationScope =
                     OperationContextHolder.scope(operationContext);
 
-            return new SecurityContextScope(
+            return new PrincipalContextScope(
                     previousPrincipal,
                     operationScope
             );
         } catch (RuntimeException | Error exception) {
-            SecurityContextState.setPrincipal(previousPrincipal);
+            PrincipalContextState.setPrincipal(previousPrincipal);
             throw exception;
         }
     }

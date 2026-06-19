@@ -11,7 +11,7 @@
 - `SynapseJwtAuthenticationConverter`
 - `SynapseJwtPrincipalMapper`
 - `SynapseJwtGrantedAuthoritiesConverter`
-- `SynapseSecurityContextBridgeFilter`
+- `SynapsePrincipalContextBridgeFilter`
 - `GatewayProofVerificationFilter`
 - 默认 `SecurityFilterChain`
 - `SynapseResourceServerConfigurer`
@@ -23,7 +23,12 @@
 - `principal_type=CLIENT` 映射为 `AuthenticatedClient`，客户端标识来自 `client_id`。
 - 主体类型使用 Core 的 `SynapsePrincipalType` 协议值判断，未知类型直接拒绝。
 - CLIENT 不会被伪装成 USER。
-- roles / permissions 只保存在 `SecurityContext`，不进入 `OperationContext`。
+- roles / permissions 只保存在 `CurrentPrincipalContext`，不进入 `OperationContext`。
+
+`SynapsePrincipalContextBridgeFilter` 位于 Bearer Token 认证过滤器之后，只接受
+`SynapseJwtAuthenticationToken` 中已经映射完成的主体。它通过
+`PrincipalContextScope` 绑定当前请求，并在过滤器链正常返回或抛出异常时自动清理，
+防止 Servlet 容器线程复用导致主体串线。
 
 ## 3. Claim 与 Authority 规则
 

@@ -30,7 +30,7 @@ OAuth2 core contract
 - 创建 RSA 私钥、JWKSource、JwtEncoder。
 - Spring Security Authentication。
 - HTTP Bearer Filter。
-- Synapse SecurityContext。
+- Synapse CurrentPrincipalContext。
 - 登录、授权码、Refresh Token 和客户端管理。
 
 ## 4. 核心对象角色

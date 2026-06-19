@@ -2,7 +2,7 @@
 
 ## 1. 模块使命
 
-该模块把 Reactive OAuth2 Resource Server 的 JWT 认证结果适配为 Synapse 主体，并通过 Reactor Context 传播 SecurityContext 与 OperationContext。它可以被 Platform Gateway 引用，但自身不是 Gateway 服务。
+该模块把 Reactive OAuth2 Resource Server 的 JWT 认证结果适配为 Synapse 主体，并通过 Reactor Context 传播 CurrentPrincipalContext 与 OperationContext。它可以被 Platform Gateway 引用，但自身不是 Gateway 服务。
 
 ## 2. 为什么与 Servlet 模块分离
 
@@ -15,7 +15,7 @@ Reactive 链路可能跨线程，Servlet ThreadLocal 不能作为唯一上下文
 - Reactive JWT Authentication converter。
 - Reactive token denylist Port。
 - USER / CLIENT 主体映射。
-- `SynapseReactiveSecurityContext`。
+- `ReactiveCurrentPrincipalContext`。
 - `SynapseReactiveOperationContext`。
 - Security WebFilter 与 Reactor Context 写入。
 - GatewayProof 前置校验 WebFilter。
@@ -32,9 +32,9 @@ Reactive 链路可能跨线程，Servlet ThreadLocal 不能作为唯一上下文
 ## 4. 核心对象角色
 
 - Reactive converter：`Jwt -> Mono<Authentication>`，可组合异步 denylist 检查。
-- `SynapseReactiveSecurityContext`：从 Reactor Context 读取 principal/user/client。
+- `ReactiveCurrentPrincipalContext`：从 Reactor Context 读取 principal/user/client。
 - `SynapseReactiveOperationContext`：从相同主体生成或读取 OperationContext。
-- `SynapseReactiveSecurityContextWebFilter`：在认证完成后的 publisher 链中写入 Context。
+- `ReactivePrincipalContextWebFilter`：在认证完成后的 publisher 链中写入 Context。
 - Reactive handlers：以非阻塞方式写出 401/403 Result。
 
 ## 5. 主链路
@@ -46,7 +46,7 @@ Bearer token + GatewayProof Headers
   -> validators
   -> SynapseReactiveJwtAuthenticationConverter
   -> Authentication in ReactiveSecurityContextHolder
-  -> SynapseReactiveSecurityContextWebFilter
+  -> ReactivePrincipalContextWebFilter
   -> contextWrite(principal + operation context)
   -> handler / gateway technical chain
 ```
@@ -54,7 +54,7 @@ Bearer token + GatewayProof Headers
 读取必须发生在订阅链中：
 
 ```java
-SynapseReactiveSecurityContext.currentUser()
+ReactiveCurrentPrincipalContext.currentUser()
     .flatMap(user -> ...);
 ```
 
@@ -88,9 +88,9 @@ Reactive Port 允许非阻塞 Redis/远程检查。实现不得在 event-loop �
 ReactiveTokenDenylistPort
   -> Reactive JWT converter
   -> Reactive authentication token / principal mapping
-  -> SynapseReactiveSecurityContext
+  -> ReactiveCurrentPrincipalContext
   -> SynapseReactiveOperationContext
-  -> SynapseReactiveSecurityContextWebFilter
+  -> ReactivePrincipalContextWebFilter
   -> 401 / 403 writers
   -> SecurityWebFilterChain auto configuration
   -> StepVerifier / WebTestClient tests

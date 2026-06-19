@@ -1,7 +1,7 @@
 package com.indigo.synapse.oauth2.resource.webflux.autoconfigure;
 
 import com.indigo.synapse.oauth2.resource.webflux.config.SynapseResourceServerServerHttpSecurityConfigurer;
-import com.indigo.synapse.oauth2.resource.webflux.context.SynapseReactiveSecurityContextWebFilter;
+import com.indigo.synapse.oauth2.resource.webflux.context.ReactivePrincipalContextWebFilter;
 import com.indigo.synapse.oauth2.resource.webflux.gatewayproof.GatewayProofServerAccessDeniedHandler;
 import com.indigo.synapse.oauth2.resource.webflux.gatewayproof.GatewayProofWebFilter;
 import com.indigo.synapse.oauth2.resource.webflux.jwt.SynapseReactiveJwtAuthenticationConverter;
@@ -48,8 +48,8 @@ public class SynapseResourceServerWebFluxAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SynapseReactiveSecurityContextWebFilter synapseReactiveSecurityContextWebFilter() {
-        return new SynapseReactiveSecurityContextWebFilter();
+    public ReactivePrincipalContextWebFilter reactivePrincipalContextWebFilter() {
+        return new ReactivePrincipalContextWebFilter();
     }
 
     @Bean
@@ -129,7 +129,7 @@ public class SynapseResourceServerWebFluxAutoConfiguration {
             SynapseReactiveJwtAuthenticationConverter authenticationConverter,
             SynapseServerAuthenticationEntryPoint entryPoint,
             SynapseServerAccessDeniedHandler accessDeniedHandler,
-            SynapseReactiveSecurityContextWebFilter bridgeFilter,
+            ReactivePrincipalContextWebFilter bridgeFilter,
             ObjectProvider<GatewayProofWebFilter> gatewayProofWebFilter) {
         return new SynapseResourceServerServerHttpSecurityConfigurer(
                 properties,

@@ -41,7 +41,7 @@
 - [ ] MVC 阶段异常返回统一 JSON。
 - [ ] 400、401、403、404、405、415、500 映射有测试。
 - [ ] traceId header、MDC、Result.traceId 一致。
-- [ ] TraceContext、RequestContext、SecurityContext、OperationContext 按正确顺序清理。
+- [ ] TraceContext、RequestContext、CurrentPrincipalContext、OperationContext 按正确顺序清理。
 - [ ] 消费方自定义 Bean 不被默认自动配置覆盖。
 
 ## 5. WebFlux
@@ -57,7 +57,7 @@
 
 - [ ] OAuth2 适配模块负责 Token 验证，`synapse-security` 不恢复身份 Header 认证协议。
 - [ ] 未把 roles 或 permissions 快照当作权威数据源。
-- [ ] SecurityContext set 和 clear 能恢复外层 OperationContext。
+- [ ] CurrentPrincipalContext set 和 clear 能恢复外层 OperationContext。
 - [ ] 连续设置不同用户不会遗留旧 scope。
 - [ ] 认证失败和权限失败错误码稳定。
 - [ ] `@RequirePermission` 未被描述为唯一安全边界。
@@ -134,6 +134,6 @@ mvn -q clean test
 - [ ] 七个目标模块均有现状记录。
 - [ ] 已记录 Data 生产依赖与文档边界不一致问题。
 - [ ] 已记录 WebMVC 和 WebFlux 双实现一致性问题。
-- [ ] 已记录 SecurityContext 生命周期风险。
+- [ ] 已记录 CurrentPrincipalContext 生命周期风险。
 - [ ] 已记录 Cache 和 Audit 失败语义风险。
 - [ ] TASK-302 至 TASK-307 均有明确验收标准。

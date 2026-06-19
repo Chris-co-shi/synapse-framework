@@ -20,8 +20,8 @@ public final class SynapseReactiveOperationContext {
             if (context.hasKey(OPERATION_CONTEXT_KEY)) {
                 return Mono.just(context.get(OPERATION_CONTEXT_KEY));
             }
-            if (context.hasKey(SynapseReactiveSecurityContext.PRINCIPAL_KEY)) {
-                AuthenticatedPrincipal principal = context.get(SynapseReactiveSecurityContext.PRINCIPAL_KEY);
+            if (context.hasKey(ReactiveCurrentPrincipalContext.PRINCIPAL_KEY)) {
+                AuthenticatedPrincipal principal = context.get(ReactiveCurrentPrincipalContext.PRINCIPAL_KEY);
                 return Mono.just(SecurityOperationContextAdapter.toOperationContext(principal));
             }
             return Mono.empty();

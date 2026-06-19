@@ -1,7 +1,7 @@
 package com.indigo.synapse.oauth2.resource.webmvc.config;
 
 import com.indigo.synapse.oauth2.resource.webmvc.autoconfigure.SynapseResourceServerProperties;
-import com.indigo.synapse.oauth2.resource.webmvc.context.SynapseSecurityContextBridgeFilter;
+import com.indigo.synapse.oauth2.resource.webmvc.context.SynapsePrincipalContextBridgeFilter;
 import com.indigo.synapse.oauth2.resource.webmvc.jwt.SynapseJwtAuthenticationConverter;
 import com.indigo.synapse.oauth2.resource.webmvc.web.SynapseAccessDeniedHandler;
 import com.indigo.synapse.oauth2.resource.webmvc.web.SynapseBearerAuthenticationEntryPoint;
@@ -23,7 +23,7 @@ import org.springframework.security.oauth2.server.resource.web.authentication.Be
  *     -> BearerTokenAuthenticationFilter
  *     -> JWT decoder and validators
  *     -> SynapseJwtAuthenticationConverter
- *     -> SynapseSecurityContextBridgeFilter
+ *     -> SynapsePrincipalContextBridgeFilter
  *     -> Controller / Service
  * </pre>
  *
@@ -36,7 +36,7 @@ public final class SynapseResourceServerConfigurer {
     private final SynapseJwtAuthenticationConverter authenticationConverter;
     private final SynapseBearerAuthenticationEntryPoint entryPoint;
     private final SynapseAccessDeniedHandler accessDeniedHandler;
-    private final SynapseSecurityContextBridgeFilter bridgeFilter;
+    private final SynapsePrincipalContextBridgeFilter bridgeFilter;
     private final GatewayProofVerificationFilter gatewayProofVerificationFilter;
 
     public SynapseResourceServerConfigurer(
@@ -44,7 +44,7 @@ public final class SynapseResourceServerConfigurer {
             SynapseJwtAuthenticationConverter authenticationConverter,
             SynapseBearerAuthenticationEntryPoint entryPoint,
             SynapseAccessDeniedHandler accessDeniedHandler,
-            SynapseSecurityContextBridgeFilter bridgeFilter) {
+            SynapsePrincipalContextBridgeFilter bridgeFilter) {
         this(properties, authenticationConverter, entryPoint, accessDeniedHandler, bridgeFilter, null);
     }
 
@@ -53,7 +53,7 @@ public final class SynapseResourceServerConfigurer {
             SynapseJwtAuthenticationConverter authenticationConverter,
             SynapseBearerAuthenticationEntryPoint entryPoint,
             SynapseAccessDeniedHandler accessDeniedHandler,
-            SynapseSecurityContextBridgeFilter bridgeFilter,
+            SynapsePrincipalContextBridgeFilter bridgeFilter,
             GatewayProofVerificationFilter gatewayProofVerificationFilter) {
         this.properties = properties;
         this.authenticationConverter = authenticationConverter;

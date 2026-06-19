@@ -14,7 +14,7 @@ Servlet Resource Server 中同时存在两套上下文：
 - `SecurityFilterChain` 中的访问判断。
 - Spring Security 生态兼容。
 
-### Synapse SecurityContext
+### Synapse CurrentPrincipalContext
 
 由 `synapse-security` 管理，保存 `AuthenticatedPrincipal`，负责：
 
@@ -29,7 +29,7 @@ Servlet Resource Server 中同时存在两套上下文：
 Spring SecurityContext
   -> 面向 Spring Security 认证框架
 
-Synapse SecurityContext
+Synapse CurrentPrincipalContext
   -> 面向 Synapse Framework 内部稳定契约
 ```
 
@@ -48,8 +48,8 @@ flowchart TD
     G --> I[SynapseJwtAuthenticationToken]
     H --> I
     I --> J[Spring SecurityContextHolder]
-    J --> K[SynapseSecurityContextBridgeFilter]
-    K --> L[SecurityContextBinder.bind]
+    J --> K[SynapsePrincipalContextBridgeFilter]
+    K --> L[PrincipalContextBinder.bind]
     L --> M[SecurityOperationContextAdapter]
     M --> N[OperationContext]
     L --> O[Controller / Service]
@@ -123,7 +123,7 @@ SynapseJwtAuthenticationToken
 2. 通过 authorities converter 生成 Spring Security authorities。
 3. 保存 token 的必要元数据，例如 `jti` 和 `issuer`。
 
-它不负责签名校验，也不负责把主体写入 Synapse `SecurityContext`。
+它不负责签名校验，也不负责把主体写入 Synapse `CurrentPrincipalContext`。
 
 ### 3.5 `SynapseJwtPrincipalMapper`
 
@@ -174,7 +174,7 @@ permissions -> permissions snapshot
 
 它的作用是让后续 Bridge Filter 能从 Spring Authentication 中取出 Synapse 主体，而不需要再次解析 JWT claims。
 
-### 3.7 `SynapseSecurityContextBridgeFilter`
+### 3.7 `SynapsePrincipalContextBridgeFilter`
 
 该 Filter 位于 `BearerTokenAuthenticationFilter` 之后。
 
@@ -185,20 +185,20 @@ Filter 的核心行为：
 ```text
 读取 Spring Authentication
   -> 取出 AuthenticatedPrincipal
-  -> SecurityContextBinder.bind(principal)
+  -> PrincipalContextBinder.bind(principal)
   -> 执行后续 Filter / Controller
   -> try-with-resources 自动关闭 scope
 ```
 
 这个 try-with-resources 是上下文安全的关键点。无论后续请求成功还是抛异常，作用域都必须关闭，避免线程池复用时污染下一次请求。
 
-### 3.8 `SecurityContextBinder.bind`
+### 3.8 `PrincipalContextBinder.bind`
 
 它会同时建立两个作用域：
 
 ```text
 AuthenticatedPrincipal
-  -> Synapse SecurityContext ThreadLocal
+  -> Synapse CurrentPrincipalContext ThreadLocal
 
 AuthenticatedPrincipal
   -> SecurityOperationContextAdapter
@@ -319,7 +319,7 @@ Reactive 版本使用：
 - Reactive JWT converter。
 - WebFilter。
 - Reactor Context。
-- `SynapseReactiveSecurityContext`。
+- `ReactiveCurrentPrincipalContext`。
 - `SynapseReactiveOperationContext`。
 
 语义与 Servlet 版本保持一致，但上下文传播机制不同。
@@ -333,9 +333,9 @@ Reactive 版本使用：
 2. SynapseJwtAuthenticationConverter
 3. SynapseJwtPrincipalMapper
 4. SynapseJwtAuthenticationToken
-5. SynapseSecurityContextBridgeFilter
-6. SecurityContext
-7. SecurityContextScope
+5. SynapsePrincipalContextBridgeFilter
+6. CurrentPrincipalContext
+7. PrincipalContextScope
 8. SecurityOperationContextAdapter
 9. PermissionChecker
 10. 对应测试

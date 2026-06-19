@@ -13,7 +13,7 @@
 第三阶段重点处理：
 
 - WebMVC / WebFlux 响应、异常和上下文契约一致性。
-- SecurityContext 与 OperationContext 的适配和生命周期边界。
+- CurrentPrincipalContext 与 OperationContext 的适配和生命周期边界。
 - Data 审计填充与依赖边界。
 - Cache 锁、限流、幂等和缓存契约的失败语义。
 - Audit 上下文补齐、输出端口和失败策略。
@@ -106,9 +106,9 @@ synapse-core
 
 它不是用户领域模型，也不是权限模型。
 
-### 6.2 SecurityContext
+### 6.2 CurrentPrincipalContext
 
-`SecurityContext` 只表达当前已认证主体和权限快照。Security 可以单向适配到 OperationContext，但 core、data、audit 不得反向读取 security。
+`CurrentPrincipalContext` 只表达当前已认证主体和权限快照。Security 可以单向适配到 OperationContext，但 core、data、audit 不得反向读取 security。
 
 ### 6.3 无用户场景
 

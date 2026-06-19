@@ -1,6 +1,6 @@
 package com.indigo.synapse.security.context.internal;
 
-import com.indigo.synapse.security.context.SecurityContext;
+import com.indigo.synapse.security.context.CurrentPrincipalContext;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -13,12 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class SecurityContextApiBoundaryTest {
+class PrincipalContextApiBoundaryTest {
 
     @Test
-    void shouldExposeOnlyReadOperationsFromSecurityContext() {
+    void shouldExposeOnlyReadOperationsFromCurrentPrincipalContext() {
         Set<String> publicStaticMethods =
-                Arrays.stream(SecurityContext.class.getDeclaredMethods())
+                Arrays.stream(CurrentPrincipalContext.class.getDeclaredMethods())
                         .filter(method ->
                                 Modifier.isPublic(method.getModifiers()))
                         .filter(method ->
@@ -37,9 +37,9 @@ class SecurityContextApiBoundaryTest {
     }
 
     @Test
-    void shouldNotExposeSecurityContextStateMutation() throws Exception {
+    void shouldNotExposePrincipalContextStateMutation() throws Exception {
         Method setPrincipal =
-                SecurityContextState.class.getDeclaredMethod(
+                PrincipalContextState.class.getDeclaredMethod(
                         "setPrincipal",
                         com.indigo.synapse.security.context
                                 .AuthenticatedPrincipal.class
@@ -57,7 +57,7 @@ class SecurityContextApiBoundaryTest {
     void shouldNotAllowApplicationCodeToConstructScope() {
         boolean hasPublicConstructor =
                 Arrays.stream(
-                                SecurityContextScope.class
+                                PrincipalContextScope.class
                                         .getDeclaredConstructors()
                         )
                         .anyMatch(constructor ->
@@ -123,7 +123,7 @@ class SecurityContextApiBoundaryTest {
     void shouldKeepBinderNonInstantiable() {
         boolean allConstructorsPrivate =
                 Arrays.stream(
-                                SecurityContextBinder.class
+                                PrincipalContextBinder.class
                                         .getDeclaredConstructors()
                         )
                         .allMatch(constructor ->

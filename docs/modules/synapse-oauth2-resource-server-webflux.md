@@ -10,9 +10,9 @@
 - `ReactiveTokenDenylistPort`
 - `SpringJwtClaimAccessor`
 - `SynapseReactiveJwtAuthenticationConverter`
-- `SynapseReactiveSecurityContext`
+- `ReactiveCurrentPrincipalContext`
 - `SynapseReactiveOperationContext`
-- `SynapseReactiveSecurityContextWebFilter`
+- `ReactivePrincipalContextWebFilter`
 - `GatewayProofWebFilter`
 - reactive 401/403 `Result` 写出
 - 默认 `ReactiveJwtDecoder`
@@ -63,20 +63,23 @@ synapse:
 WebFlux 场景通过 Reactor Context 读取：
 
 ```java
-SynapseReactiveSecurityContext.currentPrincipal();
-SynapseReactiveSecurityContext.currentUser();
-SynapseReactiveSecurityContext.currentClient();
+ReactiveCurrentPrincipalContext.currentPrincipal();
+ReactiveCurrentPrincipalContext.currentUser();
+ReactiveCurrentPrincipalContext.currentClient();
 SynapseReactiveOperationContext.currentOperationContext();
 ```
 
 不得依赖 Servlet ThreadLocal 作为唯一上下文。
+
+`ReactivePrincipalContextWebFilter` 将已认证主体写入当前订阅链的 Reactor Context。
+该上下文可跨 `publishOn`、`subscribeOn` 读取，并按订阅隔离；并发请求之间不共享可变状态。
 
 ## 5. 自动配置边界
 
 默认自动配置会在 Reactive Web 环境中装配：
 
 - JWT 到 Synapse principal 的 converter。
-- Reactive SecurityContext / OperationContext 读取能力。
+- Reactive CurrentPrincipalContext / OperationContext 读取能力。
 - 401/403 响应适配。
 - 缺少用户自定义 `ReactiveJwtDecoder` 时，按 `jwk-set-uri` 或 `issuer-uri` 创建默认 decoder。
 - 缺少用户自定义 `SecurityWebFilterChain` 时，创建默认 Resource Server filter chain。

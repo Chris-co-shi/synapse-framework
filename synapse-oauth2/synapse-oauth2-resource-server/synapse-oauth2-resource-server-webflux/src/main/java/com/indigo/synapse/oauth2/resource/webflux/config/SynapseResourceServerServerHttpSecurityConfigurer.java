@@ -1,7 +1,7 @@
 package com.indigo.synapse.oauth2.resource.webflux.config;
 
 import com.indigo.synapse.oauth2.resource.webflux.autoconfigure.SynapseReactiveResourceServerProperties;
-import com.indigo.synapse.oauth2.resource.webflux.context.SynapseReactiveSecurityContextWebFilter;
+import com.indigo.synapse.oauth2.resource.webflux.context.ReactivePrincipalContextWebFilter;
 import com.indigo.synapse.oauth2.resource.webflux.gatewayproof.GatewayProofWebFilter;
 import com.indigo.synapse.oauth2.resource.webflux.jwt.SynapseReactiveJwtAuthenticationConverter;
 import com.indigo.synapse.oauth2.resource.webflux.web.SynapseServerAccessDeniedHandler;
@@ -18,7 +18,7 @@ public final class SynapseResourceServerServerHttpSecurityConfigurer {
     private final SynapseReactiveJwtAuthenticationConverter authenticationConverter;
     private final SynapseServerAuthenticationEntryPoint entryPoint;
     private final SynapseServerAccessDeniedHandler accessDeniedHandler;
-    private final SynapseReactiveSecurityContextWebFilter bridgeFilter;
+    private final ReactivePrincipalContextWebFilter bridgeFilter;
     private final GatewayProofWebFilter gatewayProofWebFilter;
 
     public SynapseResourceServerServerHttpSecurityConfigurer(
@@ -26,7 +26,7 @@ public final class SynapseResourceServerServerHttpSecurityConfigurer {
             SynapseReactiveJwtAuthenticationConverter authenticationConverter,
             SynapseServerAuthenticationEntryPoint entryPoint,
             SynapseServerAccessDeniedHandler accessDeniedHandler,
-            SynapseReactiveSecurityContextWebFilter bridgeFilter) {
+            ReactivePrincipalContextWebFilter bridgeFilter) {
         this(properties, authenticationConverter, entryPoint, accessDeniedHandler, bridgeFilter, null);
     }
 
@@ -35,7 +35,7 @@ public final class SynapseResourceServerServerHttpSecurityConfigurer {
             SynapseReactiveJwtAuthenticationConverter authenticationConverter,
             SynapseServerAuthenticationEntryPoint entryPoint,
             SynapseServerAccessDeniedHandler accessDeniedHandler,
-            SynapseReactiveSecurityContextWebFilter bridgeFilter,
+            ReactivePrincipalContextWebFilter bridgeFilter,
             GatewayProofWebFilter gatewayProofWebFilter) {
         this.properties = properties;
         this.authenticationConverter = authenticationConverter;

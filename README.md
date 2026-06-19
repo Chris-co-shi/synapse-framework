@@ -117,7 +117,7 @@ synapse-framework
 | --- | --- |
 | [学习路径索引](docs/learning/README.md) | 推荐阅读顺序、学习方法和掌握标准 |
 | [Framework 架构阅读指南](docs/learning/01-framework-architecture-reading-guide.md) | 三层边界、模块地图、依赖方向和源码阅读方式 |
-| [Security 与 OAuth2 请求链路](docs/learning/02-security-oauth2-request-flow.md) | Bearer Token 到 SecurityContext、OperationContext 和权限检查的完整链路 |
+| [Security 与 OAuth2 请求链路](docs/learning/02-security-oauth2-request-flow.md) | Bearer Token 到 CurrentPrincipalContext、OperationContext 和权限检查的完整链路 |
 
 ## 二阶段规划入口
 

@@ -127,7 +127,7 @@ mq -> security
 Jwt
   -> SynapseJwtPrincipalMapper
   -> AuthenticatedUser / AuthenticatedClient
-  -> Synapse SecurityContext
+  -> Synapse CurrentPrincipalContext
 ```
 
 `oauth2-resource-server-*` 负责把 OAuth2/JWT 世界中的对象转换成 Synapse 安全模型。
@@ -229,8 +229,8 @@ HTTP Bearer Token
   -> SynapseJwtAuthenticationConverter
   -> SynapseJwtPrincipalMapper
   -> SynapseJwtAuthenticationToken
-  -> SynapseSecurityContextBridgeFilter
-  -> SecurityContextBinder.bind
+  -> SynapsePrincipalContextBridgeFilter
+  -> PrincipalContextBinder.bind
   -> OperationContext
   -> Controller / Service / PermissionChecker
 ```

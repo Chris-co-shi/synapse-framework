@@ -16,9 +16,15 @@ import java.util.Optional;
 
 /**
  * 将 Reactive Spring SecurityContext 桥接到 Synapse Reactor Context。
+ *
+ * <p>过滤器只从已经完成认证的 Spring Security 上下文提取主体，并把主体及其
+ * OperationContext 写入当前订阅链。它不写入 ThreadLocal，也不解析 JWT claims。</p>
  */
-public final class SynapseReactiveSecurityContextWebFilter implements WebFilter {
+public final class ReactivePrincipalContextWebFilter implements WebFilter {
 
+    /**
+     * 为当前请求的下游 Publisher 建立主体上下文。
+     */
     @Override
     public Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         return ReactiveSecurityContextHolder.getContext()
@@ -42,7 +48,7 @@ public final class SynapseReactiveSecurityContextWebFilter implements WebFilter 
 
         return chain.filter(exchange)
                 .contextWrite(context -> context
-                        .put(SynapseReactiveSecurityContext.PRINCIPAL_KEY, principal)
+                        .put(ReactiveCurrentPrincipalContext.PRINCIPAL_KEY, principal)
                         .put(
                                 SynapseReactiveOperationContext.OPERATION_CONTEXT_KEY,
                                 operationContext

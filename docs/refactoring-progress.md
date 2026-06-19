@@ -17,16 +17,19 @@
 - 修改摘要：新增 Web/OAuth2 聚合与共享 core 骨架；删除 cloud/file；将 mq 完整更名为 messaging；
   新增 observability/resilience 骨架；根 Parent 接管内部版本，BOM 移除 Alibaba 和已删除模块。
 - 测试结果：`mvn -q validate`、`mvn clean verify` 通过，27 个 reactor project 全部成功。
-- Commit SHA：待提交
+- Commit SHA：`2d11aec`
 - 遗留问题：新增骨架模块的运行时能力按后续阶段实现；历史 phase 文档保留旧模块背景并已标注历史状态。
 
 ## Phase 2：重构 Security 当前主体上下文
 
-- 状态：未开始
-- 修改摘要：待执行。
-- 测试结果：未执行。
+- 状态：已完成
+- 修改摘要：将 Synapse 自有 SecurityContext 类型族更名为 CurrentPrincipalContext 类型族；
+  Servlet 适配器使用严格可关闭 Scope，Reactive 适配器使用 Reactor Context，并补充并发和线程切换测试。
+- 测试结果：相关模块测试、OAuth2 依赖边界检查、`mvn clean verify` 和 `git diff --check` 均通过，
+  27 个 reactor project 全部成功。
 - Commit SHA：待提交
-- 遗留问题：无。
+- 遗留问题：保留 Spring Security 自身的 SecurityContext/Holder 术语；Reactive 主体门面当前位于
+  Resource Server WebFlux 适配模块，后续 Web/OAuth2 拆分阶段继续评估共享位置。
 
 ## Phase 3：完成 Web 模块拆分和 JSON 修复
 

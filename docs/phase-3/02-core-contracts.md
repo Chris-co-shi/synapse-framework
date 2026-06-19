@@ -61,7 +61,7 @@ HTTP Request
   -> trace/request context initialization
   -> OperationContext header decode
   -> OAuth2 Resource Server authentication
-  -> SecurityContext and OperationContext adaptation
+  -> CurrentPrincipalContext and OperationContext adaptation
   -> DispatcherServlet
   -> response
   -> reverse-order cleanup
@@ -72,7 +72,7 @@ HTTP Request
 - Filter 异常必须可以转换为统一 JSON 响应。
 - traceId 响应头、MDC、Result.traceId 应保持一致。
 - Bearer Token 的可信性由 OAuth2 Resource Server 适配模块处理；webmvc 只做技术 carrier 解码。
-- 请求结束必须清理 TraceContext、RequestContext、SecurityContext 和当前请求建立的 OperationContext scope。
+- 请求结束必须清理 TraceContext、RequestContext、CurrentPrincipalContext 和当前请求建立的 OperationContext scope。
 - Filter 顺序必须通过测试而不是文档约定单独保证。
 
 ## 4. HTTP WebFlux 入站契约
@@ -100,7 +100,7 @@ WebFlux Request
 verified Bearer Token
   -> JWT validation
   -> AuthenticatedPrincipal
-  -> SecurityContext
+  -> CurrentPrincipalContext
   -> OperationActor(USER)
   -> OperationContext
 ```
@@ -111,7 +111,7 @@ verified Bearer Token
 - PermissionChecker 只检查当前快照或消费方实现，不查询用户表。
 - `@RequirePermission` 是适配入口，不是唯一安全边界。
 - MQ、Job、Async 等非 AOP 入口应支持显式权限检查。
-- SecurityContext.clear 必须恢复设置主体前的 OperationContext，而不是直接破坏外层 Job/Async scope。
+- CurrentPrincipalContext.clear 必须恢复设置主体前的 OperationContext，而不是直接破坏外层 Job/Async scope。
 
 ## 6. Data 审计填充契约
 
@@ -127,7 +127,7 @@ OperationContextProvider
 - insert 只填充未显式赋值字段。
 - update 必须刷新 updatedAt；存在 actor 时刷新 updatedBy。
 - 缺少 actor 时不写固定 system。
-- data 不读取 SecurityContext。
+- data 不读取 CurrentPrincipalContext。
 - tenantId 只是承载位，不代表已经实现多租户 SQL 隔离。
 - Entity、Mapper、Repository、migration 和数据源配置由消费方拥有。
 

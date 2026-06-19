@@ -2,7 +2,7 @@
 
 ## 1. 模块使命
 
-该模块把 Spring Security Servlet OAuth2 Resource Server 认证结果适配为 Synapse 的 `AuthenticatedPrincipal`、SecurityContext 和 OperationContext，并提供统一 401/403 响应。
+该模块把 Spring Security Servlet OAuth2 Resource Server 认证结果适配为 Synapse 的 `AuthenticatedPrincipal`、CurrentPrincipalContext 和 OperationContext，并提供统一 401/403 响应。
 
 ## 2. 边界
 
@@ -11,7 +11,7 @@
 - Resource Server properties 与 validators 组装。
 - JWT claims 到 Spring Authentication 的转换。
 - JWT claims 到 USER / CLIENT 主体的映射。
-- Spring SecurityContext 到 Synapse SecurityContext 的 Bridge Filter。
+- Spring SecurityContext 到 Synapse CurrentPrincipalContext 的 Bridge Filter。
 - GatewayProof 前置校验 Filter。
 - 401 entry point 与 403 access denied handler。
 - 默认 `SecurityFilterChain` 或可复用 configurer。
@@ -29,7 +29,7 @@
 Spring SecurityContext
   -> Authentication framework integration
 
-Synapse SecurityContext
+Synapse CurrentPrincipalContext
   -> stable framework principal
   -> PermissionChecker
   -> OperationContext adapter
@@ -42,7 +42,7 @@ Bridge 不是重复认证，而是把框架外部认证对象转换为内部稳�
 - `SynapseJwtPrincipalMapper`：claims -> USER / CLIENT。
 - `SynapseJwtGrantedAuthoritiesConverter`：claims -> Spring authorities。
 - `SynapseJwtAuthenticationConverter`：组装 `SynapseJwtAuthenticationToken`。
-- `SynapseSecurityContextBridgeFilter`：认证完成后打开 Synapse scope。
+- `SynapsePrincipalContextBridgeFilter`：认证完成后打开 Synapse scope。
 - `SynapseResourceServerConfigurer`：无状态、访问策略、异常 handler、converter 和 Filter 顺序组装。
 - AutoConfiguration：验证配置并提供默认链，用户自定义链时退让。
 
@@ -57,8 +57,8 @@ Authorization: Bearer token + GatewayProof Headers
   -> SynapseJwtPrincipalMapper
   -> SynapseJwtAuthenticationToken
   -> Spring SecurityContextHolder
-  -> SynapseSecurityContextBridgeFilter
-  -> SecurityContextBinder.bind
+  -> SynapsePrincipalContextBridgeFilter
+  -> PrincipalContextBinder.bind
   -> OperationContext
   -> Controller / Service / PermissionChecker
   -> scope.close
@@ -90,7 +90,7 @@ roles / permissions 是 token 快照；mapper 不查询数据库，也不根据 
 
 GatewayProof Filter 必须位于 Bearer Token Filter 之前，只校验可信入口证明，不建立认证主体。
 
-Bridge Filter 必须位于 Bearer Token Filter 之后，否则读取不到已认证的 Synapse token。Bridge 使用 try-with-resources，确保 Controller 或后续 Filter 抛异常时仍恢复旧 SecurityContext / OperationContext。
+Bridge Filter 必须位于 Bearer Token Filter 之后，否则读取不到已认证的 Synapse token。Bridge 使用 try-with-resources，确保 Controller 或后续 Filter 抛异常时仍恢复旧 CurrentPrincipalContext / OperationContext。
 
 ## 9. 扩展原则
 
@@ -108,7 +108,7 @@ SynapseResourceServerProperties
   -> GrantedAuthoritiesConverter
   -> SynapseJwtAuthenticationToken
   -> SynapseJwtAuthenticationConverter
-  -> SynapseSecurityContextBridgeFilter
+  -> SynapsePrincipalContextBridgeFilter
   -> 401 / 403 handlers
   -> SynapseResourceServerConfigurer
   -> AutoConfiguration
@@ -120,7 +120,7 @@ SynapseResourceServerProperties
 1. 构造 USER JWT claims 并转换为 Authentication。
 2. 构造 CLIENT claims，验证不会成为 currentUser。
 3. 缺失 audience 或 principal_type，验证认证失败。
-4. Controller 抛异常后验证 Synapse SecurityContext 已清理。
+4. Controller 抛异常后验证 Synapse CurrentPrincipalContext 已清理。
 
 ## 12. 修改检查清单
 

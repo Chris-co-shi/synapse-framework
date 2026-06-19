@@ -370,9 +370,9 @@ core 不应依赖：
 
 ## 10. 常见问题
 
-### Q1：OperationContext 和 SecurityContext 有什么区别？
+### Q1：OperationContext 和 CurrentPrincipalContext 有什么区别？
 
-`SecurityContext` 表示当前安全主体，属于 security 模块。
+`CurrentPrincipalContext` 表示当前安全主体，属于 security 模块。
 
 `OperationContext` 表示当前操作链路的通用技术上下文，属于 core 模块。
 

@@ -200,9 +200,9 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 ### 3.10 synapse-security
 
-当前状态：正式 reactor module，提供 Web 无关安全主体、SecurityContext、密码编码器、PermissionChecker、权限注解适配和 GatewayProof 协议基础能力。
+当前状态：正式 reactor module，提供 Web 无关安全主体、CurrentPrincipalContext、密码编码器、PermissionChecker、权限注解适配和 GatewayProof 协议基础能力。
 
-允许内容：`AuthenticatedPrincipal`、`AuthenticatedUser`、`AuthenticatedClient` 技术模型、`SecurityContext`、PermissionChecker 抽象、`@RequirePermission`、OperationContext 与安全主体的单向适配、PasswordEncoder 默认实现、Web 无关 GatewayProof Header 协议、canonical string、HMAC-SHA256 signer/verifier、nonce replay store SPI。
+允许内容：`AuthenticatedPrincipal`、`AuthenticatedUser`、`AuthenticatedClient` 技术模型、`CurrentPrincipalContext`、PermissionChecker 抽象、`@RequirePermission`、OperationContext 与安全主体的单向适配、PasswordEncoder 默认实现、Web 无关 GatewayProof Header 协议、canonical string、HMAC-SHA256 signer/verifier、nonce replay store SPI。
 
 禁止内容：身份 Header 恢复协议、用户/角色/权限身份 Header 解析、Servlet Filter、WebFilter、Spring Security FilterChain、登录接口、用户表、角色表、菜单表、权限管理后台、IAM 服务、OAuth2 Authorization Server 或 Resource Server 实现。
 
@@ -228,7 +228,7 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 当前状态：正式 reactor module，提供 Servlet OAuth2 Resource Server 技术适配。
 
-允许内容：JwtDecoder 条件装配、JWT 到 `AuthenticatedPrincipal` 映射、Servlet SecurityContext Bridge、GatewayProof 前置校验 Filter、统一 401/403 响应适配、denylist validator。
+允许内容：JwtDecoder 条件装配、JWT 到 `AuthenticatedPrincipal` 映射、Servlet PrincipalContext Bridge、GatewayProof 前置校验 Filter、统一 401/403 响应适配、denylist validator。
 
 禁止内容：JWT 签发私钥、JwtEncoder、Authorization Server、登录认证、IAM、用户/角色/菜单管理、WebFlux/Gateway。
 
