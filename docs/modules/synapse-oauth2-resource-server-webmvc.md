@@ -50,7 +50,28 @@ synapse:
       denylist-enabled: false
 ```
 
-用户自定义 `SecurityFilterChain` 后，默认链退让。复杂 IAM 应显式调用 `SynapseResourceServerConfigurer`。
+用户自定义 `SecurityFilterChain` 后，默认链退让。复杂应用应显式调用 `SynapseResourceServerConfigurer`。
+
+配置项：
+
+| 配置 | 默认值 | 说明 |
+| --- | --- | --- |
+| `synapse.security.resource-server.enabled` | `true` | 是否启用 Servlet OAuth2 Resource Server 自动配置 |
+| `synapse.security.resource-server.issuer-uri` | 无 | 预期 JWT issuer，用于 issuer claim 校验和默认 JwtDecoder 配置 |
+| `synapse.security.resource-server.jwk-set-uri` | 无 | JWK Set 地址，用于远程加载 JWT 验签公钥 |
+| `synapse.security.resource-server.public-key-location` | 无 | 本地公钥资源位置；与 `jwk-set-uri` 互斥 |
+| `synapse.security.resource-server.issuer-validation-enabled` | `true` | 是否校验 JWT issuer claim |
+| `synapse.security.resource-server.audience-validation-enabled` | `true` | 是否校验 JWT audience claim |
+| `synapse.security.resource-server.audiences` | 空列表 | 当前服务接受的 JWT audience 列表 |
+| `synapse.security.resource-server.accepted-token-types` | `[ACCESS_TOKEN]` | 当前 Resource Server 接受的 Synapse `token_type` 协议值 |
+| `synapse.security.resource-server.required-claims` | `sub`, `exp`, `iat`, `token_type`, `principal_type` | JWT 中必须存在的 claim 名称列表 |
+| `synapse.security.resource-server.clock-skew` | `60s` | JWT 时间类 claim 校验允许的时钟偏移 |
+| `synapse.security.resource-server.denylist-enabled` | `true` | 是否启用 token denylist 校验 |
+| `synapse.security.resource-server.permit-paths` | `/actuator/health`, `/error` | 无需认证即可访问的 Servlet 路径 |
+| `synapse.security.resource-server.csrf-enabled` | `false` | 是否启用 Spring Security CSRF 防护 |
+| `synapse.security.resource-server.fail-fast` | `true` | 是否在配置不完整时启动失败 |
+
+发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，并为上述配置项提供 IDE 可读说明；`accepted-token-types` 当前只暴露 `ACCESS_TOKEN` 候选值。
 
 ## 5. 边界
 

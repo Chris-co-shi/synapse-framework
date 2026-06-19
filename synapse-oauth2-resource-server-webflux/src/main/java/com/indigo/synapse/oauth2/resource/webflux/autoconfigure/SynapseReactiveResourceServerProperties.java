@@ -9,10 +9,25 @@ import java.util.List;
 @org.springframework.boot.context.properties.ConfigurationProperties(prefix = "synapse.security.resource-server")
 public class SynapseReactiveResourceServerProperties {
 
+    /**
+     * 是否启用 Reactive OAuth2 Resource Server 自动配置。
+     */
     private boolean enabled = true;
+    /**
+     * 预期 JWT issuer；未提供 jwk-set-uri 时也用于创建默认 ReactiveJwtDecoder。
+     */
     private String issuerUri;
+    /**
+     * JWK Set 地址，用于远程加载 JWT 验签公钥。
+     */
     private String jwkSetUri;
+    /**
+     * 无需认证即可访问的 WebFlux 路径。
+     */
     private List<String> permitPaths = new ArrayList<>(List.of("/actuator/health", "/error"));
+    /**
+     * 是否启用 Spring Security CSRF 防护。
+     */
     private boolean csrfEnabled;
 
     public boolean isEnabled() {

@@ -31,10 +31,9 @@ synapse-framework
 说明：
 
 - 未进入根 `pom.xml` reactor 的目录，不视为当前已实现模块。
-- `synapse-task`、`synapse-tenant`、`synapse-data-permission` 若目录存在，也只能视为暂存目录或历史残留，不能按正式 module 使用。
 - `synapse-web` 已在 TASK-202 中拆分为 `synapse-webmvc` 和 `synapse-webflux`，不再作为正式 reactor module。
 - `synapse-oauth2` 已拆分为 `synapse-oauth2-core`、`synapse-oauth2-authorization-server-support`、`synapse-oauth2-resource-server-webmvc`、`synapse-oauth2-resource-server-webflux`，不再作为正式 reactor module。
-- `synapse-security-webmvc` 和 trusted-header 身份协议已经移除，不再作为正式模块或后续扩展方向。
+- 身份 Header 恢复协议已经移除，不再作为正式模块或后续扩展方向。
 - 身份认证只信任经过 Resource Server 验证的 Bearer Token；Gateway 不向下游传播可直接信任的用户、角色或权限 Header。
 - 新规划模块在真正加入 reactor 前，只能作为路线图，不代表已实现能力。
 - 本项目固定不创建 `synapse-starter-*`，不创建 demo / example / sample application。
@@ -68,8 +67,7 @@ synapse-framework
 固定排除项：
 
 ```text
-synapse-security-webmvc  不保留
-trusted-header 身份协议 不提供
+身份 Header 恢复协议     不提供
 synapse-starter-*        不创建
 examples / demos         不创建
 sample applications      不创建
@@ -89,7 +87,6 @@ sample applications      不创建
 | 保持 | `synapse-data` | 数据层技术支撑 |
 | 保持 | `synapse-cache` | 缓存、锁、限流、幂等技术支撑 |
 | 收紧 | `synapse-security` | Web 无关安全主体、上下文、权限检查和密码编码 |
-| 移除 | `synapse-security-webmvc` | 不使用 trusted-header 身份恢复；身份由 Resource Server 验证 Token 后建立 |
 | 已拆分 | `synapse-oauth2` | 不再作为正式模块 |
 | 新增 | `synapse-oauth2-core` | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 |
 | 新增 | `synapse-oauth2-authorization-server-support` | JWT 签发、RSAKey、JWKSource、JwtEncoder 技术支持 |
@@ -162,7 +159,7 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 当前状态：正式 reactor module，提供 MyBatis-Plus 基础配置、ID 生成器、自动填充和 OperationContext 读取能力。
 
-允许内容：MyBatis-Plus 插件默认配置、ID 生成器、MetaObjectHandler、OperationContext 自动填充、技术型 `BaseEntity` / `AuditableEntity` / `VersionedEntity`、数据权限 SPI / Port 预留、SQL 拦截器扩展点。
+允许内容：MyBatis-Plus 插件默认配置、ID 生成器、MetaObjectHandler、OperationContext 自动填充、技术型 `BaseEntity` / `AuditableEntity` / `VersionedEntity`、SQL 拦截器扩展点。
 
 禁止内容：业务 Entity、业务 Mapper、业务 Repository、业务 Service、业务数据库 migration、用户/角色/菜单/组织等业务表模型、具体 ABAC / DataScope 业务规则。
 
@@ -180,7 +177,7 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 允许内容：`AuthenticatedPrincipal`、`AuthenticatedUser`、`AuthenticatedClient` 技术模型、`SecurityContext`、PermissionChecker 抽象、`@RequirePermission`、OperationContext 与安全主体的单向适配、PasswordEncoder 默认实现。
 
-禁止内容：trusted-header 协议、用户/角色/权限身份 Header 解析、Servlet Filter、WebFilter、Spring Security FilterChain、登录接口、用户表、角色表、菜单表、权限管理后台、IAM 服务、OAuth2 Authorization Server 或 Resource Server 实现。
+禁止内容：身份 Header 恢复协议、用户/角色/权限身份 Header 解析、Servlet Filter、WebFilter、Spring Security FilterChain、登录接口、用户表、角色表、菜单表、权限管理后台、IAM 服务、OAuth2 Authorization Server 或 Resource Server 实现。
 
 认证主体只能由 OAuth2 Resource Server 等专用适配模块在完成 Token 验证后建立。
 
@@ -270,7 +267,7 @@ Header 契约：详见 `docs/phase-2/04-cloud-context-propagation.md`。
 
 以下能力不进入 Synapse-Framework：
 
-- trusted-header 身份恢复模块。
+- 身份 Header 恢复模块。
 - 用户、角色或权限身份 Header 协议。
 - `synapse-starter-*`。
 - demo application。

@@ -6,7 +6,7 @@
 
 二阶段目标：
 
-> 在不引入业务代码、不提供可启动服务的前提下，把 Synapse-Framework 从一阶段基础模块升级为 Synapse-Platform 可复用的微服务技术基座。
+> 在不引入业务代码、不提供可启动服务的前提下，把 Synapse-Framework 升级为 Synapse-Platform 可复用的微服务技术基座。
 
 重点方向：
 

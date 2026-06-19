@@ -42,7 +42,7 @@ synapse-audit
 | Framework 依赖 | `synapse-core` |
 | 主要外部依赖 | Jackson、Spring Web、Spring WebMVC、Servlet API、Validation |
 | 当前优势 | MVC 异常与 Filter 异常已区分；traceId 可进入 Header、MDC、请求上下文和响应体 |
-| 已知缺口 | 文档仍存在“一阶段”和“Gateway/WebFlux 后续处理”的旧表述；需要验证 TraceContext、RequestContext、OperationContext 的建立和清理顺序；需要与 WebFlux 统一响应和错误语义 |
+| 已知缺口 | 需要验证 TraceContext、RequestContext、OperationContext 的建立和清理顺序；需要与 WebFlux 统一响应和错误语义 |
 
 ### 2.3 synapse-webflux
 
@@ -60,13 +60,13 @@ synapse-audit
 
 | 维度 | 当前事实 |
 | --- | --- |
-| 定位 | trusted-header、安全上下文和权限检查基础模块 |
-| 公开能力 | AuthenticatedUser、SecurityContext、trusted-header HMAC/时间戳校验、TrustedHeaderAuthenticationFilter、PermissionChecker、`@RequirePermission`、Security 到 OperationContext 适配、PasswordEncoder |
+| 定位 | Web 无关安全主体、安全上下文和权限检查基础模块 |
+| 公开能力 | AuthenticatedPrincipal、AuthenticatedUser、AuthenticatedClient、SecurityContext、PermissionChecker、`@RequirePermission`、Security 到 OperationContext 适配、PasswordEncoder |
 | 自动配置 | 安全基础自动配置；不创建 SecurityFilterChain |
 | Framework 依赖 | `synapse-core` |
-| 主要外部依赖 | Spring Boot AutoConfigure、Spring AOP、Servlet API、spring-security-crypto |
+| 主要外部依赖 | Spring Boot AutoConfigure、Spring AOP、spring-security-crypto |
 | 当前优势 | data/audit/mq 无需依赖 security；权限检查既有显式入口也有注解适配 |
-| 已知缺口 | SecurityContext 同时维护当前用户 ThreadLocal 与 OperationContextScope，需要重点验证嵌套 set/clear、异常清理和已有 OperationContext 恢复；trusted-header 的 nonce 防重放不在当前实现内，必须明确由上层承担 |
+| 已知缺口 | SecurityContext 同时维护当前主体 ThreadLocal 与 OperationContextScope，需要重点验证嵌套 set/clear、异常清理和已有 OperationContext 恢复 |
 
 ### 2.5 synapse-data
 
@@ -133,7 +133,7 @@ OperationContext snapshot
 4. Data 模块生产依赖与文档边界不完全一致。
 5. Cache 的失败语义与可观测性尚未形成统一契约。
 6. Audit 的多端口失败策略和默认 Noop 行为需要明确。
-7. 多份模块手册仍使用“一阶段”历史措辞，容易把当前事实与历史计划混淆。
+7. 模块手册需要持续避免把历史阶段表述写成当前事实。
 
 ## 4. 第三阶段处理原则
 

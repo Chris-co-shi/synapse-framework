@@ -80,7 +80,7 @@ rg -n "@TableName\b|BaseMapper\b|IService\b|ServiceImpl\b|CREATE TABLE|create ta
 ### 3.4 平台服务关键词检查
 
 ```bash
-rg -n "file-service|message-service|config-service|audit-service|task-service|iam-service|用户中心|配置中心|文件中心|消息中心|审计中心|任务中心|国际化资源中心" README.md AGENTS.md docs
+rg -n "file-service|message-service|config-service|audit-service|iam-service|用户中心|配置中心|文件中心|消息中心|审计中心|国际化资源中心" README.md AGENTS.md docs
 ```
 
 判断规则：
@@ -257,7 +257,7 @@ rg -n "IAM|登录认证|业务鉴权|注册中心|配置中心|服务治理后�
 - WebMVC / WebFlux / Cloud / MQ 的协议适配应复用 core carrier 规则。
 - 缺少 actor type 或 actor id 时不得恢复出默认 USER、UNKNOWN 或 SYSTEM。
 - system actor 必须由入口方显式创建。
-- 不创建 task-service、starter 或 demo。
+- 不创建 starter 或 demo。
 
 ### TASK-205
 
@@ -300,7 +300,7 @@ rg -n "IAM|登录认证|业务鉴权|注册中心|配置中心|服务治理后�
 rg -n "@SpringBootApplication|SpringApplication\.run" .
 rg -n "@RestController\b|@Controller\b|@RequestMapping\b|@GetMapping\b|@PostMapping\b" '*/src/main/java'
 rg -n "@TableName\b|BaseMapper\b|IService\b|ServiceImpl\b|CREATE TABLE|create table" '*/src/main'
-rg -n "file-service|message-service|config-service|audit-service|task-service|用户中心|配置中心|文件中心|消息中心|审计中心" README.md AGENTS.md docs
+rg -n "file-service|message-service|config-service|audit-service|用户中心|配置中心|文件中心|消息中心|审计中心" README.md AGENTS.md docs
 rg -n "spring-cloud-starter-gateway|nacos|seata|rocketmq" .
 rg -n "synapse-webmvc|synapse-webflux" synapse-cloud || true
 rg -n "starter|demo|example|sample" README.md AGENTS.md docs pom.xml synapse-bom/pom.xml

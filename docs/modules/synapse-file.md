@@ -4,7 +4,7 @@
 
 `synapse-file` 是 Synapse Framework 的文件存储抽象模块。
 
-一阶段它只提供最小文件存储 SPI、文件保存命令、文件元数据模型、读取结果模型、本地文件系统实现和自动配置。
+它提供最小文件存储 SPI、文件保存命令、文件元数据模型、读取结果模型、本地文件系统实现和自动配置。
 
 当前核心能力：
 
@@ -239,7 +239,7 @@ synapse-file-minio-adapter
 synapse-file-s3-adapter
 ```
 
-一阶段不在 `synapse-file` 主模块中直接引入对象存储 SDK。
+当前不在 `synapse-file` 主模块中直接引入对象存储 SDK。
 
 ## 8. 配置项
 
@@ -270,7 +270,7 @@ synapse.file
 - 文件生命周期。
 - 文件预览和转码。
 
-这些不属于一阶段 framework 模块。
+这些不属于 framework 文件存储抽象。
 
 ### 9.2 不要把业务附件模型放入 synapse-file
 
@@ -294,7 +294,7 @@ synapse.file
 
 ### 9.5 当前没有大小和类型策略
 
-一阶段不内置文件大小限制、contentType 白名单或 checksum 校验。需要这些策略时，应在业务系统或后续文件平台能力中处理。
+当前不内置文件大小限制、contentType 白名单或 checksum 校验。需要这些策略时，应在业务系统或文件平台能力中处理。
 
 ## 10. 常见问题
 
@@ -308,7 +308,7 @@ synapse.file
 
 ### Q3：可以用 MinIO / OSS / S3 吗？
 
-可以，但应通过自定义 `FileStorage` 实现接入。主模块一阶段不直接引入对象存储 SDK。
+可以，但应通过自定义 `FileStorage` 实现接入。主模块当前不直接引入对象存储 SDK。
 
 ### Q4：LocalFileStorage 是否安全？
 

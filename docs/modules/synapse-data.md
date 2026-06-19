@@ -4,7 +4,7 @@
 
 `synapse-data` 是 Synapse Framework 的数据层基础设施模块。
 
-一阶段它只提供 MyBatis-Plus 基础配置和基于 `OperationContext` 的通用字段自动填充能力，不提供业务 Entity、Mapper、Repository 或数据库连接配置。
+它提供 MyBatis-Plus 基础配置和基于 `OperationContext` 的通用字段自动填充能力，不提供业务 Entity、Mapper、Repository 或数据库连接配置。
 
 当前核心能力：
 
@@ -37,11 +37,10 @@
 - 数据库连接池配置。
 - 业务 SQL。
 - 业务查询封装。
-- 数据权限 / DataScope。
-- 多租户隔离规则。
+- DataScope。
 - 业务审计落库。
 
-这些能力应由业务系统、平台服务或后续独立模块实现。
+这些能力应由业务系统或平台服务实现。
 
 ## 4. Maven 引入
 
@@ -153,7 +152,7 @@ SynapseAuditorProvider
 | `updatedBy` | 是 | 是 | 更新人 |
 | `deleted` | 是 | 否 | 逻辑删除标记，默认 0 |
 | `version` | 是 | 否 | 乐观锁版本，默认 0 |
-| `tenantId` | 是 | 否 | 租户标识，一阶段只保留承载位 |
+| `tenantId` | 是 | 否 | 租户标识，当前只保留承载位 |
 
 插入填充时只填充空字段，不覆盖业务侧显式赋值。
 
@@ -266,7 +265,7 @@ OperationContextProvider operationContextProvider() {
 
 ## 8. 配置项
 
-`synapse-data` 一阶段没有独立配置项。
+`synapse-data` 当前没有独立配置项。
 
 行为主要通过 Bean 覆盖扩展：
 
@@ -307,16 +306,13 @@ data -> security
 
 只要实体有对应 setter，MyBatis-Plus 自动填充就可以生效。
 
-### 9.4 tenantId 不是多租户实现
+### 9.4 tenantId 只是承载位
 
-`tenantId` 只是上下文和字段承载位。一阶段不实现：
+`tenantId` 只是上下文和字段承载位，当前不实现：
 
-- 租户表。
-- 租户解析。
-- 租户隔离。
 - SQL 自动拼租户条件。
 
-这些应由后续 tenant / data-permission 模块或业务系统实现。
+相关隔离规则应由业务系统或平台服务实现。
 
 ## 10. 常见问题
 
@@ -326,7 +322,7 @@ data -> security
 
 ### Q2：为什么没有 BaseEntity？
 
-BaseEntity 会强约束业务实体继承结构，不适合作为 framework 一阶段默认要求。当前采用字段名约定，更轻量。
+BaseEntity 会强约束业务实体继承结构，不适合作为 framework 默认要求。当前采用字段名约定，更轻量。
 
 ### Q3：createdBy 没有自动填充怎么办？
 
@@ -334,7 +330,7 @@ BaseEntity 会强约束业务实体继承结构，不适合作为 framework 一�
 
 ### Q4：可以修改默认字段名吗？
 
-一阶段未提供配置项。需要不同字段名时，可以替换 `MetaObjectHandler`。
+当前未提供配置项。需要不同字段名时，可以替换 `MetaObjectHandler`。
 
 ### Q5：为什么分页插件 DbType 是 OTHER？
 

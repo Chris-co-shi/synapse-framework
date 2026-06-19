@@ -17,7 +17,7 @@ import java.util.Map;
  * @param initiator 最初发起本次链路的主体；转发、补偿、异步消费时可与 actor 不同
  * @param source 操作来源，例如 HTTP、MQ、JOB、ASYNC 等通用来源信息
  * @param traceId 链路追踪标识，用于日志、响应和跨模块追踪
- * @param tenantId 租户标识；一阶段不实现多租户，只保留上下文承载位
+ * @param tenantId 租户标识；当前只保留上下文承载位，不实现隔离规则
  * @param requestId 请求标识，用于一次入口请求或一次消息消费内的排查
  * @param occurredAt 上下文创建或恢复的时间，不允许为空
  * @param attributes 扩展属性；只允许存放技术元数据，不应写入业务模型

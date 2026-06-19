@@ -72,8 +72,8 @@ Framework 中禁止新增：
 - starter 聚合包。
 - demo / example / sample application。
 - 用户、角色、菜单、组织、部门、字典等平台业务模型。
-- 配置中心、文件中心、消息中心、审计中心、任务中心、IAM 等平台服务实现。
-- Gateway、IAM、Message、File、Config、Task 等可启动服务。
+- 配置中心、文件中心、消息中心、审计中心、IAM 等平台服务实现。
+- Gateway、IAM、Message、File、Config 等可启动服务。
 - 后台管理页面或前端应用。
 
 测试 fixture 可以出现测试专用 Controller、Configuration 或 Application，但必须位于 `src/test`，且不得作为生产能力暴露。
@@ -100,7 +100,6 @@ Synapse-Framework 固定采用“按需引用具体 module”的交付方式：
 | `synapse-message-service` | 站内信、短信、邮件、消息模板、消息记录 | `synapse-mq` 只提供 MQ 技术抽象 |
 | `synapse-file-service` | 文件管理、附件表、权限、预览、下载审计 | `synapse-file` 只提供文件存储抽象 |
 | `synapse-config-service` | 配置管理、发布、审批、历史版本、后台页面 | `synapse-config` 只提供配置抽象和客户端能力 |
-| `synapse-task-service` | 任务编排、调度管理、补偿、可视化运维 | Framework 只提供上下文与执行抽象 |
 | `synapse-i18n-resource-center` | 国际化资源维护、翻译流程、停用语言管理 | `synapse-i18n` 只提供运行时解析抽象 |
 
 ## 6. 关键模块归属判定
@@ -139,10 +138,6 @@ Framework 中的 `synapse-i18n` 只能提供运行时解析能力，例如 Local
 ### 6.7 synapse-webflux
 
 `synapse-webflux` 只能提供 WebFlux 技术支撑，例如 WebFilter、TraceId / RequestId、ServerWebExchange Header 解析、Reactor Context、异常响应适配和 OperationContext 恢复；不能提供 Gateway 路由、Gateway 配置管理、网关业务鉴权、限流后台或可启动 gateway 服务。
-
-### 6.8 synapse-task
-
-`task-service` 属于 Platform。Framework 侧如未来需要任务相关能力，只能提供异步执行上下文传播、Job Actor 抽象、调度入口上下文恢复和任务执行技术契约；不能提供任务调度管理后台、可视化任务编排、任务数据库表或可启动 task-service。
 
 ## 7. 业务应用边界
 

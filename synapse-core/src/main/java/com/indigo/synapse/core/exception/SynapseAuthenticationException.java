@@ -9,11 +9,12 @@ import java.util.Objects;
  * 认证失败异常。
  *
  * <p>该异常只表达“调用方尚未完成认证或认证信息无效”的通用技术语义，不绑定 security、OAuth2、
- * Servlet MVC 或 WebFlux 实现。synapse-web 可以将它统一映射为 HTTP 401，security / oauth2 可以在
+ * Servlet MVC 或 WebFlux 实现。WebMVC / WebFlux / OAuth2 Resource Server 适配模块可以将它统一映射为 HTTP 401，
+ * security / oauth2 可以在
  * 抛出时显式传入本模块之外的细分错误码。</p>
  *
  * <p>默认构造器使用 {@link CommonErrorCode#COMMON_UNAUTHORIZED}。如果某个上层模块需要表达
- * trusted-header 签名错误、token 过期等细分语义，应传入该模块自己的 {@link ErrorCode} 实现，
+ * token 过期、签名无效等细分语义，应传入该模块自己的 {@link ErrorCode} 实现，
  * 但不得把这些细分错误码放回 core。</p>
  */
 public class SynapseAuthenticationException extends SynapseException {

@@ -17,5 +17,9 @@ class ConfigurationMetadataTest {
         assertThat(metadata).contains("synapse.security.resource-server.enabled");
         assertThat(metadata).contains("synapse.security.resource-server.issuer-uri");
         assertThat(metadata).contains("synapse.security.resource-server.audiences");
+        assertThat(metadata).contains("是否启用 Servlet OAuth2 Resource Server 自动配置。");
+        assertThat(metadata).contains("当前服务接受的 JWT audience 列表。");
+        assertThat(metadata).contains("synapse.security.resource-server.accepted-token-types");
+        assertThat(metadata).contains("ACCESS_TOKEN");
     }
 }

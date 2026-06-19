@@ -57,7 +57,7 @@ HTTP Request
   -> exception bridge
   -> trace/request context initialization
   -> OperationContext header decode
-  -> trusted-header authentication
+  -> OAuth2 Resource Server authentication
   -> SecurityContext and OperationContext adaptation
   -> DispatcherServlet
   -> response
@@ -68,7 +68,7 @@ HTTP Request
 
 - Filter 异常必须可以转换为统一 JSON 响应。
 - traceId 响应头、MDC、Result.traceId 应保持一致。
-- trusted-header 的可信性由 security 处理；webmvc 只做技术 carrier 解码。
+- Bearer Token 的可信性由 OAuth2 Resource Server 适配模块处理；webmvc 只做技术 carrier 解码。
 - 请求结束必须清理 TraceContext、RequestContext、SecurityContext 和当前请求建立的 OperationContext scope。
 - Filter 顺序必须通过测试而不是文档约定单独保证。
 
@@ -94,9 +94,9 @@ WebFlux Request
 ## 5. Security 契约
 
 ```text
-trusted headers
-  -> signature/timestamp validation
-  -> AuthenticatedUser
+verified Bearer Token
+  -> JWT validation
+  -> AuthenticatedPrincipal
   -> SecurityContext
   -> OperationActor(USER)
   -> OperationContext
@@ -108,7 +108,7 @@ trusted headers
 - PermissionChecker 只检查当前快照或消费方实现，不查询用户表。
 - `@RequirePermission` 是适配入口，不是唯一安全边界。
 - MQ、Job、Async 等非 AOP 入口应支持显式权限检查。
-- SecurityContext.clear 必须恢复设置用户前的 OperationContext，而不是直接破坏外层 Job/Async scope。
+- SecurityContext.clear 必须恢复设置主体前的 OperationContext，而不是直接破坏外层 Job/Async scope。
 
 ## 6. Data 审计填充契约
 

@@ -29,7 +29,7 @@ synapse-cache
 synapse-audit
 ```
 
-其他已实现模块不在本阶段主动扩展。只有当跨模块契约变更影响 `synapse-cloud`、`synapse-mq`、`synapse-time`、`synapse-config`、`synapse-i18n`、`synapse-oauth2` 或 `synapse-file` 时，才允许做最小兼容修改。
+其他已实现模块不在本阶段主动扩展。只有当跨模块契约变更影响 `synapse-cloud`、`synapse-mq`、`synapse-time`、`synapse-config`、`synapse-i18n`、OAuth2 拆分模块或 `synapse-file` 时，才允许做最小兼容修改。
 
 ## 3. 允许内容
 

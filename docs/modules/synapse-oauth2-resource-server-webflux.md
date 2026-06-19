@@ -6,6 +6,7 @@
 
 当前能力：
 
+- `SynapseReactiveResourceServerProperties`
 - `ReactiveTokenDenylistPort`
 - `SpringJwtClaimAccessor`
 - `SynapseReactiveJwtAuthenticationConverter`
@@ -13,7 +14,9 @@
 - `SynapseReactiveOperationContext`
 - `SynapseReactiveSecurityContextWebFilter`
 - reactive 401/403 `Result` 写出
+- 默认 `ReactiveJwtDecoder`
 - 默认 `SecurityWebFilterChain`
+- `SynapseResourceServerServerHttpSecurityConfigurer`
 
 ## 2. 主体与 Claim 规则
 
@@ -27,7 +30,34 @@
 
 上述规则必须与 Servlet WebMVC Resource Server 保持一致。
 
-## 3. Reactor Context
+## 3. 配置示例
+
+```yaml
+synapse:
+  security:
+    resource-server:
+      enabled: true
+      issuer-uri: http://127.0.0.1:8100
+      jwk-set-uri: http://127.0.0.1:8100/oauth2/jwks
+      permit-paths:
+        - /actuator/health
+        - /error
+      csrf-enabled: false
+```
+
+配置项：
+
+| 配置 | 默认值 | 说明 |
+| --- | --- | --- |
+| `synapse.security.resource-server.enabled` | `true` | 是否启用 Reactive OAuth2 Resource Server 自动配置 |
+| `synapse.security.resource-server.issuer-uri` | 无 | 预期 JWT issuer；未提供 `jwk-set-uri` 时也用于创建默认 `ReactiveJwtDecoder` |
+| `synapse.security.resource-server.jwk-set-uri` | 无 | JWK Set 地址，用于远程加载 JWT 验签公钥 |
+| `synapse.security.resource-server.permit-paths` | `/actuator/health`, `/error` | 无需认证即可访问的 WebFlux 路径 |
+| `synapse.security.resource-server.csrf-enabled` | `false` | 是否启用 Spring Security CSRF 防护 |
+
+发布 jar 必须包含 `META-INF/spring-configuration-metadata.json`，并为上述配置项提供 IDE 可读说明。
+
+## 4. Reactor Context
 
 WebFlux 场景通过 Reactor Context 读取：
 
@@ -40,6 +70,18 @@ SynapseReactiveOperationContext.currentOperationContext();
 
 不得依赖 Servlet ThreadLocal 作为唯一上下文。
 
-## 4. 边界
+## 5. 自动配置边界
+
+默认自动配置会在 Reactive Web 环境中装配：
+
+- JWT 到 Synapse principal 的 converter。
+- Reactive SecurityContext / OperationContext 读取能力。
+- 401/403 响应适配。
+- 缺少用户自定义 `ReactiveJwtDecoder` 时，按 `jwk-set-uri` 或 `issuer-uri` 创建默认 decoder。
+- 缺少用户自定义 `SecurityWebFilterChain` 时，创建默认 Resource Server filter chain。
+
+用户自定义 `SecurityWebFilterChain` 后，默认链退让。复杂网关或平台鉴权应显式调用 `SynapseResourceServerServerHttpSecurityConfigurer`，但 Gateway 路由和网关业务鉴权不进入 Framework。
+
+## 6. 边界
 
 该模块不是 Gateway 服务，不提供 RouteLocator、Gateway Filter 业务逻辑、网关鉴权后台或启动服务，也不创建私钥、`RSAKey` 或 `JwtEncoder`。

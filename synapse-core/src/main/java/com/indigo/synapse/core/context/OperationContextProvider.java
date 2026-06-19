@@ -34,7 +34,7 @@ public interface OperationContextProvider {
     /**
      * 返回当前租户标识。
      *
-     * <p>一阶段不实现多租户，但保留该读取方法，方便后续 tenant / data-permission 模块复用。</p>
+     * <p>当前不实现租户隔离或数据范围规则，只保留跨模块上下文承载位。</p>
      *
      * @return tenant id；没有上下文或值为空时返回 empty
      */

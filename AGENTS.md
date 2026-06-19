@@ -60,9 +60,8 @@ synapse-mq
 - `synapse-message` 已更名为 `synapse-mq`，不得继续使用旧名称描述正式模块。
 - `synapse-config`、`synapse-i18n`、`synapse-time` 已在 TASK-205 进入 reactor，必须按当前已实现技术模块描述。
 - `synapse-oauth2` 已拆分为 `synapse-oauth2-core`、`synapse-oauth2-authorization-server-support`、`synapse-oauth2-resource-server-webmvc`、`synapse-oauth2-resource-server-webflux`，不得继续作为正式 reactor module 描述。
-- `synapse-security-webmvc` 与 trusted-header 身份协议已移除；认证主体只能由 OAuth2 Resource Server 等验证 Bearer Token 的专用适配模块建立。
+- 身份 Header 恢复协议已移除；认证主体只能由 OAuth2 Resource Server 等验证 Bearer Token 的专用适配模块建立。
 - Gateway 与下游服务之间只传播 Bearer Token，不传播可直接信任的用户、角色或权限 Header；下游服务必须独立验证 token。
-- `synapse-task`、`synapse-tenant`、`synapse-data-permission` 若存在目录，也只视为暂存或历史残留，不得擅自加入 reactor。
 - 本项目不创建 `synapse-starter-*`，不创建 starter 聚合包，不创建 demo / example / sample application。
 
 ## 3. 修改前必读文档
@@ -116,7 +115,7 @@ skills/<module-name>/SKILL.md
 - starter 聚合包。
 - demo / example / sample application。
 - Admin UI、业务页面或前端应用。
-- Gateway / IAM / Message / File / Config / Task 等可启动平台服务。
+- Gateway / IAM / Message / File / Config 等可启动平台服务。
 
 允许出现：
 
@@ -202,7 +201,7 @@ rg -n "@SpringBootApplication|SpringApplication\.run" .
 rg -n "@RestController\b|@Controller\b|@RequestMapping\b|@GetMapping\b|@PostMapping\b" '*/src/main/java'
 rg -n "@TableName\b|BaseMapper\b|IService\b|ServiceImpl\b|CREATE TABLE|create table" '*/src/main'
 rg -n "starter|demo|example|sample" README.md AGENTS.md docs pom.xml synapse-bom/pom.xml
-rg -n "file-service|message-service|config-service|audit-service|task-service|iam-service|配置中心|文件中心|消息中心|审计中心|任务中心" README.md AGENTS.md docs
+rg -n "file-service|message-service|config-service|audit-service|iam-service|配置中心|文件中心|消息中心|审计中心" README.md AGENTS.md docs
 find . -path "*/target/classes/META-INF/spring-configuration-metadata.json" -print
 ```
 

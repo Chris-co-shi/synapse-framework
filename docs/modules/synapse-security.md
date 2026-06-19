@@ -34,7 +34,7 @@ Authorization: Bearer <token>
 - Gateway 可以验证 Token，但下游服务仍必须独立验证。
 - Gateway 与下游服务之间只传播 Bearer Token。
 - 不传播或信任用户、角色、权限等身份 Header。
-- `synapse-security` 不提供 trusted-header 协议、HMAC Header 签名或 Servlet Filter。
+- `synapse-security` 不提供身份 Header 协议、HMAC Header 签名或 Servlet Filter。
 - `synapse-security` 不依赖 Spring Security Web / Config。
 
 Web 认证适配模块：

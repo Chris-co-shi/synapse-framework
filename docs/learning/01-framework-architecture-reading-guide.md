@@ -64,7 +64,7 @@ synapse-cloud
   -> Synapse Context
 ```
 
-身份认证适配只接受经过验证的 Bearer Token，不提供 trusted-header 身份恢复模块。
+身份认证适配只接受经过验证的 Bearer Token，不提供身份 Header 恢复模块。
 
 ### 2.3 基础设施能力层
 

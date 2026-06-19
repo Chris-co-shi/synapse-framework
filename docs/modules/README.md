@@ -22,7 +22,7 @@
 - 本项目不提供 demo / example / sample application。
 - 业务系统按需直接引用具体 module。
 - 后续文档不得再把 starter 或 demo 作为正向规划。
-- 身份认证只信任经过 Resource Server 验证的 Bearer Token，不提供 trusted-header 身份适配模块。
+- 身份认证只信任经过 Resource Server 验证的 Bearer Token，不提供身份 Header 适配模块。
 
 模块文档必须明确区分：
 

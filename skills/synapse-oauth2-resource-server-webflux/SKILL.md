@@ -12,6 +12,13 @@
 - 对应前缀依次为 `SCOPE_`、`ROLE_`、`PERM_`，已有前缀不得重复添加。
 - 主体和 authority 语义必须与 WebMVC Resource Server 保持一致。
 
+## 配置
+
+- 配置前缀：`synapse.security.resource-server`。
+- WebFlux 当前支持 enabled、issuer-uri、jwk-set-uri、permit-paths、csrf-enabled。
+- 公开配置项必须生成 Spring Boot Configuration Metadata。
+- WebFlux 不提供 WebMVC 的本地公钥、audience、token type、required claims、denylist 和 fail fast 配置，除非代码真实实现。
+
 ## 禁止事项
 
 - 不做 Gateway 服务。
@@ -26,3 +33,4 @@
 - roles、permissions、scope 覆盖空白过滤、去重、前缀和顺序。
 - Reactor Context 读取 principal 和 OperationContext。
 - 401/403 复用 synapse-webflux writer。
+- metadata 测试应覆盖配置项说明。

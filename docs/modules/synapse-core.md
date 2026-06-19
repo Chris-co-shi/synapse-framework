@@ -106,7 +106,7 @@ String message();
 - `COMMON_CONFLICT`
 - `COMMON_INTERNAL_ERROR`
 
-模块细分错误码不应放入 core。例如 security 的签名错误、trusted-header 过期、权限不足细分码应留在 `synapse-security`。
+模块细分错误码不应放入 core。例如 token 过期、签名无效、权限不足等细分码应留在对应安全或 OAuth2 适配模块。
 
 ### 5.2 通用异常
 
@@ -386,7 +386,7 @@ security 可以把 `AuthenticatedUser` 适配成 `OperationActor` 放入 `Operat
 
 ### Q3：tenantId 为什么在 core 里？
 
-一阶段不实现多租户，但 `tenantId` 是跨模块上下文传播常见字段。core 只提供承载位，不实现租户规则、租户表或数据隔离。
+当前不实现多租户隔离规则，但 `tenantId` 是跨模块上下文传播常见字段。core 只提供承载位，不实现租户规则、租户表或数据隔离。
 
 ### Q4：为什么 ErrorCode 不包含 HTTP status？
 

@@ -53,7 +53,7 @@
 
 ## 6. Security
 
-- [ ] trusted-header 签名和时间戳校验有边界测试。
+- [ ] OAuth2 适配模块负责 Token 验证，`synapse-security` 不恢复身份 Header 认证协议。
 - [ ] 未把 roles 或 permissions 快照当作权威数据源。
 - [ ] SecurityContext set 和 clear 能恢复外层 OperationContext。
 - [ ] 连续设置不同用户不会遗留旧 scope。

@@ -11,7 +11,7 @@
 - Gateway 与下游服务之间只传播 Bearer Token。
 - 下游服务必须独立验证签名、issuer、audience、有效期和 token contract。
 - 不传播或信任用户、角色、权限等身份 Header。
-- 不恢复 trusted-header，不提供 HMAC Header 签名和时间戳校验。
+- 不恢复身份 Header 认证协议，不提供 HMAC Header 签名和时间戳校验。
 
 ## 禁止事项
 
@@ -34,5 +34,5 @@
 ## 验证
 
 - 运行 `mvn -q -pl synapse-security -am test`。
-- 搜索 trusted-header、身份 Header、IAM、登录、用户/角色/菜单等残留概念。
+- 搜索身份 Header、IAM、登录、用户/角色/菜单等残留概念。
 - 修改 `SynapseSecurityProperties` 时必须验证 `synapse.security.*` Spring Boot Configuration Metadata。

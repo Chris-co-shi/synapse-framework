@@ -40,10 +40,10 @@ Framework 禁止提供：
 - 业务数据库 migration。
 - starter 聚合包。
 - demo / example / sample application。
-- 用户、角色、菜单、组织、配置中心、文件中心、消息中心、任务中心等平台业务实现。
-- Gateway / IAM / Message / File / Config / Task 等可启动服务。
+- 用户、角色、菜单、组织、配置中心、文件中心、消息中心等平台业务实现。
+- Gateway / IAM / Message / File / Config 等可启动服务。
 
-可启动平台服务统一属于 Synapse Platform，例如 `synapse-gateway`、`synapse-iam`、`synapse-message-service`、`synapse-file-service`、`synapse-config-service`、`synapse-task-service`。
+可启动平台服务统一属于 Synapse Platform，例如 `synapse-gateway`、`synapse-iam`、`synapse-message-service`、`synapse-file-service`、`synapse-config-service`。
 
 ## 当前模块
 
@@ -213,11 +213,10 @@ OpenFeign 服务间调用引入：
 | 文档 | 内容 |
 | --- | --- |
 | [学习路径](docs/learning/README.md) | 面向代码接管和手写练习的阅读顺序 |
-| [01-项目定位与边界](docs/01-项目定位与边界.md) | 项目定位、一阶段边界、成功标准 |
+| [01-项目定位与边界](docs/01-项目定位与边界.md) | 项目定位、当前边界、成功标准 |
 | [02-总体架构设计](docs/02-总体架构设计.md) | 模块职责、依赖方向、设计原则 |
 | [03-核心链路设计](docs/03-核心链路设计.md) | OperationContext、Web、Security、Data、MQ 等核心链路 |
 | [04-技术复杂点](docs/04-技术复杂点.md) | 模块边界、异常链路、上下文传播、并发控制等风险点 |
-| [06-待补充问题](docs/06-待补充问题.md) | 二阶段候选问题与冻结结论 |
 | [二阶段规划](docs/phase-2/02-phase-2-roadmap.md) | 二阶段任务拆分与执行顺序 |
 | [模块使用手册](docs/modules/README.md) | 各模块接入方式、扩展点和边界说明 |
 
@@ -234,8 +233,7 @@ Framework 明确不做：
 - 不做前端页面。
 - 不做完整 IAM / RBAC / ABAC 平台。
 - 不做 Gateway / WebFlux 可启动服务。
-- 不做文件中心、消息中心、配置中心、审计中心、任务中心、集成中心。
-- 不做租户和数据权限平台服务。
+- 不做文件中心、消息中心、配置中心、审计中心、集成中心。
 
 ## 边界原则
 
@@ -250,7 +248,7 @@ Business Application
 Synapse Platform
   -> depends on Synapse Framework
   -> owns platform services
-  -> owns gateway / iam / message / file / config / task runtime
+  -> owns gateway / iam / message / file / config runtime
 
 Synapse Framework
   -> provides reusable technical foundation
@@ -266,8 +264,8 @@ Synapse Framework
 - `synapse-webflux` 提供 WebFlux 最小技术闭环，不包含 Gateway 服务。
 - `synapse-cloud` 提供 OpenFeign 出站 OperationContext Header 编码、RequestInterceptor、ErrorDecoder 和自动配置，不包含 Gateway、Nacos、Seata、RocketMQ、IAM 或业务鉴权。
 - `synapse-security` 是 Web 无关安全基础模块；认证主体由 OAuth2 Resource Server 适配模块从经过验证的 Bearer Token 建立。
-- OAuth2 已拆分为 core、authorization-server-support、resource-server-webmvc、resource-server-webflux；旧 `synapse-oauth2` 不再是正式 reactor module。
-- `synapse-web` 不再作为正式 reactor module 保留。
+- OAuth2 当前以 `synapse-oauth2-core`、`synapse-oauth2-authorization-server-support`、`synapse-oauth2-resource-server-webmvc`、`synapse-oauth2-resource-server-webflux` 四个正式模块交付。
+- Web 当前以 `synapse-webmvc` 和 `synapse-webflux` 两个正式模块交付。
 - `synapse-security` 不依赖 Spring Security Web / Config。
 - `synapse-mq` 不包含真实 MQ / Redis 幂等 / DB / Outbox / 外部渠道 SDK 实现。
 - `synapse-cache` 不包含业务缓存 key 或业务规则。

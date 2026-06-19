@@ -97,7 +97,7 @@ synapse-cloud
 
 - `synapse-cloud` 不通过依赖 WebMVC / WebFlux 复用 `Result`。
 - `synapse-cloud` 不复用 MQ codec。
-- Header codec 第一阶段先放在 `synapse-cloud`。
+- Header codec 当前放在 `synapse-cloud`。
 - 后续如果 MQ / Cloud / WebFlux 复用需求稳定，再单独评估是否抽纯 Java codec 到 `synapse-core`。
 - `synapse-core` 不允许出现 HTTP、Feign、Spring、Servlet、Reactor 依赖。
 

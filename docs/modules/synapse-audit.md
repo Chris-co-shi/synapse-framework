@@ -4,7 +4,7 @@
 
 `synapse-audit` 是 Synapse Framework 的审计事件契约模块。
 
-一阶段它只定义审计事件结构、审计上下文、审计记录入口和审计输出端口，不实现审计落库、审计查询、审计后台或业务审计规则。
+它定义审计事件结构、审计上下文、审计记录入口和审计输出端口，不实现审计落库、审计查询、审计后台或业务审计规则。
 
 当前核心能力：
 
@@ -285,7 +285,7 @@ OperationContextProvider operationContextProvider() {
 
 ## 8. 配置项
 
-`synapse-audit` 一阶段没有独立配置项。
+`synapse-audit` 当前没有独立配置项。
 
 行为主要通过 Bean 扩展：
 

@@ -20,7 +20,7 @@
 
 - 登录、用户表、角色菜单后台。
 - JWT/JWK 解析和 OAuth2 Resource Server。
-- trusted-header 身份协议或身份 Header 解析。
+- 身份 Header 认证协议或 Header 解析。
 - Servlet Filter / WebFilter。
 - Spring Security FilterChain。
 - ABAC、DataScope 和多租户授权规则。

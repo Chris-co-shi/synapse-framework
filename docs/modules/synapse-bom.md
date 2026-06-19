@@ -4,7 +4,7 @@
 
 `synapse-bom` 是 Synapse Framework 的 Maven BOM 模块。
 
-它只负责统一管理 Synapse Framework 一阶段模块和关键第三方依赖的版本，方便业务系统、平台系统或其他内部模块通过 `dependencyManagement` 进行版本对齐。
+它只负责统一管理 Synapse Framework 当前正式模块和关键第三方依赖的版本，方便业务系统、平台系统或其他内部模块通过 `dependencyManagement` 进行版本对齐。
 
 它不包含 Java 代码，不提供自动配置，也不是 starter。
 
@@ -74,7 +74,7 @@
 | JUnit Jupiter | 5.10.3 |
 | Jakarta Validation API | 3.0.2 |
 
-### 5.2 一阶段内部模块
+### 5.2 当前正式模块
 
 当前 BOM 管理以下 Synapse Framework 模块版本：
 
@@ -86,7 +86,6 @@ synapse-cloud
 synapse-data
 synapse-cache
 synapse-security
-synapse-security-webmvc
 synapse-oauth2-core
 synapse-oauth2-authorization-server-support
 synapse-oauth2-resource-server-webmvc

@@ -15,7 +15,7 @@ import java.util.Map;
  * @param type 主体类型，例如 USER、SERVICE、JOB、MESSAGE
  * @param id 主体稳定标识，例如用户 ID、服务名或任务 ID
  * @param name 主体展示名称，用于日志、审计或排查
- * @param tenantId 主体所属租户；一阶段只作为上下文字段保留
+ * @param tenantId 主体所属租户；当前只作为上下文字段保留
  * @param attributes 技术扩展属性，不应写入业务模型
  */
 public record OperationActor(

@@ -56,7 +56,7 @@
 - ObjectMapper 默认规则是否一致。
 - 未认证、无权限、参数错误、404、405、415、未知异常响应是否一致。
 - traceId header、MDC 或 Reactor Context、Result.traceId 是否一致。
-- MvcOperationContextFilter 与 trusted-header filter 的顺序。
+- MvcOperationContextFilter 与认证桥接 Filter 的顺序。
 
 ### 不做
 
@@ -77,7 +77,7 @@
 
 - 固化 SecurityContext 与 OperationContext 的单向适配。
 - 修复或证明嵌套 set/clear、重复 clear、异常路径和外层 scope 恢复行为。
-- 冻结 trusted-header 认证与技术 carrier 解码的职责边界。
+- 冻结 OAuth2 Resource Server 认证与技术 carrier 解码的职责边界。
 
 ### 重点检查
 
@@ -85,7 +85,7 @@
 - SecurityContext 嵌套在 Job 或 Async OperationContext scope 中。
 - Filter chain 抛异常时的清理。
 - PermissionChecker 显式入口与注解入口的一致性。
-- timestamp tolerance、签名失败和空权限输入。
+- Token 校验失败、主体映射失败和空权限输入。
 
 ### 不做
 

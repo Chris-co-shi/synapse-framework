@@ -19,7 +19,7 @@
 
 - 业务 Controller 和 DTO。
 - Spring Security FilterChain。
-- OAuth2 / trusted-header 认证。
+- OAuth2 / 身份 Header 认证。
 - WebFlux / Gateway。
 - 业务错误码定义。
 

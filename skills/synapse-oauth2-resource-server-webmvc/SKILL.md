@@ -11,6 +11,13 @@
 - authority 固定按 scope、roles、permissions 顺序生成。
 - 对应前缀依次为 `SCOPE_`、`ROLE_`、`PERM_`，已有前缀不得重复添加。
 
+## 配置
+
+- 配置前缀：`synapse.security.resource-server`。
+- WebMVC 当前支持 issuer、JWK Set、本地公钥、issuer/audience 校验开关、audiences、accepted token types、required claims、clock skew、denylist、permit paths、CSRF、fail fast。
+- 公开配置项必须生成 Spring Boot Configuration Metadata。
+- `accepted-token-types` 当前只应暴露 `ACCESS_TOKEN` 候选值。
+
 ## 禁止事项
 
 - 不依赖 authorization-server-support。
@@ -26,3 +33,4 @@
 - CLIENT 不伪装成 USER。
 - 默认链在用户自定义 SecurityFilterChain 后退让。
 - 401/403 复用 synapse-webmvc writer。
+- metadata 测试应覆盖配置项说明和必要 hints。
