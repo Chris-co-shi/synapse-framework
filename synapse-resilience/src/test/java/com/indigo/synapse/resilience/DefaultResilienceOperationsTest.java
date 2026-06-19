@@ -125,6 +125,17 @@ class DefaultResilienceOperationsTest {
         }
     }
 
+    @Test
+    void shouldRejectDifferentConfigurationForExistingPolicyName() throws Exception {
+        ResiliencePolicy first = policy("inventory-client", true, 1, Duration.ofSeconds(1));
+        ResiliencePolicy conflicting = policy("inventory-client", true, 2, Duration.ofSeconds(2));
+
+        assertThat(operations.execute(first, () -> "ok")).isEqualTo("ok");
+        assertThatThrownBy(() -> operations.execute(conflicting, () -> "unexpected"))
+                .isInstanceOf(ResiliencePolicyConflictException.class)
+                .hasMessageContaining("inventory-client");
+    }
+
     private static ResiliencePolicy policy(String name, boolean idempotent, int attempts, Duration timeout) {
         return new ResiliencePolicy(name, idempotent, attempts, timeout,
                 50, 10, Duration.ofSeconds(1), 10, Duration.ZERO);
