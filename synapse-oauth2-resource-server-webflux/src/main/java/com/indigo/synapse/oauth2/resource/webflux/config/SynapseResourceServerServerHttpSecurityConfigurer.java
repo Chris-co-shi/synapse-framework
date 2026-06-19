@@ -61,7 +61,7 @@ public final class SynapseResourceServerServerHttpSecurityConfigurer {
                 .accessDeniedHandler(accessDeniedHandler)
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(authenticationConverter)));
         if (gatewayProofWebFilter != null) {
-            http.addFilterAt(gatewayProofWebFilter, SecurityWebFiltersOrder.HTTP_BASIC);
+            http.addFilterAt(gatewayProofWebFilter, SecurityWebFiltersOrder.AUTHENTICATION);
         }
         http.addFilterAfter(bridgeFilter, SecurityWebFiltersOrder.AUTHENTICATION);
         return http;
