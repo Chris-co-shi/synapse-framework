@@ -93,11 +93,11 @@
 
 ## Phase 10：补充事务和数据库迁移规范
 
-- 状态：未开始
-- 修改摘要：待执行。
-- 测试结果：未执行。
-- Commit SHA：待提交
-- 遗留问题：无。
+- 状态：已完成
+- 修改摘要：新增事务和数据库迁移规范，明确应用服务事务边界、本地事务 Outbox/Audit 约束、分布式一致性选择、Schema 所有权和服务级 Flyway 规则。
+- 测试结果：`mvn clean verify` 和 `git diff --check` 通过。
+- Commit SHA：本阶段独立提交（见 Git 历史）
+- 遗留问题：规范由具体 Platform/Application 落地，Framework 不提供 Migration 或事务模块。
 
 ## Phase 11：建立自动配置契约测试标准
 
