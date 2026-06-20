@@ -215,8 +215,8 @@ Phase 1 起必须随模块删除和更名同步更新，不能留下仍可消费
 执行命令：
 
 ```bash
-/Users/sxc/Documents/tool/apache-maven-3.9.0/bin/mvn clean test
-/Users/sxc/Documents/tool/apache-maven-3.9.0/bin/mvn clean verify
+/Users/sxc/Documents/tool/apache-maven-3.8.6/bin/mvn clean test
+/Users/sxc/Documents/tool/apache-maven-3.8.6/bin/mvn clean verify
 git diff --check
 ```
 

@@ -145,7 +145,7 @@ synapse-framework
 
 ```text
 Java 21
-Maven 3.9.x
+Maven 3.8.6
 ```
 
 ### 构建与测试
@@ -158,8 +158,8 @@ mvn validate
 当前工作站 Maven 路径示例：
 
 ```bash
-/Users/sxc/Documents/tool/apache-maven-3.9.0/bin/mvn -q clean test
-/Users/sxc/Documents/tool/apache-maven-3.9.0/bin/mvn -q validate
+/Users/sxc/Documents/tool/apache-maven-3.8.6/bin/mvn -q clean test
+/Users/sxc/Documents/tool/apache-maven-3.8.6/bin/mvn -q validate
 ```
 
 ### Configuration Metadata
