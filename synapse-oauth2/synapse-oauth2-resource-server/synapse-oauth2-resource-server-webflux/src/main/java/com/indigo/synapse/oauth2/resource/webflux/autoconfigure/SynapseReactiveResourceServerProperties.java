@@ -7,21 +7,70 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Reactive Resource Server 配置。 */
+/**
+ * Reactive Resource Server 配置。
+ */
 @org.springframework.boot.context.properties.ConfigurationProperties(prefix = "synapse.security.resource-server")
 public class SynapseReactiveResourceServerProperties {
 
+    /**
+     * 是否启用 Reactive OAuth2 Resource Server 自动配置。
+     */
     private boolean enabled = true;
+
+    /**
+     * 预期 JWT issuer；未提供 jwk-set-uri 时也用于创建默认 ReactiveJwtDecoder。
+     */
     private String issuerUri;
+
+    /**
+     * JWK Set 地址，用于远程加载 JWT 验签公钥。
+     */
     private String jwkSetUri;
+
+    /**
+     * 是否校验 JWT issuer claim。
+     */
     private boolean issuerValidationEnabled = true;
+
+    /**
+     * 是否校验 JWT audience claim。
+     */
     private boolean audienceValidationEnabled = true;
+
+    /**
+     * 当前服务接受的 JWT audience 列表。
+     */
     private List<String> audiences = new ArrayList<>();
+
+    /**
+     * 当前 Resource Server 接受的 token_type。
+     */
     private List<SynapseTokenType> acceptedTokenTypes = new ArrayList<>(List.of(SynapseTokenType.ACCESS_TOKEN));
+
+    /**
+     * JWT 必须存在的 claim 名称。
+     */
     private List<String> requiredClaims = new ArrayList<>(ResourceServerValidationPolicy.DEFAULT_REQUIRED_CLAIMS);
+
+    /**
+     * JWT 时间校验允许的时钟偏移。
+     */
     private Duration clockSkew = Duration.ofSeconds(60);
+
+    /**
+     * 是否启用 token denylist 校验。
+     */
     private boolean denylistEnabled = true;
+
+    /**
+     * 无需认证即可访问的 WebFlux 路径。
+     */
     private List<String> permitPaths = new ArrayList<>(List.of("/actuator/health", "/error"));
+
+    /**
+     * 是否启用 Spring Security CSRF 防护。
+     */
     private boolean csrfEnabled;
 
     /** 校验 Reactive 密钥来源和共享协议策略。 */
