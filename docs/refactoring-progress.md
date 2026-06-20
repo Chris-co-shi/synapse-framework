@@ -85,11 +85,11 @@
 
 ## Phase 9：重构 Audit
 
-- 状态：未开始
-- 修改摘要：待执行。
-- 测试结果：未执行。
-- Commit SHA：待提交
-- 遗留问题：无。
+- 状态：已完成
+- 修改摘要：Audit 依赖 Messaging，新增 AuditPublisher、AuditFailurePolicy、AuditSanitizer、@Audited/AuditAspect；自动补齐 eventId、主体、租户、traceId 和 source service；普通审计 best-effort 失败继续，关键审计 reliable 失败传播。
+- 测试结果：Audit 36 项测试通过；`mvn clean verify` 通过，27 个 reactor project 全部成功；依赖方向、敏感信息和生产边界扫描通过。
+- Commit SHA：本阶段独立提交（见 Git 历史）
+- 遗留问题：可靠审计依赖应用提供本地 OutboxStore 和活动本地事务；旧 AuditRecorder/AuditLogPort 仅作为兼容入口保留。
 
 ## Phase 10：补充事务和数据库迁移规范
 

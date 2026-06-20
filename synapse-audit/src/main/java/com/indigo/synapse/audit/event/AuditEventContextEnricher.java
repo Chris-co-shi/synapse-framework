@@ -11,6 +11,7 @@ import com.indigo.synapse.core.context.OperationSource;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * 为审计事件补齐当前操作上下文。
@@ -94,11 +95,15 @@ public final class AuditEventContextEnricher {
             Optional<OperationContext> operationContext
     ) {
         Map<String, String> enriched = new LinkedHashMap<>(attributes == null ? Map.of() : attributes);
+        enriched.putIfAbsent("audit.eventId", UUID.randomUUID().toString());
         operationContext.ifPresent(context -> {
             putActor(enriched, "operation.actor", context.actor());
             putActor(enriched, "operation.initiator", context.initiator());
             putIfPresent(enriched, "operation.requestId", context.requestId());
             putSource(enriched, context.source());
+            if (context.source() != null) {
+                putIfPresent(enriched, "audit.sourceService", context.source().name());
+            }
         });
         return enriched;
     }

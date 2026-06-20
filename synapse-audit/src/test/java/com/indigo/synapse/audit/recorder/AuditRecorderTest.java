@@ -26,7 +26,8 @@ class AuditRecorderTest {
 
         recorder.record(event);
 
-        assertEquals(event, port.event);
+        assertEquals(event.action(), port.event.action());
+        org.junit.jupiter.api.Assertions.assertNotNull(port.event.eventId());
     }
 
     @Test

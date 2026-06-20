@@ -1,7 +1,6 @@
 package com.indigo.synapse.audit;
 
-import com.indigo.synapse.core.CoreModule;
-
+/** Audit 模块标识和主要依赖边界。 */
 public final class AuditModule {
 
     public static final String NAME = "synapse-audit";
@@ -10,6 +9,6 @@ public final class AuditModule {
     }
 
     public static String dependsOn() {
-        return CoreModule.NAME;
+        return "synapse-messaging";
     }
 }

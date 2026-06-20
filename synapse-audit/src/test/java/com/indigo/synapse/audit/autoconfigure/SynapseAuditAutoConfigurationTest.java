@@ -8,6 +8,9 @@ import com.indigo.synapse.audit.event.AuditTarget;
 import com.indigo.synapse.audit.port.AuditLogPort;
 import com.indigo.synapse.audit.port.NoopAuditLogPort;
 import com.indigo.synapse.audit.recorder.AuditRecorder;
+import com.indigo.synapse.audit.publish.AuditPublisher;
+import com.indigo.synapse.audit.sanitize.AuditSanitizer;
+import com.indigo.synapse.audit.annotation.AuditAspect;
 import com.indigo.synapse.core.context.OperationActor;
 import com.indigo.synapse.core.context.OperationActorType;
 import com.indigo.synapse.core.context.OperationContext;
@@ -38,6 +41,9 @@ class SynapseAuditAutoConfigurationTest {
             assertInstanceOf(NoopAuditLogPort.class, context.getBean(AuditLogPort.class));
             assertNotNull(context.getBean(AuditEventContextEnricher.class));
             assertNotNull(context.getBean(AuditRecorder.class));
+            assertNotNull(context.getBean(AuditPublisher.class));
+            assertNotNull(context.getBean(AuditSanitizer.class));
+            assertNotNull(context.getBean(AuditAspect.class));
         });
     }
 
@@ -54,8 +60,9 @@ class SynapseAuditAutoConfigurationTest {
 
                     context.getBean(AuditRecorder.class).record(event);
 
-                    assertEquals(List.of(event), first);
-                    assertEquals(List.of(event), second);
+                    assertEquals(event.action(), first.getFirst().action());
+                    assertEquals(first, second);
+                    org.junit.jupiter.api.Assertions.assertNotNull(first.getFirst().eventId());
                 });
     }
 

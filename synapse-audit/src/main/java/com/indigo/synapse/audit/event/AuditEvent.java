@@ -61,6 +61,12 @@ public record AuditEvent(
         }
     }
 
+    /** 返回稳定事件 ID；上下文补齐器会在缺失时写入 attributes。 */
+    public String eventId() { return attributes.get("audit.eventId"); }
+
+    /** 返回产生审计事件的服务名。 */
+    public String sourceService() { return attributes.get("audit.sourceService"); }
+
     /**
      * 创建审计事件构建器。
      */

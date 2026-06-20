@@ -13,7 +13,10 @@ public final class SensitiveAuditValueMasker {
             "token",
             "secret",
             "salt",
-            "key"
+            "key",
+            "authorization",
+            "cookie",
+            "credential"
     );
 
     private SensitiveAuditValueMasker() {

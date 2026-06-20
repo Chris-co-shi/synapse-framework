@@ -55,7 +55,7 @@
 | `synapse-oauth2-resource-server-core` | [synapse-oauth2-resource-server-core.md](synapse-oauth2-resource-server-core.md) | Resource Server 共享验证与主体映射语义 |
 | `synapse-oauth2-resource-server-webmvc` | [synapse-oauth2-resource-server-webmvc.md](synapse-oauth2-resource-server-webmvc.md) | Servlet OAuth2 Resource Server 技术适配 |
 | `synapse-oauth2-resource-server-webflux` | [synapse-oauth2-resource-server-webflux.md](synapse-oauth2-resource-server-webflux.md) | Reactive OAuth2 Resource Server 技术适配 |
-| `synapse-audit` | [synapse-audit.md](synapse-audit.md) | 审计事件契约，不是审计中心 |
+| `synapse-audit` | [synapse-audit.md](synapse-audit.md) | 审计模型、脱敏、失败策略和 Messaging 发布适配，不是审计中心 |
 | `synapse-messaging` | [synapse-messaging.md](synapse-messaging.md) | Broker 中立消息模型、发布/消费编排、Stream 适配和可靠性 SPI，不是消息中心 |
 | `synapse-observability` | [synapse-observability.md](synapse-observability.md) | Micrometer Observation 与低基数标签约定 |
 | `synapse-resilience` | [synapse-resilience.md](synapse-resilience.md) | Resilience4j 超时、重试、熔断和隔离 |

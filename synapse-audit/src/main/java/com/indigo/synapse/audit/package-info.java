@@ -1,10 +1,9 @@
 /**
- * 审计事件契约与输出 Port。
+ * 审计模型、上下文补齐、脱敏、失败策略和 Messaging 发布适配。
  *
- * <p>该模块定义审计事件、显式 AuditContext、基于 OperationContext 的上下文补齐、AuditRecorder
- * 和 AuditLogPort。最终事件必须具备可追溯的 subject 与 traceId；缺失时不会自动写入 system。</p>
+ * <p>该模块定义 AuditEvent、AuditPublisher、AuditSanitizer、Audited/AuditAspect，并将消息投递
+ * 委托给 synapse-messaging。最终事件必须具备可追溯 subject 与 traceId。</p>
  *
- * <p>本模块不提供审计表、Repository、查询后台、可靠消息、归档或业务审计规则。Noop Port 不会
- * 持久化事件，Composite Port 也不提供失败隔离、重试或事务保证。</p>
+ * <p>本模块不提供审计表、Repository、查询后台、Broker、Outbox 实现、归档或业务审计规则。</p>
  */
 package com.indigo.synapse.audit;
