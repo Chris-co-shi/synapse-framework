@@ -60,6 +60,7 @@ public void approveOrder() {
 
 `AuditRecorder`/`AuditLogPort` 保留为显式本地输出兼容入口，不参与默认消息发布链路。
 新消息投递统一使用 `AuditPublisher`，不得在自定义 Publisher 中直接访问 StreamBridge 或 Broker。
+两个兼容入口自 0.1.0 起标记为 `@Deprecated`；迁移记录见根 `CHANGELOG.md`。
 
 ## 8. 边界
 

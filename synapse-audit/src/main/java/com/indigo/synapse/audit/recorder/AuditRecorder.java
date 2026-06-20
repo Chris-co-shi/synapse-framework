@@ -10,7 +10,10 @@ import com.indigo.synapse.core.context.DefaultOperationContextProvider;
  *
  * <p>AuditRecorder 负责在记录前补齐审计上下文，并校验事件具备最小可追溯字段。它不负责落库、异步发送、
  * 重试、事务一致性或查询后台，这些能力由 {@link AuditLogPort} 的消费方实现决定。</p>
+ *
+ * @deprecated since 0.1.0，新代码使用 {@link com.indigo.synapse.audit.publish.AuditPublisher}。
  */
+@Deprecated(since = "0.1.0", forRemoval = false)
 public final class AuditRecorder {
 
     private final AuditLogPort auditLogPort;

@@ -117,8 +117,8 @@
 
 ## Phase 13：发布工程与质量门禁
 
-- 状态：未开始
-- 修改摘要：待执行。
-- 测试结果：未执行。
-- Commit SHA：待提交
-- 遗留问题：无。
+- 状态：已完成
+- 修改摘要：建立 Enforcer、sources/javadoc、轻量 Checkstyle、SpotBugs High、JaCoCo 和可选 API 兼容报告；新增 Changelog、发布规范、PR/Release/定时漏洞扫描工作流，并弃用 Audit 兼容入口。
+- 测试结果：最终 `mvn clean verify`、架构脚本、`git diff --check` 和工作区检查通过。
+- Commit SHA：本阶段独立提交（见 Git 历史）
+- 遗留问题：当前版本仍为 0.1.0-SNAPSHOT，创建 Release Tag 前必须切换非 SNAPSHOT；API 兼容在 0.x 阶段只生成报告。
