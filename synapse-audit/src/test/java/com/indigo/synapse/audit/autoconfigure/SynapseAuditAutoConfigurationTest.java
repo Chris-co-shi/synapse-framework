@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SynapseAuditAutoConfigurationTest {
 
@@ -92,6 +93,25 @@ class SynapseAuditAutoConfigurationTest {
         contextRunner
                 .withBean(AuditEventContextEnricher.class, () -> customEnricher)
                 .run(context -> assertSame(customEnricher, context.getBean(AuditEventContextEnricher.class)));
+    }
+
+    @Test
+    void shouldDisableAuditAutoConfiguration() {
+        contextRunner.withPropertyValues("synapse.audit.enabled=false")
+                .run(context -> assertThat(context).doesNotHaveBean(AuditPublisher.class)
+                        .doesNotHaveBean(AuditRecorder.class));
+    }
+
+    @Test
+    void shouldKeepUserAuditPublisherAndDisableOnlyAop() {
+        AuditPublisher custom = (event, policy) -> { };
+        contextRunner.withBean(AuditPublisher.class, () -> custom)
+                .withPropertyValues("synapse.audit.aop-enabled=false")
+                .run(context -> {
+                    assertSame(custom, context.getBean(AuditPublisher.class));
+                    assertThat(context).doesNotHaveBean(AuditAspect.class);
+                    assertThat(context).hasSingleBean(AuditSanitizer.class);
+                });
     }
 
     private static AuditEvent event() {
