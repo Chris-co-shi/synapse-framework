@@ -2,37 +2,13 @@
 
 ## 1. 模块定位
 
-`synapse-messaging` 是 Synapse Framework 的消息基础设施契约模块。
+`synapse-messaging` 是单一 JAR 的 Broker 中立消息基础模块，提供消息模型、发布/消费编排、
+Spring Cloud Stream 可选适配、上下文传播及可靠性 SPI。它不是消息中心，也不创建中央 Outbox 服务。
 
-它负责定义通用 MQ 消息外壳、消息发布/消费 SPI、发布/消费模板、消息上下文传播、异常分类、幂等检查契约和自动配置入口。
+模块不拆分 API/Core/Outbox/Starter，不引入 Kafka、RocketMQ、RabbitMQ Binder 或原生 SDK，
+不实现 JDBC、Redis、MongoDB、文件 Outbox 和幂等存储。
 
-该模块不等同于业务消息中心，也不表达站内信、短信、邮件、模板消息、已读未读等业务语义。
-它不引入 RocketMQ / Kafka / RabbitMQ 等真实 MQ SDK，不实现 Redis 幂等，不做数据库消息表、Outbox 或事务消息。
-
-## 2. 适用场景
-
-适合以下场景：
-
-- 业务模块需要统一构造 MQ 消息外壳。
-- 生产者需要将 `OperationContext` 写入消息 header。
-- 消费者需要从消息 header 恢复 `OperationContext`。
-- 消费者需要把处理异常归类为 `SUCCESS` / `RETRY` / `DISCARD`。
-- 后续 RocketMQ / Kafka / RabbitMQ 适配器需要统一发布和消费契约。
-
-## 3. 不适用场景
-
-不适合以下场景：
-
-- 站内信中心。
-- 短信、邮件、钉钉、企业微信等通知渠道实现。
-- 消息模板管理。
-- 消息已读未读。
-- 消息中心后台。
-- MQ Broker 运维管理。
-- Redis 幂等默认实现。
-- 数据库消息表、Outbox、事务消息或死信表。
-
-## 4. Maven 引入方式
+## 2. Maven 引入
 
 ```xml
 <dependency>
@@ -41,177 +17,69 @@
 </dependency>
 ```
 
-建议通过 `synapse-bom` 统一管理版本。
+`spring-cloud-stream` 是 optional 依赖。应用需要默认传输适配时自行引入 Spring Cloud Stream 和具体 Binder；
+缺少 Spring Cloud Stream 或 `StreamBridge` 时，Messaging 基础自动配置仍可正常启动。
 
-## 5. 核心能力
+## 3. 核心模型
 
-当前核心能力包括：
+- `MessageEnvelope`：组合 Metadata、Destination 和已序列化 payload。
+- `MessageMetadata`：messageId、eventId、messageType、来源、内容类型、版本、header 和时间。
+- `MessageDestination`：逻辑 binding 名和可选路由键，不表达 Broker 专有概念。
+- `MessageVersion`：负载结构版本。
+- `MessagePublishResult`：`SENT`、`STORED` 或 `FAILED`。
+- `MessageHandleResult`：`SUCCESS`、`DUPLICATE`、`RETRY` 或 `DISCARD`。
 
-- `MessageEnvelope`：通用消息外壳。
-- `MessageHeaderKeys`：消息自身元数据 header key。
-- `MessagePublisher`：消息发布 SPI。
-- `MessagePublishTemplate`：发布侧标准入口，发布前自动补充上下文 header。
-- `MessageHandler`：消息消费处理 SPI。
-- `MessageConsumeTemplate`：消费侧标准入口，消费前恢复上下文并分类异常。
-- `MessagePublishResult`：消息发布结果。
-- `MessageConsumeResult`：消息消费结果。
-- `MessageErrorCode`：MQ framework 层技术错误码。
-- `MessageException`：MQ 模块基础异常。
-- `MessageExceptionClassifier`：消费异常到消费决策的分类接口。
-- `MessageIdempotencyChecker`：消费幂等检查契约。
-- `MessageContextHeaders`：消息上下文 header key。
-- `OperationContextMessageCodec`：`OperationContextSnapshot` 与 header 的编解码。
-- `OperationContextMessagePropagator`：生产和消费两端的上下文传播入口。
+`eventId` 表示同一领域事件的稳定身份，重投时应保持不变；`messageId` 表示消息实例。
+消费幂等键优先使用 `eventId`，缺失时回退到 `messageId`。
 
-`OperationContextMessageCodec` 保持 MQ 小写 header 名称契约，但内部复用 `synapse-core` 的
-`OperationContextSnapshotCodec` 规则。缺少 actor type 或 actor id 时不恢复上下文，也不会默认创建 system actor。
+## 4. 发布语义
 
-## 6. 快速使用示例
+`BestEffortMessagePublisher` 通过 `MessageTransport` 立即发送，不持久化失败消息。
 
-生产端推荐通过 `MessagePublishTemplate` 发布。模板会通过 `OperationContextProvider` 读取当前上下文，
-并在发布前补充消息 header：
+`ReliableMessagePublisher` 只在当前活动本地事务中调用 `OutboxStore.append`：
 
-```java
-MessageEnvelope envelope = MessageEnvelope.create(
-        "sample.created",
-        "sample-topic",
-        "sample-tag",
-        "sample-key",
-        "sample-idempotent-key",
-        "sample-service",
-        "application/json",
-        "v1",
-        Map.of(),
-        payload,
-        traceId,
-        tenantId,
-        occurredAt
-);
+- 无活动本地事务时抛出明确异常。
+- 只登记发送方服务的本地 Outbox，不同步等待 Broker。
+- `OutboxStore` 实现必须与业务数据使用同一数据源和同一本地事务。
+- Framework 不提供 Outbox 表、实现、扫描器、Scheduler 或集群抢占。
 
-publishTemplate.publish(envelope);
-```
+可靠链路采用 At-least-once，允许消息重复，不承诺通用 Exactly-once。
 
-消费端推荐通过 `MessageConsumeTemplate` 执行业务处理。模板会从消息 header 恢复上下文，
-并把异常归类为未来 MQ 适配器可识别的消费决策：
+## 5. 消费语义
 
-```java
-MessageConsumeResult result = consumeTemplate.consume(envelope, messageHandler);
-```
+应用通过 `MessageHandler.messageType()` 声明路由类型。`MessageHandlerRegistry` 拒绝重复类型，
+`MessageDispatcher` 负责上下文恢复、Handler 查找、幂等检查、结果处理和失败决策。
 
-未来 MQ 适配器可以将结果映射为：
+可选 SPI：
 
-```text
-SUCCESS -> ACK / CONSUME_SUCCESS
-RETRY   -> RECONSUME / retry
-DISCARD -> ACK 后记录、告警、死信或丢弃
-```
+- `MessageIdempotencyStore`：查询和标记 `messageId/eventId`。
+- `MessageRetryPolicy`：按异常和尝试次数决定是否重试。
+- `MessageFailureStore`：记录最终失败摘要，不含 payload 和异常堆栈。
 
-## 7. MQ 异常抽象与分类
+Framework 不提供这些 SPI 的生产实现。若未提供 `MessageIdempotencyStore`，Dispatcher 不会伪装成已具备幂等保护。
 
-`synapse-messaging` 定义了 MQ framework 层异常体系，用于稳定表达消息外壳、header、payload、上下文传播、
-发布、消费、路由和幂等处理等技术失败。
+## 6. Spring Cloud Stream
 
-核心类型：
+`SpringStreamMessageTransport` 使用 `StreamBridge` 将逻辑目的地解释为 binding 名。
+仅当 `StreamBridge` 类和 Bean 都存在时才创建默认 `MessageTransport`；用户自定义 `MessageTransport`
+始终优先。具体 Binder、destination、consumer group、重试和 DLQ 由应用配置。
 
-- `MessageErrorCode`：MQ 技术错误码枚举，错误码字符串发布后应保持稳定。
-- `MessageException`：MQ 基础异常，继承 core 的 `SynapseException`。
-- `MessageException.retryable()`：告诉消费异常分类器是否建议重试。
-- `MessageValidationException`：消息结构、消息头或消息体约束失败，默认不可重试。
-- `MessageSerializationException`：序列化或反序列化失败，默认不可重试。
-- `MessagePublishException`：发布动作失败，默认可重试。
-- `MessageConsumeException`：消费处理失败，是否重试由调用方指定。
-- `MessageRoutingException`：topic、tag、key、messageType 等路由元数据解析失败，默认不可重试。
-- `MessageContextPropagationException`：`OperationContext` 写入或恢复失败，默认不可重试。
-- `MessageIdempotencyException`：幂等检查或标记失败，是否重试由调用方指定。
+## 7. 配置
 
-默认分类规则：
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| `synapse.messaging.enabled` | `true` | 启用 Messaging 基础自动配置 |
+| `synapse.messaging.stream.enabled` | `true` | 允许创建默认 StreamBridge 传输 |
+| `synapse.messaging.reliable.enabled` | `false` | 创建可靠发布器；开启后必须存在唯一 `OutboxStore` Bean |
 
-```text
-null                                  -> RETRY
-MessageException(retryable = true)    -> RETRY
-MessageException(retryable = false)   -> DISCARD
-IllegalArgumentException              -> DISCARD
-其他异常                              -> RETRY
-```
+显式开启可靠发布但缺少 `OutboxStore` 时，应用启动快速失败。配置 metadata 由
+`spring-boot-configuration-processor` 自动生成。
 
-`DefaultMessageExceptionClassifier` 会把异常转换为 `MessageConsumeResult`，reason 只包含异常类名和 message，
-不包含完整堆栈。未来 MQ adapter 可以把 Broker 原生异常转换为 `MessageException` 或其子类，再交给模板统一分类。
+## 8. 边界
 
-边界要求：
-
-- 不允许把 RocketMQ / Kafka / RabbitMQ 原生异常暴露为 framework 对外契约。
-- 不允许把业务异常或业务错误码塞进 `MessageErrorCode`。
-- 不允许在 `synapse-messaging` 中引入真实 Broker SDK、Redis 或数据库来实现异常处理。
-
-## 8. 扩展方式
-
-具体 MQ SDK 不直接放入当前基础契约。
-
-后续可以通过适配器扩展：
-
-```text
-RocketMQ Listener / Producer
-  -> MessageEnvelope
-  -> MessagePublisher / MessageHandler
-```
-
-适配器负责处理：
-
-- SDK 消息对象转换。
-- 发布确认。
-- 消费确认。
-- 重试。
-- 死信。
-- 顺序消息。
-- 延迟消息。
-
-真实幂等检查由消费方或后续适配模块通过 `MessageIdempotencyChecker` 替换默认实现。
-`NoopMessageIdempotencyChecker` 只是不保存状态的默认实现，不提供生产级幂等保护。
-
-## 9. 配置项
-
-当前模块没有外部配置项。
-
-自动配置类：
-
-```text
-com.indigo.synapse.messaging.autoconfigure.SynapseMessagingAutoConfiguration
-```
-
-默认装配：
-
-- `OperationContextProvider`
-- `OperationContextMessageCodec`
-- `OperationContextMessagePropagator`
-- `MessageExceptionClassifier`
-- `MessageIdempotencyChecker`
-- `MessageConsumeTemplate`
-
-当应用中存在 `MessagePublisher` Bean 时，自动装配：
-
-- `MessagePublishTemplate`
-
-消费方可以声明同类型 Bean 覆盖默认实现。
-
-## 10. 边界与注意事项
-
-- `synapse-messaging` 只依赖 `synapse-core`。
-- 不直接依赖 `synapse-webmvc`、`synapse-security`、`synapse-data`、`synapse-audit` 或 `synapse-cache`。
-- 不传播角色、权限和业务字段。
-- 发布端读取当前上下文应通过 `OperationContextProvider`，不要直接散落调用 `OperationContextHolder.snapshot()`。
-- 没有上下文的 MQ / Task / Async 场景应由调用方显式建立上下文。
-- 不要把通知中心能力塞回 `synapse-messaging`。
-
-## 11. 常见问题
-
-### 为什么不叫 synapse-message？
-
-因为 `message` 容易和站内信、短信、邮件、模板消息等业务消息中心混淆。
-
-Framework 层的职责是 MQ / Messaging 技术契约，因此使用 `synapse-messaging` 更清晰。
-
-### 现在是否已经支持 RocketMQ？
-
-当前只定义通用契约和上下文传播，还没有绑定 RocketMQ SDK。
-
-RocketMQ 适配器应作为后续能力追加，不能污染当前基础契约。
+- 不暴露 Broker 专有类型。
+- 不同步调用 Platform 消息服务。
+- 不传播角色、权限或业务身份 Header。
+- 不实现通知、短信、邮件、站内信和模板业务。
+- 不实现任何 Outbox、幂等或失败存储。
+- 不创建 Controller、Entity、Repository、migration、starter 或示例应用。

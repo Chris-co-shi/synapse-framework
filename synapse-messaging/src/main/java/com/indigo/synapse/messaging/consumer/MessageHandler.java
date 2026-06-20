@@ -1,20 +1,13 @@
 package com.indigo.synapse.messaging.consumer;
 
-import com.indigo.synapse.messaging.core.MessageConsumeResult;
 import com.indigo.synapse.messaging.core.MessageEnvelope;
+import com.indigo.synapse.messaging.core.MessageHandleResult;
 
-/**
- * 消息消费处理 SPI。
- *
- * <p>该接口面向业务消费逻辑，具体 MQ Listener 到该接口的适配由适配器完成。</p>
- */
+/** 由 {@link #messageType()} 唯一标识的消费处理器。 */
 public interface MessageHandler {
+    /** 返回与 {@code MessageMetadata.messageType} 匹配的稳定类型。 */
+    String messageType();
 
-    /**
-     * 处理一条消息。
-     *
-     * @param envelope 通用消息外壳
-     * @return 消费结果
-     */
-    MessageConsumeResult handle(MessageEnvelope envelope);
+    /** 处理消息；允许消息重复到达，实现应配合幂等存储。 */
+    MessageHandleResult handle(MessageEnvelope envelope);
 }

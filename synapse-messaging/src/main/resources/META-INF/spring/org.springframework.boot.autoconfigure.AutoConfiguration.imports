@@ -1,1 +1,3 @@
 com.indigo.synapse.messaging.autoconfigure.SynapseMessagingAutoConfiguration
+com.indigo.synapse.messaging.autoconfigure.SynapseMessagingStreamAutoConfiguration
+com.indigo.synapse.messaging.autoconfigure.SynapseMessagingPublisherAutoConfiguration

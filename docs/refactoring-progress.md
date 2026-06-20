@@ -77,11 +77,11 @@
 
 ## Phase 8：重构 Messaging
 
-- 状态：未开始
-- 修改摘要：待执行。
-- 测试结果：未执行。
-- Commit SHA：待提交
-- 遗留问题：无。
+- 状态：已完成
+- 修改摘要：保持单一 JAR，重建 Broker 中立 Envelope/Metadata/Destination、best-effort 与事务 Outbox 可靠发布、Handler Registry/Dispatcher、可靠性 SPI，以及可选 Spring Cloud Stream Transport；明确 At-least-once 和 eventId/messageId 幂等边界。
+- 测试结果：Messaging 31 项测试通过；`mvn clean verify` 通过，27 个 reactor project 全部成功；`git diff --check` 和生产边界扫描通过。
+- Commit SHA：本阶段独立提交（见 Git 历史）
+- 遗留问题：Framework 不提供 Outbox、幂等和失败存储实现；应用需提供本地持久化实现及 Binder 配置。
 
 ## Phase 9：重构 Audit
 

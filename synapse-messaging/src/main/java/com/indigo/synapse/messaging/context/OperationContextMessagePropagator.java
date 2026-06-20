@@ -51,24 +51,8 @@ public final class OperationContextMessagePropagator {
             return envelope;
         }
         Map<String, String> mergedHeaders = new LinkedHashMap<>(contextHeaders);
-        envelope.headers().forEach(mergedHeaders::put);
-        return new MessageEnvelope(
-                envelope.messageId(),
-                envelope.messageType(),
-                envelope.topic(),
-                envelope.tag(),
-                envelope.key(),
-                envelope.idempotentKey(),
-                envelope.sourceService(),
-                envelope.contentType(),
-                envelope.schemaVersion(),
-                mergedHeaders,
-                envelope.payload(),
-                envelope.traceId(),
-                envelope.tenantId(),
-                envelope.occurredAt(),
-                envelope.createdAt()
-        );
+        envelope.metadata().headers().forEach(mergedHeaders::put);
+        return new MessageEnvelope(envelope.metadata().withHeaders(mergedHeaders), envelope.destination(), envelope.payload());
     }
 
     public OperationContextScope restore(MessageEnvelope envelope) {
@@ -76,7 +60,7 @@ public final class OperationContextMessagePropagator {
             throw new IllegalArgumentException("envelope must not be null");
         }
         OperationContextSnapshot currentSnapshot = OperationContextHolder.snapshot();
-        return codec.decode(envelope.headers())
+        return codec.decode(envelope.metadata().headers())
                 .map(OperationContextHolder::restore)
                 .orElseGet(() -> OperationContextHolder.restore(currentSnapshot));
     }

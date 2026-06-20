@@ -101,7 +101,7 @@ synapse-framework
 | `synapse-oauth2-resource-server-webmvc` | Servlet OAuth2 Resource Server 技术适配 | [查看](docs/modules/synapse-oauth2-resource-server-webmvc.md) |
 | `synapse-oauth2-resource-server-webflux` | Reactive OAuth2 Resource Server 技术适配 | [查看](docs/modules/synapse-oauth2-resource-server-webflux.md) |
 | `synapse-audit` | 审计事件契约 | [查看](docs/modules/synapse-audit.md) |
-| `synapse-messaging` | MQ 消息外壳、发布/消费模板、SPI、上下文传播契约 | [查看](docs/modules/synapse-messaging.md) |
+| `synapse-messaging` | Broker 中立消息模型、发布/消费编排、Stream 适配与可靠性 SPI | [查看](docs/modules/synapse-messaging.md) |
 | `synapse-observability` | Micrometer Observation 命名、低基数标签、MDC 与健康扩展约定 | [查看](docs/modules/synapse-observability.md) |
 | `synapse-resilience` | 基于 Resilience4j 的超时、重试、熔断、隔离和观测 | [查看](docs/modules/synapse-resilience.md) |
 

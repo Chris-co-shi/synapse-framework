@@ -1,50 +1,35 @@
 package com.indigo.synapse.messaging.core;
 
-/**
- * 消息发布结果。
- *
- * <p>该类型只描述框架层发布动作结果，不表达业务处理结果。
- * {@code brokerMessageId} 由未来具体 MQ 适配器在发布成功后填充。</p>
- */
-public record MessagePublishResult(
-        Status status,
-        String messageId,
-        String brokerMessageId,
-        String reason
-) {
+import java.util.Objects;
 
+/**
+ * 发布入口的技术结果。
+ *
+ * <p>{@link Status#SENT} 仅表示 Transport 接受发送；{@link Status#STORED} 仅表示消息已在
+ * 当前本地事务中登记到 Outbox。二者都不表示消费者已处理。</p>
+ */
+public record MessagePublishResult(Status status, String messageId, String transportMessageId, String reason) {
     public MessagePublishResult {
-        if (status == null) {
-            throw new IllegalArgumentException("status must not be null");
-        }
+        status = Objects.requireNonNull(status, "status must not be null");
+        if (messageId == null || messageId.isBlank()) throw new IllegalArgumentException("messageId must not be blank");
         reason = reason == null ? "" : reason;
     }
 
-    public static MessagePublishResult success(String messageId, String brokerMessageId) {
-        return new MessagePublishResult(Status.SUCCESS, messageId, brokerMessageId, "");
+    public static MessagePublishResult sent(String messageId, String transportMessageId) {
+        return new MessagePublishResult(Status.SENT, messageId, transportMessageId, "");
     }
 
-    public static MessagePublishResult failure(String messageId, String reason) {
+    public static MessagePublishResult stored(String messageId) {
+        return new MessagePublishResult(Status.STORED, messageId, null, "");
+    }
+
+    public static MessagePublishResult failed(String messageId, String reason) {
         return new MessagePublishResult(Status.FAILED, messageId, null, reason);
     }
 
-    public boolean isSuccess() {
-        return status == Status.SUCCESS;
+    public boolean isAccepted() {
+        return status != Status.FAILED;
     }
 
-    /**
-     * 发布动作状态。
-     */
-    public enum Status {
-
-        /**
-         * 发布动作成功。
-         */
-        SUCCESS,
-
-        /**
-         * 发布动作失败。
-         */
-        FAILED
-    }
+    public enum Status {SENT, STORED, FAILED}
 }
