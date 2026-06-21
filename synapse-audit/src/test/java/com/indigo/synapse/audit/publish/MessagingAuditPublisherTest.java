@@ -16,7 +16,9 @@ import com.indigo.synapse.messaging.producer.ReliableMessagePublisher;
 import com.indigo.synapse.messaging.transport.MessageTransportResult;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -116,13 +118,17 @@ class MessagingAuditPublisherTest {
     void requiresNewFailureShouldAppendOutboxInIndependentTransaction() {
         AtomicReference<MessageEnvelope> stored = new AtomicReference<>();
         AtomicInteger newTransactions = new AtomicInteger();
-        TransactionOperations requiresNew = action -> {
-            newTransactions.incrementAndGet();
-            TransactionSynchronizationManager.setActualTransactionActive(true);
-            try {
-                return action.doInTransaction(new SimpleTransactionStatus());
-            } finally {
-                TransactionSynchronizationManager.setActualTransactionActive(false);
+        TransactionOperations requiresNew = new TransactionOperations() {
+            @Override
+            public <T> T execute(TransactionCallback<T> action) {
+                newTransactions.incrementAndGet();
+                TransactionSynchronizationManager.setActualTransactionActive(true);
+                try {
+                    TransactionStatus status = new SimpleTransactionStatus();
+                    return action.doInTransaction(status);
+                } finally {
+                    TransactionSynchronizationManager.setActualTransactionActive(false);
+                }
             }
         };
         beginSynchronizedTransaction();
@@ -145,7 +151,7 @@ class MessagingAuditPublisherTest {
         publisher(null, null, null, received::set)
                 .publishFailure(event(AuditOutcome.FAILURE), AuditFailurePolicy.EXTERNAL_SINK,
                         new IllegalStateException("business"));
-        assertThat(received).hasValue(null);
+        assertThat(received.get()).isNull();
 
         complete(TransactionSynchronization.STATUS_ROLLED_BACK);
         assertThat(received.get().outcome()).isEqualTo(AuditOutcome.FAILURE);
