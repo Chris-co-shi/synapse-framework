@@ -2,7 +2,7 @@
 
 ## 状态
 
-进行中，目标分支：`refactor/batch-3-messaging-idempotency`。
+实现完成，等待 PR CI 验证。目标分支：`refactor/batch-3-messaging-idempotency`。
 
 ## 冻结语义
 
