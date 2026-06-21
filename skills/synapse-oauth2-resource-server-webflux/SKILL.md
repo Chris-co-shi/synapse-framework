@@ -11,6 +11,7 @@
 - authority 固定按 scope、roles、permissions 顺序生成。
 - 对应前缀依次为 `SCOPE_`、`ROLE_`、`PERM_`，已有前缀不得重复添加。
 - 主体和 authority 语义必须与 WebMVC Resource Server 保持一致。
+- 普通 HTTP Header 不得进入可信 actor、tenant、initiator；未实现可信内部 initiator 协议时 initiator 等于 actor。
 
 ## 配置
 

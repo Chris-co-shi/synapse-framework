@@ -212,6 +212,8 @@ public SampleDetail getSample(String id) {
 
 - 方法级注解优先于类型级注解。
 - AOP 只把注解转换为 `PermissionChecker.require(...)`。
+- Security 只注册 Advisor，不注册 `AutoProxyCreator`；应用必须使用 Spring Boot AOP 基础设施。
+- Security Advisor 的 order 为 `-200`，应先于事务和 Audit 执行。
 - AOP 不是唯一安全边界。
 - MQ、Task、Async 场景推荐显式调用 `PermissionChecker`。
 

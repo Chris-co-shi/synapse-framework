@@ -4,11 +4,11 @@ import com.indigo.synapse.security.autoconfigure.SynapseSecurityAutoConfiguratio
 import com.indigo.synapse.core.exception.SynapseAccessDeniedException;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.framework.Advised;
-import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.core.env.MapPropertySource;
 
 import java.util.ArrayList;
@@ -70,17 +70,9 @@ class RequirePermissionAspectIntegrationTest {
                 TestConfiguration.class,
                 Map.of("synapse.security.permission.annotation-enabled", "false")
         )) {
-            assertThrows(NoSuchBeanDefinitionException.class, () ->
-                    context.getBean(DefaultAdvisorAutoProxyCreator.class));
-        }
-    }
-
-    @Test
-    void shouldNotOverrideExistingAutoProxyCreator() {
-        try (AnnotationConfigApplicationContext context = context(CustomAutoProxyCreatorConfiguration.class)) {
-            assertEquals(1, context.getBeansOfType(DefaultAdvisorAutoProxyCreator.class).size());
-            assertEquals("customAutoProxyCreator",
-                    context.getBeanNamesForType(DefaultAdvisorAutoProxyCreator.class)[0]);
+            assertEquals(1, context.getBeansOfType(AbstractAutoProxyCreator.class).size());
+            assertTrue(context.getBeansOfType(RequirePermissionAspect.class).isEmpty());
+            assertTrue(!(context.getBean(SecuredService.class) instanceof Advised));
         }
     }
 
@@ -98,6 +90,7 @@ class RequirePermissionAspectIntegrationTest {
     }
 
     @Configuration(proxyBeanMethods = false)
+    @EnableAspectJAutoProxy(proxyTargetClass = true)
     static class TestConfiguration {
 
         @Bean
@@ -108,15 +101,6 @@ class RequirePermissionAspectIntegrationTest {
         @Bean
         SecuredService securedService() {
             return new SecuredService();
-        }
-    }
-
-    @Configuration(proxyBeanMethods = false)
-    static class CustomAutoProxyCreatorConfiguration extends TestConfiguration {
-
-        @Bean
-        static DefaultAdvisorAutoProxyCreator customAutoProxyCreator() {
-            return new DefaultAdvisorAutoProxyCreator();
         }
     }
 

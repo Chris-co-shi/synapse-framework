@@ -1,7 +1,5 @@
 package com.indigo.synapse.webflux.filter;
 
-import com.indigo.synapse.core.context.OperationContextSnapshot;
-import com.indigo.synapse.webflux.context.OperationContextWebFluxCodec;
 import com.indigo.synapse.webflux.context.ReactiveRequestContext;
 import com.indigo.synapse.webflux.context.RequestContext;
 import com.indigo.synapse.web.core.trace.TraceHeaders;
@@ -14,21 +12,13 @@ import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
 
 import java.net.InetSocketAddress;
-import java.util.Optional;
-
 /**
  * WebFlux 请求上下文 Filter。
  *
- * <p>该 Filter 只建立 traceId、requestId 和 OperationContext 的 reactive 技术上下文，不做 Gateway
- * 路由、认证或授权业务。</p>
+ * <p>该 Filter 只建立 traceId、requestId 和当前传输入口信息。普通 HTTP Header 不得建立 actor、tenant
+ * 或 initiator；认证主体只能由完成 Token 验证的安全适配器建立。</p>
  */
 public final class SynapseWebFluxContextFilter implements WebFilter {
-
-    private final OperationContextWebFluxCodec operationContextCodec;
-
-    public SynapseWebFluxContextFilter(OperationContextWebFluxCodec operationContextCodec) {
-        this.operationContextCodec = operationContextCodec;
-    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
@@ -38,30 +28,20 @@ public final class SynapseWebFluxContextFilter implements WebFilter {
         String path = exchange.getRequest().getURI().getPath();
         String clientIp = clientIp(exchange);
         RequestContext requestContext = new RequestContext(traceId, requestId, method, path, clientIp);
-        Optional<OperationContextSnapshot> snapshot = operationContextCodec.decode(
-                exchange.getRequest().getHeaders(),
-                traceId,
-                requestId,
-                method,
-                path
-        );
-
         exchange.getResponse().getHeaders().set(TraceHeaders.TRACE_ID, traceId);
         exchange.getResponse().getHeaders().set(TraceHeaders.REQUEST_ID, requestId);
 
-        return chain.filter(exchange).contextWrite(context -> withContext(context, requestContext, snapshot));
+        return chain.filter(exchange).contextWrite(context -> withContext(context, requestContext));
     }
 
     private static Context withContext(
             Context context,
-            RequestContext requestContext,
-            Optional<OperationContextSnapshot> snapshot
+            RequestContext requestContext
     ) {
-        Context next = context
+        return context
                 .put(ReactiveRequestContext.TRACE_ID_KEY, requestContext.traceId())
                 .put(ReactiveRequestContext.REQUEST_ID_KEY, requestContext.requestId())
                 .put(ReactiveRequestContext.REQUEST_CONTEXT_KEY, requestContext);
-        return snapshot.map(operationContextSnapshot -> next.put(ReactiveRequestContext.OPERATION_CONTEXT_SNAPSHOT_KEY, operationContextSnapshot)).orElse(next);
     }
 
     private static String requestId(ServerWebExchange exchange) {

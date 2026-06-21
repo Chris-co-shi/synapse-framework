@@ -37,19 +37,19 @@ synapse-audit
 | 维度 | 当前事实 |
 | --- | --- |
 | 定位 | Servlet MVC 技术支撑 |
-| 公开能力 | 复用 web-core Result/ErrorHttpStatusResolver/Jackson 定制；GlobalExceptionHandler、Filter 异常桥接、TraceContext、RequestContext、MvcTraceFilter、MvcOperationContextFilter、OpenAPI 可见性策略 |
+| 公开能力 | 复用 web-core Result/ErrorHttpStatusResolver/Jackson 定制；GlobalExceptionHandler、Filter 异常桥接、TraceContext、RequestContext、MvcTraceFilter、OpenAPI 可见性策略 |
 | 自动配置 | 已提供 WebMVC 自动配置，核心 Bean 支持消费方覆盖 |
 | Framework 依赖 | `synapse-core` |
 | 主要外部依赖 | Jackson、Spring Web、Spring WebMVC、Servlet API、Validation |
 | 当前优势 | MVC 异常与 Filter 异常已区分；traceId 可进入 Header、MDC、请求上下文和响应体 |
-| 已知缺口 | 需要验证 TraceContext、RequestContext、OperationContext 的建立和清理顺序；需要与 WebFlux 统一响应和错误语义 |
+| 已知缺口 | 需要持续验证 TraceContext、RequestContext 的建立和清理顺序；认证 OperationContext 属于 Resource Server 适配层 |
 
 ### 2.3 synapse-webflux
 
 | 维度 | 当前事实 |
 | --- | --- |
 | 定位 | WebFlux 技术支撑，不是 Gateway 服务 |
-| 公开能力 | 复用 web-core Result/ErrorHttpStatusResolver/Jackson 定制；ReactiveRequestContext、SynapseWebFluxContextFilter、OperationContextWebFluxCodec、异常处理器 |
+| 公开能力 | 复用 web-core Result/ErrorHttpStatusResolver/Jackson 定制；ReactiveRequestContext、SynapseWebFluxContextFilter、异常处理器 |
 | 自动配置 | `SynapseWebFluxAutoConfiguration` |
 | Framework 依赖 | `synapse-core` |
 | 主要外部依赖 | Jackson、Spring Web、Spring WebFlux、Reactor |

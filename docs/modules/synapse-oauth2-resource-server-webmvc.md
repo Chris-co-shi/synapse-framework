@@ -30,6 +30,9 @@
 `PrincipalContextScope` 绑定当前请求，并在过滤器链正常返回或抛出异常时自动清理，
 防止 Servlet 容器线程复用导致主体串线。
 
+普通 HTTP Header 中的 actor、tenant、initiator 会被忽略，不能覆盖上述认证主体。当前未实现可信内部
+initiator 协议，因此 Bridge 建立的 initiator 默认等于当前 actor。
+
 ## 3. Claim 与 Authority 规则
 
 `SpringJwtClaimAccessor` 只把 Spring Security `Jwt` 适配成 Core 的 `JwtClaimAccessor`。必填校验、空白过滤、去重和顺序保持统一由 `JwtClaimValues` 完成。

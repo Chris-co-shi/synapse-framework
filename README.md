@@ -85,7 +85,7 @@ synapse-framework
 | `synapse-core` | 错误码、异常、ID、OperationContext 等核心契约 | [查看](docs/modules/synapse-core.md) |
 | `synapse-web-core` | 统一响应、错误映射、traceId 与 Jackson 定制 | [查看](docs/modules/synapse-web-core.md) |
 | `synapse-webmvc` | Servlet MVC 响应、异常处理、Filter 异常桥接 | [查看](docs/modules/synapse-webmvc.md) |
-| `synapse-webflux` | WebFlux Trace、异常响应、Reactor Context / OperationContext 恢复 | [查看](docs/modules/synapse-webflux.md) |
+| `synapse-webflux` | WebFlux Trace、异常响应和不可信请求技术上下文 | [查看](docs/modules/synapse-webflux.md) |
 | `synapse-time` | 时间和时区技术支撑，提供 UTC 查询范围转换 | [查看](docs/modules/synapse-time.md) |
 | `synapse-config` | 配置抽象、运行时读取和类型解析，不是配置中心 | [查看](docs/modules/synapse-config.md) |
 | `synapse-i18n` | 国际化消息解析抽象，不是资源中心 | [查看](docs/modules/synapse-i18n.md) |
@@ -272,6 +272,7 @@ Synapse Framework
 - OAuth2 当前通过聚合层组织 core、authorization support、client 和 resource server 子模块。
 - Web 当前通过聚合层组织 web-core、MVC 和 WebFlux 子模块。
 - `synapse-security` 不依赖 Spring Security Web / Config。
+- 普通 HTTP Header 只能建立 traceId、requestId 等不可信技术上下文；actor、tenant 和 initiator 只能由验证 Token 的认证适配器建立。
 - `synapse-messaging` 不包含真实 MQ / Redis 幂等 / DB / Outbox / 外部渠道 SDK 实现。
 - `synapse-cache` 不包含业务缓存 key 或业务规则。
 - `synapse-data` 只提供 ORM 无关的数据语义抽象，不包含 MyBatis-Plus、DataSource、Flyway 或自动配置。

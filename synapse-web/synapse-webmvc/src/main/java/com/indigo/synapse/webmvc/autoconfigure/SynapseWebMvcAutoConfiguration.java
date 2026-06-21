@@ -1,6 +1,5 @@
 package com.indigo.synapse.webmvc.autoconfigure;
 
-import com.indigo.synapse.webmvc.context.MvcOperationContextFilter;
 import com.indigo.synapse.webmvc.exception.SynapseExceptionBridgeFilter;
 import com.indigo.synapse.webmvc.exception.WebExceptionResponseFactory;
 import com.indigo.synapse.webmvc.exception.WebErrorResponseWriter;
@@ -65,12 +64,4 @@ public class SynapseWebMvcAutoConfiguration {
         return new MvcTraceFilter();
     }
 
-    /**
-     * 创建 MVC OperationContext 恢复 filter。
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public MvcOperationContextFilter synapseMvcOperationContextFilter() {
-        return new MvcOperationContextFilter();
-    }
 }

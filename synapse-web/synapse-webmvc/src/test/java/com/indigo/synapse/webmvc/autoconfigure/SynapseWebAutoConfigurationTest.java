@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indigo.synapse.web.core.autoconfigure.SynapseWebCoreAutoConfiguration;
-import com.indigo.synapse.webmvc.context.MvcOperationContextFilter;
 import com.indigo.synapse.webmvc.openapi.OpenApiProperties;
 import com.indigo.synapse.webmvc.openapi.OpenApiVisibilityPolicy;
 import com.indigo.synapse.webmvc.exception.SynapseExceptionBridgeFilter;
@@ -52,7 +51,7 @@ class SynapseWebAutoConfigurationTest {
             assertNotNull(context.getBean(OpenApiProperties.class));
             assertNotNull(context.getBean(SynapseExceptionBridgeFilter.class));
             assertNotNull(context.getBean(MvcTraceFilter.class));
-            assertNotNull(context.getBean(MvcOperationContextFilter.class));
+            assertFalse(context.containsBean("synapseMvcOperationContextFilter"));
         });
     }
 

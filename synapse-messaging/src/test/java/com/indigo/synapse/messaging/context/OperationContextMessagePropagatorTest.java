@@ -31,6 +31,8 @@ class OperationContextMessagePropagatorTest {
         assertThat(enriched.metadata().headers())
                 .containsEntry(MessageContextHeaders.TRACE_ID, "trace-1")
                 .containsEntry(MessageContextHeaders.ACTOR_ID, "actor-1")
+                .containsEntry(MessageContextHeaders.TENANT_ID, "tenant-a")
+                .containsEntry(MessageContextHeaders.INITIATOR_ID, "actor-1")
                 .doesNotContainKeys("Authorization", "roles", "permissions");
     }
 

@@ -16,7 +16,8 @@ class RequestContextHolderTest {
 
     @Test
     void shouldStoreAndClearRequestContext() {
-        RequestContext context = new RequestContext("trace-1", "GET", "/api/admin/users", "127.0.0.1");
+        RequestContext context = new RequestContext(
+                "trace-1", "request-1", "GET", "/api/admin/users", "127.0.0.1");
 
         RequestContextHolder.set(context);
 
@@ -29,8 +30,13 @@ class RequestContextHolderTest {
 
     @Test
     void shouldValidateRequiredContextFields() {
-        assertThrows(IllegalArgumentException.class, () -> new RequestContext("", "GET", "/x", null));
-        assertThrows(IllegalArgumentException.class, () -> new RequestContext("trace", "", "/x", null));
-        assertThrows(IllegalArgumentException.class, () -> new RequestContext("trace", "GET", "", null));
+        assertThrows(IllegalArgumentException.class,
+                () -> new RequestContext("", "request", "GET", "/x", null));
+        assertThrows(IllegalArgumentException.class,
+                () -> new RequestContext("trace", "", "GET", "/x", null));
+        assertThrows(IllegalArgumentException.class,
+                () -> new RequestContext("trace", "request", "", "/x", null));
+        assertThrows(IllegalArgumentException.class,
+                () -> new RequestContext("trace", "request", "GET", "", null));
     }
 }

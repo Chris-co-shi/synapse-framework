@@ -56,7 +56,7 @@
 - Jackson 默认规则由 web-core Module/Builder Customizer 统一，Framework 不创建全局 ObjectMapper。
 - 未认证、无权限、参数错误、404、405、415、未知异常响应是否一致。
 - traceId header、MDC 或 Reactor Context、Result.traceId 是否一致。
-- MvcOperationContextFilter 与认证桥接 Filter 的顺序。
+- 普通 HTTP Header 与认证桥接的信任边界（0.1.0 发布前已通过移除通用 Web 身份恢复入口解决）。
 
 ### 不做
 

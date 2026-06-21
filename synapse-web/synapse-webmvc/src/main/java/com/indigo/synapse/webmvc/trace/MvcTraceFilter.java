@@ -23,11 +23,13 @@ public final class MvcTraceFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         RequestContext requestContext = WebTraceLifecycle.start(
                 request.getHeader(TraceHeaders.TRACE_ID),
+                request.getHeader(TraceHeaders.REQUEST_ID),
                 request.getMethod(),
                 request.getRequestURI(),
                 request.getRemoteAddr()
         );
         response.setHeader(TraceHeaders.TRACE_ID, requestContext.traceId());
+        response.setHeader(TraceHeaders.REQUEST_ID, requestContext.requestId());
         try {
             filterChain.doFilter(request, response);
         } finally {

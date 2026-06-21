@@ -74,6 +74,24 @@ class AuditEventContextEnricherTest {
     }
 
     @Test
+    void shouldUseCurrentActorRatherThanInitiatorAsAuditSubject() {
+        OperationActor actor = new OperationActor(
+                OperationActorType.USER, "verified-user", "Verified User", "tenant-a", Map.of());
+        OperationActor initiator = new OperationActor(
+                OperationActorType.SERVICE, "internal-initiator", "Internal Initiator", "tenant-a", Map.of());
+        OperationContext context = new OperationContext(
+                actor, initiator, null, null, "tenant-a", null,
+                Instant.parse("2026-06-21T00:00:00Z"), Map.of());
+
+        try (OperationContextScope ignored = OperationContextHolder.scope(context)) {
+            AuditEvent enriched = enricher.enrich(event(null, null, Map.of()));
+
+            assertEquals("verified-user", enriched.subject().subjectId());
+            assertEquals("tenant-a", enriched.subject().tenantId());
+        }
+    }
+
+    @Test
     void shouldFillClientSubjectFromOperationContext() {
         OperationActor actor = new OperationActor(OperationActorType.SERVICE, "client-a", "Client A", "tenant-a", Map.of());
         OperationContext context = new OperationContext(

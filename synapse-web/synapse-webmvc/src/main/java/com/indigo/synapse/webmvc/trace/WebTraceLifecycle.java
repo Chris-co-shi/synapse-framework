@@ -18,11 +18,18 @@ public final class WebTraceLifecycle {
     /**
      * 开始一次 Web trace 生命周期。
      */
-    public static RequestContext start(String incomingTraceId, String method, String path, String clientIp) {
+    public static RequestContext start(
+            String incomingTraceId,
+            String incomingRequestId,
+            String method,
+            String path,
+            String clientIp
+    ) {
         String traceId = TraceIdResolver.resolve(incomingTraceId);
+        String requestId = TraceIdResolver.resolve(incomingRequestId);
         TraceContext.setTraceId(traceId);
         TraceMdc.setTraceId(traceId);
-        RequestContext requestContext = new RequestContext(traceId, method, path, clientIp);
+        RequestContext requestContext = new RequestContext(traceId, requestId, method, path, clientIp);
         RequestContextHolder.set(requestContext);
         return requestContext;
     }

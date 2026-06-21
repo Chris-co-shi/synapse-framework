@@ -33,6 +33,7 @@
 - 未知主体类型与缺失必填 claim 必须拒绝。
 - roles、permissions、scope 覆盖空白过滤、去重、前缀和顺序。
 - CLIENT 不伪装成 USER。
+- 普通 HTTP Header 不得覆盖 actor、tenant、initiator；未实现可信内部 initiator 协议时 initiator 等于 actor。
 - 默认链在用户自定义 SecurityFilterChain 后退让。
 - 401/403 复用 synapse-webmvc writer。
 - GatewayProof valid/missing/permit path/required=false 必须覆盖。

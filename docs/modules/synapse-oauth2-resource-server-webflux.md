@@ -84,6 +84,8 @@ SynapseReactiveOperationContext.currentOperationContext();
 
 `ReactivePrincipalContextWebFilter` 将已认证主体写入当前订阅链的 Reactor Context。
 该上下文可跨 `publishOn`、`subscribeOn` 读取，并按订阅隔离；并发请求之间不共享可变状态。
+普通 HTTP Header 中的 actor、tenant、initiator 不进入该可信上下文，也不能覆盖已认证主体；当前未实现
+可信内部 initiator 协议时，initiator 默认等于当前 actor。
 
 ## 5. 自动配置边界
 

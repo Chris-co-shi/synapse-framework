@@ -17,7 +17,6 @@ import com.indigo.synapse.core.context.DefaultOperationContextProvider;
 import com.indigo.synapse.core.context.OperationContextProvider;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -41,14 +40,6 @@ import java.util.List;
 public class SynapseAuditAutoConfiguration {
 
     @Bean
-    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    @ConditionalOnMissingBean(DefaultAdvisorAutoProxyCreator.class)
-    @ConditionalOnProperty(prefix = "synapse.audit", name = "aop-enabled", matchIfMissing = true)
-    public static DefaultAdvisorAutoProxyCreator synapseAuditAutoProxyCreator() {
-        return new DefaultAdvisorAutoProxyCreator();
-    }
-
-    @Bean
     @ConditionalOnMissingBean
     public AuditSanitizer synapseAuditSanitizer() { return new DefaultAuditSanitizer(); }
 
@@ -65,11 +56,13 @@ public class SynapseAuditAutoConfiguration {
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConditionalOnProperty(prefix = "synapse.audit", name = "aop-enabled", matchIfMissing = true)
     @ConditionalOnMissingBean
     public AuditAspect synapseAuditAspect(AuditPublisher publisher) { return new AuditAspect(publisher); }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConditionalOnProperty(prefix = "synapse.audit", name = "aop-enabled", matchIfMissing = true)
     @ConditionalOnMissingBean
     public AuditMethodAdvisor synapseAuditMethodAdvisor(AuditAspect aspect) { return new AuditMethodAdvisor(aspect); }

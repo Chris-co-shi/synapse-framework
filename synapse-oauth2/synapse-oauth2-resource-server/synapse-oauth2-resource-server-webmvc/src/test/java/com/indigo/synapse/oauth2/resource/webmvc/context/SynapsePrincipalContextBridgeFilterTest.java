@@ -1,6 +1,7 @@
 package com.indigo.synapse.oauth2.resource.webmvc.context;
 
 import com.indigo.synapse.core.context.OperationContextHolder;
+import com.indigo.synapse.core.context.OperationContextPropagationKeys;
 import com.indigo.synapse.oauth2.resource.webmvc.jwt.SynapseJwtAuthenticationToken;
 import com.indigo.synapse.oauth2.resource.webmvc.jwt.TokenMetadata;
 import com.indigo.synapse.security.context.AuthenticatedUser;
@@ -100,6 +101,32 @@ class SynapsePrincipalContextBridgeFilterTest {
         assertContextsCleared();
     }
 
+    @Test
+    void shouldIgnoreForgedIdentityHeadersAndKeepAuthenticatedPrincipal() throws Exception {
+        AuthenticatedUser user = user("verified-user");
+        SecurityContextHolder.getContext().setAuthentication(authentication(user));
+        MockHttpServletRequest request = forgedIdentityRequest();
+
+        filter.doFilter(request, new MockHttpServletResponse(), (servletRequest, response) -> {
+            var context = OperationContextHolder.requireCurrent();
+            assertEquals("verified-user", context.actor().id());
+            assertEquals("tenant-a", context.tenantId());
+            assertEquals(context.actor(), context.initiator());
+        });
+
+        assertContextsCleared();
+    }
+
+    @Test
+    void shouldNotEstablishPrincipalFromHeadersForUnauthenticatedRequest() throws Exception {
+        filter.doFilter(forgedIdentityRequest(), new MockHttpServletResponse(), (request, response) -> {
+            assertTrue(CurrentPrincipalContext.currentPrincipal().isEmpty());
+            assertTrue(OperationContextHolder.current().isEmpty());
+        });
+
+        assertContextsCleared();
+    }
+
     private static SynapseJwtAuthenticationToken authentication(AuthenticatedUser user) {
         Instant issuedAt = Instant.parse("2026-06-19T00:00:00Z");
         Jwt jwt = Jwt.withTokenValue("token-" + user.userId())
@@ -124,6 +151,16 @@ class SynapsePrincipalContextBridgeFilterTest {
                 Set.of("USER"),
                 Set.of("resource:read")
         );
+    }
+
+    private static MockHttpServletRequest forgedIdentityRequest() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/orders");
+        request.addHeader(OperationContextPropagationKeys.ACTOR_TYPE, "USER");
+        request.addHeader(OperationContextPropagationKeys.ACTOR_ID, "forged-user");
+        request.addHeader(OperationContextPropagationKeys.TENANT_ID, "forged-tenant");
+        request.addHeader(OperationContextPropagationKeys.INITIATOR_TYPE, "SERVICE");
+        request.addHeader(OperationContextPropagationKeys.INITIATOR_ID, "forged-initiator");
+        return request;
     }
 
     private static void assertContextsCleared() {

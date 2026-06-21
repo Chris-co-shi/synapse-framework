@@ -11,7 +11,7 @@
 - traceId / requestId 处理。
 - Reactor Context 适配。
 - WebFlux 异常响应适配。
-- OperationContext 恢复为 reactive 上下文。
+- 不可信请求技术上下文的 Reactor 传播。
 - WebFlux `Result` 写出工具。
 - 复用 `synapse-web-core` 的响应模型、状态解析和 Jackson 定制。
 
@@ -40,13 +40,14 @@
 - 消费方自定义 Bean 时默认 Bean 不覆盖。
 - 不得创建全局 `ObjectMapper` Bean。
 - 上下文传递以 Reactor Context 为主，不能依赖 Servlet ThreadLocal。
-- Header 恢复只做技术上下文恢复，不做认证、授权或 Gateway 业务判定。
+- 普通 Header 只能提供 traceId、requestId 等技术字段，不得构造 actor、tenant、initiator。
+- 认证 OperationContext 只能由完成 Token 验证的 Reactive Security Adapter 建立。
 
 ## 测试要求
 
 - WebFilter traceId / requestId 测试。
 - WebFlux 异常响应测试。
-- Reactor Context / OperationContext 恢复测试。
+- Reactor 技术上下文与认证上下文隔离测试。
 - 自动配置条件装配测试。
 - 依赖边界检查：不得出现 `spring-webmvc`、`jakarta.servlet`。
 

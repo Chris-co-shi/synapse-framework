@@ -2,7 +2,6 @@ package com.indigo.synapse.webflux.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indigo.synapse.web.core.autoconfigure.SynapseWebCoreAutoConfiguration;
-import com.indigo.synapse.webflux.context.OperationContextWebFluxCodec;
 import com.indigo.synapse.webflux.exception.SynapseWebFluxExceptionHandler;
 import com.indigo.synapse.webflux.filter.SynapseWebFluxContextFilter;
 import org.junit.jupiter.api.Test;
@@ -28,7 +27,6 @@ class SynapseWebFluxAutoConfigurationTest {
     void shouldCreateWebFluxFoundationBeans() {
         contextRunner.run(context -> {
             assertNotNull(context.getBean(ObjectMapper.class));
-            assertNotNull(context.getBean(OperationContextWebFluxCodec.class));
             assertNotNull(context.getBean(SynapseWebFluxContextFilter.class));
             assertNotNull(context.getBean(SynapseWebFluxExceptionHandler.class));
         });

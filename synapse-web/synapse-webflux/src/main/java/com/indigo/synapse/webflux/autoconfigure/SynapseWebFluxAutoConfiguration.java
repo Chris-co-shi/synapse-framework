@@ -1,7 +1,6 @@
 package com.indigo.synapse.webflux.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.indigo.synapse.webflux.context.OperationContextWebFluxCodec;
 import com.indigo.synapse.web.core.error.CommonErrorHttpStatusResolver;
 import com.indigo.synapse.web.core.error.CompositeErrorHttpStatusResolver;
 import com.indigo.synapse.web.core.error.ErrorHttpStatusResolver;
@@ -51,14 +50,8 @@ public class SynapseWebFluxAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public OperationContextWebFluxCodec operationContextWebFluxCodec() {
-        return new OperationContextWebFluxCodec();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public SynapseWebFluxContextFilter synapseWebFluxContextFilter(OperationContextWebFluxCodec codec) {
-        return new SynapseWebFluxContextFilter(codec);
+    public SynapseWebFluxContextFilter synapseWebFluxContextFilter() {
+        return new SynapseWebFluxContextFilter();
     }
 
     @Bean

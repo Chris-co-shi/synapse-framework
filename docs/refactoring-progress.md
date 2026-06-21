@@ -2,6 +2,20 @@
 
 本文件记录整体架构重构各阶段的状态。最终提交清单以 Git 历史为准。
 
+## 0.1.0 发布前批次 0～1：构建基线与上下文信任边界
+
+- 状态：已实现，等待独立提交。
+- 批次 0：Messaging 测试显式加载 Mockito Java Agent，避免 JDK 21 下 inline mock maker self-attach 失败；不改变生产行为。
+- 批次 1：通用 WebMVC/WebFlux 只建立不可信技术上下文，删除普通 HTTP Header 到 actor、tenant、initiator 的恢复入口；Resource Server 继续作为认证主体唯一建立入口。
+- 架构门禁：禁止通用 Web Adapter 使用身份传播 key 或 OperationContext Snapshot Codec 建立认证身份。
+
+## 0.1.0 发布前批次 2：统一 AOP 基础设施
+
+- 状态：已完成。
+- 修改摘要：Security、Audit 删除自建 AutoProxyCreator，只保留有明确 order 的 Advisor；统一由 Spring Boot AOP 创建单一代理，修复 Audit 在 JDK 接口代理下解析不到实现方法注解的问题。
+- 顺序约定：Security `-200`、Spring Transaction `0`、Audit `200`、业务方法；返回路径相反。
+- 架构门禁：Framework 生产代码禁止依赖 Spring `autoproxy` 包。
+
 ## Phase 0：建立重构基线
 
 - 状态：已完成

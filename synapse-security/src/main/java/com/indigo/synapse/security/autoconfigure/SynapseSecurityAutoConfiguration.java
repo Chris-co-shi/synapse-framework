@@ -10,7 +10,6 @@ import com.indigo.synapse.security.gatewayproof.GatewayProofSigner;
 import com.indigo.synapse.security.gatewayproof.GatewayProofTokenHasher;
 import com.indigo.synapse.security.gatewayproof.HmacSha256GatewayProofSigner;
 import org.aopalliance.intercept.MethodInterceptor;
-import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -101,23 +100,6 @@ public class SynapseSecurityAutoConfiguration {
     @ConditionalOnMissingBean(PermissionChecker.class)
     public PermissionChecker permissionChecker() {
         return new DefaultPermissionChecker();
-    }
-
-    /**
-     * RequirePermission 声明式权限检查自动代理创建器。
-     */
-    @Bean
-    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    @ConditionalOnClass(MethodInterceptor.class)
-    @ConditionalOnMissingBean(DefaultAdvisorAutoProxyCreator.class)
-    @ConditionalOnProperty(
-            prefix = "synapse.security.permission",
-            name = "annotation-enabled",
-            havingValue = "true",
-            matchIfMissing = true
-    )
-    public static DefaultAdvisorAutoProxyCreator requirePermissionAutoProxyCreator() {
-        return new DefaultAdvisorAutoProxyCreator();
     }
 
     /**

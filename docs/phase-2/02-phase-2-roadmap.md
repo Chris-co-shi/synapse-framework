@@ -163,6 +163,9 @@
 
 验收标准：没有上下文时不能悄悄伪装成 system；actor、initiator、source 可以区分；异步执行后能恢复旧上下文并清理 ThreadLocal；MQ 消费可以从 Header 恢复 OperationContext。
 
+> 0.1.0 发布前信任边界修订：上述 HTTP 入站恢复方案已废止。普通 HTTP Header 只保留技术上下文，
+> 不再恢复 actor、tenant、initiator；认证主体由当前服务验证 Token 后的 Resource Server Adapter 建立。
+
 ## 7. TASK-205：Time / Config / I18n 基础抽象
 
 目标：

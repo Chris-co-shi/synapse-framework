@@ -33,6 +33,23 @@ class OperationContextDataAuditorProviderTest {
     }
 
     @Test
+    void shouldUseCurrentActorRatherThanInitiatorForAuditFields() {
+        OperationContextDataAuditorProvider provider =
+                new OperationContextDataAuditorProvider(new DefaultOperationContextProvider());
+        OperationActor actor = new OperationActor(
+                OperationActorType.USER, "verified-user", "Verified User", "tenant-a", Map.of());
+        OperationActor initiator = new OperationActor(
+                OperationActorType.SERVICE, "internal-initiator", "Internal Initiator", "tenant-a", Map.of());
+        OperationContext context = new OperationContext(
+                actor, initiator, null, null, "tenant-a", null,
+                Instant.parse("2026-06-21T00:00:00Z"), Map.of());
+
+        try (OperationContextScope ignored = OperationContextHolder.scope(context)) {
+            assertThat(provider.currentAuditor()).contains("verified-user");
+        }
+    }
+
+    @Test
     void shouldReturnEmptyWhenContextMissing() {
         OperationContextDataAuditorProvider provider =
                 new OperationContextDataAuditorProvider(new DefaultOperationContextProvider());

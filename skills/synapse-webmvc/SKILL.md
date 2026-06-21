@@ -12,7 +12,7 @@
 - MVC traceId / RequestContext。
 - 复用 `synapse-web-core` 的 Jackson Module 和 Builder Customizer。
 - OpenAPI visibility 策略。
-- MVC OperationContext 恢复扩展。
+- 不可信请求技术上下文。
 
 禁止提供：
 
@@ -37,6 +37,7 @@
 - Servlet 相关能力必须只在 Servlet Web Application 下生效。
 - Filter 阶段异常桥接必须早于安全 Filter。
 - `synapse-webmvc` 不依赖 `synapse-security`。
+- 普通 Header 不得建立 actor、tenant、initiator；认证 OperationContext 由专用安全适配模块建立。
 
 ## 测试要求
 

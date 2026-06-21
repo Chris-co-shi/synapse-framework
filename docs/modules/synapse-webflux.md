@@ -7,8 +7,7 @@
 它只提供 reactive Web 基础设施：
 
 - WebFlux 请求 traceId / requestId 处理。
-- Reactor Context 中的请求上下文。
-- OperationContext Header 恢复为 `OperationContextSnapshot`。
+- Reactor Context 中的不可信请求技术上下文。
 - WebFlux 异常响应适配。
 - 复用 `synapse-web-core` 的 JSON Builder 定制。
 - 复用 `synapse-web-core` 的统一 `Result` 响应结构。
@@ -23,7 +22,6 @@
 
 - `SynapseWebFluxContextFilter`
 - `ReactiveRequestContext`
-- `OperationContextWebFluxCodec`
 - `SynapseWebFluxExceptionHandler`
 - `WebFluxExceptionResponseFactory`
 - `com.indigo.synapse.web.core.response.Result`
@@ -35,7 +33,7 @@
 - WebFlux 应用需要统一 traceId / requestId。
 - WebFlux 应用需要统一异常 JSON 响应。
 - Platform Gateway 需要引用 Framework 的 WebFlux 技术支撑能力。
-- WebFlux 链路需要从 Header 恢复 OperationContext 技术上下文。
+- WebFlux 链路需要传播 traceId、requestId 和真实传输入口信息。
 
 ## 4. 不适用场景
 
@@ -67,7 +65,6 @@ WebFlux Request
   -> SynapseWebFluxContextFilter
   -> traceId / requestId response headers
   -> Reactor Context
-  -> OperationContextSnapshot
   -> Handler / Gateway technical chain
 ```
 
@@ -80,31 +77,13 @@ WebFlux Throwable
   -> Result JSON
 ```
 
-## 7. OperationContext Header
+## 7. 请求上下文信任边界
 
-当前支持的技术 Header：
-
-```text
-X-Synapse-Actor-Type
-X-Synapse-Actor-Id
-X-Synapse-Actor-Name
-X-Synapse-Initiator-Type
-X-Synapse-Initiator-Id
-X-Synapse-Initiator-Name
-X-Synapse-Tenant-Id
-X-Synapse-Source-Type
-X-Synapse-Source-Name
-X-Synapse-Source-Instance-Id
-X-Synapse-Source-Entrypoint
-```
-
-说明：
-
-- Header 恢复只做技术上下文恢复。
-- Header 解码复用 `synapse-core` 的 `OperationContextSnapshotCodec` 规则。
-- 缺少 actor type 或 actor id 时不恢复上下文，不默认创建 system actor。
-- Header 是否可信、是否签名、是否来自 Gateway 不在本模块内判定。
-- `synapse-webflux` 不做认证和授权。
+- 普通 Header 只允许提供 traceId、requestId 等不可信技术字段。
+- method、path、clientIp 等来源信息由当前 WebFlux Adapter 根据真实请求建立。
+- actor、tenant、initiator、roles、permissions 不进入 `ReactiveRequestContext`。
+- 已认证 actor 和 tenant 由 Reactive Resource Server 在完成 Token 验证后写入独立的可信 Reactor Context。
+- 当前没有可信内部 initiator 协议时，initiator 默认等于 actor。
 
 ## 8. 边界与注意事项
 
@@ -123,7 +102,8 @@ Gateway 可启动服务属于 Synapse Platform。Framework 中的 `synapse-webfl
 
 ### 8.3 Reactor Context 是主通道
 
-WebFlux 场景不要依赖 Servlet ThreadLocal。请求上下文、traceId、requestId、OperationContextSnapshot 应通过 Reactor Context 读取。
+WebFlux 场景不要依赖 Servlet ThreadLocal。请求技术上下文、traceId、requestId 应通过 Reactor Context 读取；
+认证 `OperationContext` 通过 Resource Server 的可信读取入口获取。
 
 ## 9. 常见问题
 

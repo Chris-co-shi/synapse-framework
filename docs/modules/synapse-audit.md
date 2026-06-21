@@ -48,6 +48,10 @@ public void approveOrder() {
 切面根据返回或异常生成 SUCCESS/FAILURE 事件。`targetId` 未指定时使用方法名作为技术标识；
 需要真实业务目标 ID 时，建议显式构造 `AuditEvent` 并调用 `AuditPublisher`。
 
+Audit 只注册 Advisor，不注册 `AutoProxyCreator`。应用必须启用 Spring Boot AOP，并将 Spring Transaction
+Advisor order 配置为 `0`；Audit Advisor 的 order 为 `200`，因此审计发布发生在活动业务事务内。
+本约定不改变成功与失败审计当前的事务策略。
+
 ## 6. 配置
 
 | 配置项 | 默认值 | 说明 |

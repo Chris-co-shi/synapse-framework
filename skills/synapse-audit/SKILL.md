@@ -11,6 +11,7 @@
 - 关键审计使用 `ROLLBACK`，通过 Reliable 发布，并确保调用处已有活动本地事务和 OutboxStore。
 - 显式字段优先于 AuditContext 和 OperationContext。
 - 不确定真实主体时不得伪造 system/unknown。
+- Audit 只提供 order 为 `200` 的 Advisor；不得注册 `AutoProxyCreator`，事务 Advisor 必须显式配置为 order `0`。
 
 ## 安全规则
 
@@ -30,6 +31,7 @@
 - 覆盖普通审计继续业务、关键审计可靠登记及失败传播。
 - 覆盖 `@Audited` 成功/失败事件与不采集参数。
 - 覆盖自动配置退让、开关和 Configuration Metadata。
+- 覆盖 Security、Transaction、Audit 与用户 Advisor 共存，以及 JDK/CGLIB 代理场景。
 
 ## 必读
 

@@ -363,7 +363,6 @@ SynapseExceptionBridgeFilter synapseExceptionBridgeFilter(
 - `ObjectMapper`：用户提供则不覆盖。
 - `SynapseExceptionBridgeFilter`：用户提供则不覆盖。
 - `MvcTraceFilter`：用户提供则不覆盖。
-- `MvcOperationContextFilter`：用户提供则不覆盖。
 
 ## 9. 边界与注意事项
 
@@ -392,10 +391,11 @@ Gateway = Platform 可启动服务
 
 业务系统可以直接返回 `Result<T>`，也可以在自己的 Controller 层转换。但不要把业务字段直接塞进 `Result` 结构本身。
 
-### 9.5 OperationContext 恢复只做技术上下文
+### 9.5 普通请求只建立不可信技术上下文
 
-`MvcOperationContextFilter` 使用 `synapse-core` 的 `OperationContextSnapshotCodec` 从标准 Header 恢复上下文。
-缺少 actor type 或 actor id 时不会恢复上下文，也不会默认创建 system actor。Header 是否可信、是否由 Gateway 注入，不在 `synapse-webmvc` 内判断。
+`MvcTraceFilter` 只从请求恢复或生成 traceId，并根据当前 Servlet 请求建立 method、path、clientIp 等技术信息。
+`synapse-webmvc` 不从普通 Header 恢复 `OperationContext`，也不读取 actor、tenant、initiator。认证主体只能由
+OAuth2 Resource Server 等完成 Token 验证的专用适配模块建立；当前未实现可信内部 initiator 协议时，initiator 默认等于 actor。
 
 ## 10. 常见问题
 
@@ -415,7 +415,8 @@ Gateway = Platform 可启动服务
 
 `TraceContext` 是 Web 层 traceId 持有器，只处理 traceId。
 
-`OperationContext` 是 core 层通用操作上下文，包含 actor、source、traceId、requestId 等更完整信息。
+`OperationContext` 是 core 层通用操作上下文。HTTP 场景中的 actor、tenant 和 initiator 来自认证适配层，
+不能由 `TraceContext` 或普通请求 Header 建立。
 
 ### Q5：OpenAPI 策略会自动启用 Swagger UI 吗？
 

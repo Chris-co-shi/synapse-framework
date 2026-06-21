@@ -37,6 +37,8 @@ class ArchitectureVerifier:
         self._verify_auto_configuration_imports()
         self._verify_deleted_modules()
         self._verify_dependency_boundaries()
+        self._verify_web_context_trust_boundaries()
+        self._verify_aop_infrastructure_boundaries()
 
     def _load_reactor(self, pom: Path, *, is_root: bool = False) -> None:
         if not pom.is_file():
@@ -144,6 +146,36 @@ class ArchitectureVerifier:
         self._forbid_artifact_fragments("synapse-core", ("synapse-web", "synapse-security", "synapse-cloud"))
         self._forbid_source_imports("synapse-web-core", ("jakarta.servlet", "reactor.", "org.springframework.web.reactive"))
         self._forbid_source_imports("synapse-core", ("com.indigo.synapse.web", "com.indigo.synapse.security"))
+
+    def _verify_web_context_trust_boundaries(self) -> None:
+        """通用 Web Adapter 只能建立不可信技术上下文，不能从 Header 恢复身份。"""
+        forbidden_tokens = (
+            "OperationContextPropagationKeys.ACTOR_",
+            "OperationContextPropagationKeys.TENANT_ID",
+            "OperationContextPropagationKeys.INITIATOR_",
+            "OperationContextSnapshotCodec",
+            "SecurityOperationContextAdapter",
+        )
+        for artifact in ("synapse-webmvc", "synapse-webflux"):
+            project = self.projects.get(artifact)
+            if not project:
+                continue
+            for source in project.path.glob("src/main/**/*.java"):
+                text = source.read_text(encoding="utf-8")
+                if any(token in text for token in forbidden_tokens):
+                    self.errors.append(
+                        f"{artifact} 不得从普通请求建立认证身份: {source.relative_to(ROOT)}"
+                    )
+
+    def _verify_aop_infrastructure_boundaries(self) -> None:
+        """Framework 模块只能贡献 Advisor，不得自行创建全局代理基础设施。"""
+        forbidden_package = "org.springframework.aop.framework.autoproxy."
+        for project in self.projects.values():
+            for source in project.path.glob("src/main/**/*.java"):
+                if forbidden_package in source.read_text(encoding="utf-8"):
+                    self.errors.append(
+                        f"Framework 生产代码不得注册或依赖 AutoProxyCreator: {source.relative_to(ROOT)}"
+                    )
 
     def _forbid_dependency(self, artifact: str, forbidden: str) -> None:
         project = self.projects.get(artifact)

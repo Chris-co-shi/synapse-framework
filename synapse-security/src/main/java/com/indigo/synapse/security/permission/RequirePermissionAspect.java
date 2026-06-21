@@ -23,6 +23,9 @@ import java.util.Optional;
  */
 public class RequirePermissionAspect extends StaticMethodMatcherPointcutAdvisor implements MethodInterceptor {
 
+    /** Security 必须位于事务和审计外层，拒绝请求时不应开启业务事务。 */
+    public static final int ORDER = -200;
+
     private final ObjectProvider<PermissionChecker> permissionCheckerProvider;
 
     public RequirePermissionAspect(ObjectProvider<PermissionChecker> permissionCheckerProvider) {
@@ -31,6 +34,7 @@ public class RequirePermissionAspect extends StaticMethodMatcherPointcutAdvisor 
                 "permissionCheckerProvider must not be null"
         );
         setAdvice(this);
+        setOrder(ORDER);
     }
 
     /**

@@ -2,7 +2,7 @@
 
 ## 1. 模块使命
 
-`synapse-webflux` 把 trace、请求上下文、OperationContext carrier 和统一异常响应适配到 Reactive Web 执行模型。它提供 WebFlux 技术基础，但不是 Gateway 服务。
+`synapse-webflux` 把 trace、不可信请求技术上下文和统一异常响应适配到 Reactive Web 执行模型。它提供 WebFlux 技术基础，但不是 Gateway 服务。
 
 ## 2. 为什么不能复用 Servlet 实现
 
@@ -21,7 +21,6 @@ Reactive: Reactor Context + publisher lifecycle
 
 - traceId / requestId 解析与响应 Header。
 - `ReactiveRequestContext`。
-- OperationContext Header 解码。
 - Reactor Context 写入与读取。
 - WebFlux 异常到 Result JSON 的转换。
 - Reactive JSON 默认规则。
@@ -35,9 +34,8 @@ Reactive: Reactor Context + publisher lifecycle
 
 ## 4. 核心对象角色
 
-- `SynapseWebFluxContextFilter`：请求入口，建立 trace、request 和 OperationContext snapshot。
+- `SynapseWebFluxContextFilter`：请求入口，只建立 trace、request 和真实传输入口信息。
 - `ReactiveRequestContext`：从 Reactor Context 读取请求技术信息。
-- `OperationContextWebFluxCodec`：WebFlux Header 与 core carrier 的适配器。
 - `SynapseWebFluxExceptionHandler`：Reactive 异常写出入口。
 - `WebFluxExceptionResponseFactory`：异常语义和响应模型转换。
 - `SynapseWebFluxAutoConfiguration`：按 classpath 和缺失 Bean 条件装配。
@@ -48,7 +46,6 @@ Reactive: Reactor Context + publisher lifecycle
 ServerWebExchange
   -> SynapseWebFluxContextFilter
   -> resolve traceId / requestId
-  -> decode OperationContextSnapshot
   -> contextWrite(Reactor Context)
   -> Handler / Gateway technical chain
   -> response headers
@@ -67,15 +64,15 @@ Throwable
 
 - 不通过静态 ThreadLocal 保存 Reactive 主体。
 - Context 必须通过 publisher 链传播，避免在订阅前读取。
-- 缺少 actor type / id 时不创建伪 OperationContext。
-- Header 恢复只代表数据解码，不代表调用方可信。
+- 普通 Header 不得进入 actor、tenant、initiator 或认证 client identity。
+- 认证 `OperationContext` 由 Reactive Resource Server 在验证 Token 后写入独立上下文。
 - 响应写出必须遵守 Reactive backpressure 和响应是否已提交状态。
 
 ## 7. 扩展原则
 
 - Platform Gateway 可以依赖本模块，但 Route、鉴权和网关业务留在 Platform。
 - 自定义异常响应可替换 factory / handler Bean。
-- 自定义 Header 适配应继续复用 core codec 规则。
+- 自定义技术 Header 不得扩展为身份恢复协议。
 - 不为了代码复用让本模块依赖 `synapse-webmvc`。
 
 ## 8. 源码阅读顺序
@@ -83,7 +80,6 @@ Throwable
 ```text
 Result
   -> ReactiveRequestContext
-  -> OperationContextWebFluxCodec
   -> SynapseWebFluxContextFilter
   -> WebFluxExceptionResponseFactory
   -> SynapseWebFluxExceptionHandler
@@ -103,6 +99,6 @@ Result
 - 是否引入 `jakarta.servlet` 或 Spring MVC。
 - 是否把 Gateway 运行时能力放入 Framework。
 - 是否把 ThreadLocal 当成唯一上下文。
-- 是否复制而不是复用 core carrier 规则。
+- 是否从普通 Header 构造 actor、tenant 或 initiator。
 - 是否在 response committed 后重复写响应。
 - 默认 Bean 是否允许消费方覆盖。

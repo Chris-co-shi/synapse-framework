@@ -6,6 +6,7 @@ import com.indigo.synapse.audit.event.AuditTarget;
 import com.indigo.synapse.audit.publish.AuditPublisher;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.time.Clock;
@@ -26,7 +27,7 @@ public final class AuditAspect implements MethodInterceptor {
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        Audited audited = AnnotatedElementUtils.findMergedAnnotation(invocation.getMethod(), Audited.class);
+        Audited audited = findAudited(invocation);
         if (audited == null) return invocation.proceed();
         try {
             Object result = invocation.proceed();
@@ -41,6 +42,17 @@ public final class AuditAspect implements MethodInterceptor {
             }
             throw businessFailure;
         }
+    }
+
+    private Audited findAudited(MethodInvocation invocation) {
+        Class<?> targetClass = invocation.getThis() == null
+                ? invocation.getMethod().getDeclaringClass()
+                : invocation.getThis().getClass();
+        Audited audited = AnnotatedElementUtils.findMergedAnnotation(
+                AopUtils.getMostSpecificMethod(invocation.getMethod(), targetClass), Audited.class);
+        return audited != null
+                ? audited
+                : AnnotatedElementUtils.findMergedAnnotation(invocation.getMethod(), Audited.class);
     }
 
     private AuditEvent event(MethodInvocation invocation, Audited audited, AuditOutcome outcome, String failureType) {

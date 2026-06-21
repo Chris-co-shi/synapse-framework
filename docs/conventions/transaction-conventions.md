@@ -21,6 +21,9 @@
 
 ## 4. Spring 代理限制
 
+- 应用统一使用 Spring Boot AOP 基础设施，同一 `ApplicationContext` 只允许一个 `AbstractAutoProxyCreator`；Framework 模块不得自行注册代理创建器。
+- Advisor 进入顺序固定为 Security `-200`、Spring Transaction `0`、Audit `200`、业务方法；返回顺序相反。
+- 使用 `@EnableTransactionManagement(order = 0)` 明确事务 Advisor 顺序，避免 Audit 落到事务外层。
 - 同一对象内部自调用通常不会经过 Spring 事务代理，目标方法上的 `@Transactional` 不生效。
 - private、final 或非代理可见的方法不应承担事务边界。
 - 需要复用事务用例时，将边界移动到独立 Bean 的 public 方法，或重构调用关系；不要手工获取自身代理掩盖设计问题。

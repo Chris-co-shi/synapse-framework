@@ -2,7 +2,7 @@
 
 ## 1. 模块使命
 
-`synapse-webmvc` 把 core 的错误和操作上下文契约适配到 Servlet MVC，形成统一 HTTP 响应、异常收口、trace 生命周期和请求上下文恢复。
+`synapse-webmvc` 把 core 错误契约适配到 Servlet MVC，形成统一 HTTP 响应、异常收口、trace 生命周期和不可信请求技术上下文。
 
 ## 2. 边界
 
@@ -12,7 +12,7 @@
 - MVC 异常到 HTTP status / Result 的转换。
 - Filter 阶段 `SynapseException` 的统一响应桥接。
 - traceId、requestId、MDC 和请求上下文生命周期。
-- 从标准 Header 恢复 OperationContext。
+- 根据真实 Servlet 请求建立 method、path、clientIp 等技术信息。
 - Servlet MVC 默认 JSON 规则。
 
 不负责：
@@ -66,7 +66,7 @@ Handler 和 Filter 只负责接入各自生命周期，不重复判断错误码�
 
 ### 4.5 Trace / Request Context
 
-`MvcTraceFilter` 建立 traceId、MDC、RequestContext 和响应 Header，在 finally 中清理。`MvcOperationContextFilter` 只恢复技术上下文，不认证 Header 的可信性。
+`MvcTraceFilter` 建立 traceId、MDC、RequestContext 和响应 Header，在 finally 中清理。通用 MVC 模块不建立认证 `OperationContext`。
 
 ## 5. 主链路
 
@@ -74,13 +74,12 @@ Handler 和 Filter 只负责接入各自生命周期，不重复判断错误码�
 HTTP Request
   -> SynapseExceptionBridgeFilter
   -> MvcTraceFilter
-  -> MvcOperationContextFilter
   -> security filters owned by other modules
   -> DispatcherServlet
   -> Controller
   -> GlobalExceptionHandler when failed
   -> Result JSON
-  -> finally clean MDC / RequestContext / OperationContext
+  -> finally clean MDC / RequestContext
 ```
 
 ## 6. HTTP 状态边界
@@ -102,7 +101,7 @@ core 的 ErrorCode 不携带 HTTP status。webmvc 通过 resolver 完成映射�
 - Filter 必须在 finally 中清理 ThreadLocal 和 MDC。
 - 统一异常响应不得泄露完整堆栈、凭证和敏感请求内容。
 - traceId 应在响应 Header、Result 和日志 MDC 中一致。
-- OperationContext Header 恢复不等于信任建立；可信边界属于 Gateway / Security。
+- 普通 Header 不得建立 actor、tenant、initiator；可信身份只能由验证 Token 的认证适配器建立。
 - ObjectMapper 默认使用 UTC，但业务发生地日期仍需要 time 模块显式转换。
 
 ## 8. 扩展原则
@@ -122,7 +121,6 @@ Result
   -> GlobalExceptionHandler
   -> SynapseExceptionBridgeFilter
   -> MvcTraceFilter / WebTraceLifecycle
-  -> MvcOperationContextFilter
   -> SynapseWebMvcAutoConfiguration
   -> tests
 ```
@@ -138,7 +136,7 @@ Result
 
 - 是否混入 WebFlux、Gateway 或业务 Controller。
 - 是否让 Filter 和 ControllerAdvice 使用了两套错误映射。
-- 是否把认证逻辑放进 OperationContext Filter。
+- 是否从普通 Header 构造了 actor、tenant 或 initiator。
 - 是否在异常响应中泄露敏感信息。
 - 是否忘记清理 MDC / ThreadLocal。
 - 用户自定义 Bean 是否能让默认自动配置退让。

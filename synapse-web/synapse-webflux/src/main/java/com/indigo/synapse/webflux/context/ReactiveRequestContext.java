@@ -1,6 +1,5 @@
 package com.indigo.synapse.webflux.context;
 
-import com.indigo.synapse.core.context.OperationContextSnapshot;
 import reactor.util.context.ContextView;
 
 import java.util.Optional;
@@ -8,15 +7,14 @@ import java.util.Optional;
 /**
  * Reactor Context 读取工具。
  *
- * <p>WebFlux 场景不应依赖 Servlet ThreadLocal。需要读取 traceId、requestId 或 OperationContext 时，
- * 应从 Reactor Context 中显式获取。</p>
+ * <p>WebFlux 场景不应依赖 Servlet ThreadLocal。该类型只公开不可信的请求技术上下文，
+ * 不承载认证主体、租户或 initiator。认证上下文由 Resource Server 等可信适配器单独建立。</p>
  */
 public final class ReactiveRequestContext {
 
     public static final String TRACE_ID_KEY = "synapse.traceId";
     public static final String REQUEST_ID_KEY = "synapse.requestId";
     public static final String REQUEST_CONTEXT_KEY = "synapse.requestContext";
-    public static final String OPERATION_CONTEXT_SNAPSHOT_KEY = "synapse.operationContextSnapshot";
 
     private ReactiveRequestContext() {
     }
@@ -31,10 +29,6 @@ public final class ReactiveRequestContext {
 
     public static Optional<RequestContext> requestContext(ContextView contextView) {
         return get(contextView, REQUEST_CONTEXT_KEY, RequestContext.class);
-    }
-
-    public static Optional<OperationContextSnapshot> operationContextSnapshot(ContextView contextView) {
-        return get(contextView, OPERATION_CONTEXT_SNAPSHOT_KEY, OperationContextSnapshot.class);
     }
 
     private static <T> Optional<T> get(ContextView contextView, String key, Class<T> type) {

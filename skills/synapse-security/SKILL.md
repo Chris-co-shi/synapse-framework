@@ -30,6 +30,7 @@
 - 安全主体模型必须保持轻量。
 - `AuthenticatedClient` 不得伪装为 `AuthenticatedUser`。
 - 权限注解只调用 `PermissionChecker`，不内置业务权限数据来源。
+- Security 只提供 order 为 `-200` 的 Advisor；不得注册 `AutoProxyCreator`，消费方统一启用 Spring Boot AOP。
 - roles 和 permissions 不得进入 `OperationContext`。
 - 业务代码只通过 `CurrentPrincipalContext` 只读门面访问当前主体。
 - Servlet ThreadLocal 只能存在于可关闭 Scope 中，正常和异常路径都必须恢复外层状态。

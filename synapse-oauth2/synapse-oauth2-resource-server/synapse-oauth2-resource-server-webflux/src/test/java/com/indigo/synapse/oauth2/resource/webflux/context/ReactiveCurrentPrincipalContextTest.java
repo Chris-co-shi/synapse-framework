@@ -1,15 +1,23 @@
 package com.indigo.synapse.oauth2.resource.webflux.context;
 
 import com.indigo.synapse.core.context.OperationActorType;
+import com.indigo.synapse.core.context.OperationContextPropagationKeys;
 import com.indigo.synapse.security.context.AuthenticatedClient;
 import com.indigo.synapse.security.context.AuthenticatedPrincipal;
 import com.indigo.synapse.security.context.AuthenticatedUser;
+import com.indigo.synapse.webflux.filter.SynapseWebFluxContextFilter;
 import org.junit.jupiter.api.Test;
+import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
+import org.springframework.mock.web.server.MockServerWebExchange;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 import reactor.util.context.Context;
 
+import java.time.Instant;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,6 +89,33 @@ class ReactiveCurrentPrincipalContextTest {
                 .verifyComplete();
     }
 
+    @Test
+    void shouldIgnoreUntrustedIdentityHeadersAndKeepAuthenticatedOperationContext() {
+        AuthenticatedUser user = new AuthenticatedUser(
+                "verified-user", "Verified User", "tenant-a", Set.of("USER"), Set.of()
+        );
+        Authentication authentication = authentication(user);
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/items")
+                .header(OperationContextPropagationKeys.ACTOR_ID, "forged-user")
+                .header(OperationContextPropagationKeys.TENANT_ID, "forged-tenant")
+                .header(OperationContextPropagationKeys.INITIATOR_ID, "forged-initiator")
+                .build());
+        SynapseWebFluxContextFilter technicalFilter = new SynapseWebFluxContextFilter();
+        ReactivePrincipalContextWebFilter principalFilter = new ReactivePrincipalContextWebFilter();
+
+        Mono<Void> result = technicalFilter.filter(exchange, currentExchange ->
+                principalFilter.filter(currentExchange, ignored ->
+                        SynapseReactiveOperationContext.currentOperationContext().doOnNext(context -> {
+                            assertThat(context.actor().id()).isEqualTo("verified-user");
+                            assertThat(context.tenantId()).isEqualTo("tenant-a");
+                            assertThat(context.initiator()).isEqualTo(context.actor());
+                        }).then()))
+                .contextWrite(org.springframework.security.core.context.ReactiveSecurityContextHolder
+                        .withAuthentication(authentication));
+
+        StepVerifier.create(result).verifyComplete();
+    }
+
     private static Mono<String> currentPrincipalId(AuthenticatedPrincipal principal) {
         return ReactiveCurrentPrincipalContext.currentPrincipal()
                 .publishOn(Schedulers.parallel())
@@ -89,5 +124,18 @@ class ReactiveCurrentPrincipalContextTest {
                         ReactiveCurrentPrincipalContext.PRINCIPAL_KEY,
                         principal
                 ));
+    }
+
+    private static Authentication authentication(AuthenticatedPrincipal principal) {
+        Instant issuedAt = Instant.parse("2026-06-21T00:00:00Z");
+        Jwt jwt = Jwt.withTokenValue("token")
+                .header("alg", "none")
+                .subject(principal.principalId())
+                .issuedAt(issuedAt)
+                .expiresAt(issuedAt.plusSeconds(300))
+                .build();
+        JwtAuthenticationToken authentication = new JwtAuthenticationToken(jwt);
+        authentication.setDetails(principal);
+        return authentication;
     }
 }

@@ -45,7 +45,8 @@ OperationContextSnapshot
 
 - `OperationContextSnapshotCodec` 只能处理 `Map<String, String>`。
 - Header / Message key 使用 `OperationContextPropagationKeys` 作为统一语义来源。
-- WebMVC、WebFlux、Cloud、MQ 不应复制一套不同的 actor 兜底规则。
+- 普通 HTTP Header 不得调用该 codec 建立 actor、tenant 或 initiator；HTTP 身份由认证适配器建立。
+- MQ、任务等可信内部传播必须由入口 Adapter 明确其信任策略。
 - 缺少 actor type 或 actor id 时 decode 返回 empty。
 - roles、permissions、raw token、password、credential、业务数据不得进入 carrier。
 

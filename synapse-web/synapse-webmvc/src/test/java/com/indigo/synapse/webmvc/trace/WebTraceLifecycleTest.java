@@ -17,7 +17,8 @@ class WebTraceLifecycleTest {
 
     @Test
     void shouldStartAndEndTraceLifecycle() {
-        RequestContext context = WebTraceLifecycle.start("trace-1", "GET", "/api/admin/users", "127.0.0.1");
+        RequestContext context = WebTraceLifecycle.start(
+                "trace-1", "request-1", "GET", "/api/admin/users", "127.0.0.1");
 
         assertEquals("trace-1", context.traceId());
         assertEquals("trace-1", TraceContext.currentTraceId().orElseThrow());
