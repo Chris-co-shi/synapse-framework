@@ -57,7 +57,7 @@ public class SynapseMessagingAutoConfiguration {
             ObjectProvider<MessageFailureStore> failures,
             ObjectProvider<MessageRetryPolicy> policies,
             SynapseMessagingProperties properties) {
-        MessageIdempotencyStore store = stores.getIfUnique();
+        MessageIdempotencyStore store = stores.getIfAvailable();
         return new MessageDispatcher(registry, propagator, store, failures.getIfUnique(), policies.getIfUnique(),
                 properties.getConsumerId(), properties.getIdempotencyLease());
     }
