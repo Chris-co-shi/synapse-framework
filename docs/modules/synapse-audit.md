@@ -55,7 +55,7 @@ Security(-200) -> Transaction(0) -> Audit(200) -> business method
 
 Audit 只注册 Advisor，不创建 `AutoProxyCreator`。Framework 自动将 Spring 标准 Transaction Advisor 的 order 校正为 `0`，消费方不需要手工配置 `@EnableTransactionManagement(order = 0)`。
 
-当可靠 Publisher 存在且 Audit AOP 启用时，缺少标准事务 Advisor或顺序异常会启动失败，防止可靠审计静默退化到事务外。
+当可靠 Publisher 存在且 Audit AOP 启用时，缺少标准事务 Advisor 或顺序异常会启动失败，防止可靠审计静默退化到事务外。
 
 ## 7. 配置
 
