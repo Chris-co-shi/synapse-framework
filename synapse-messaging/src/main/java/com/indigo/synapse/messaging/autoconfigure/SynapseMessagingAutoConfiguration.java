@@ -19,6 +19,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+/** Broker 中立的 Messaging 基础自动配置。 */
 @AutoConfiguration
 @EnableConfigurationProperties(SynapseMessagingProperties.class)
 @ConditionalOnProperty(prefix = "synapse.messaging", name = "enabled", matchIfMissing = true)
