@@ -19,12 +19,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-/** Broker 中立的 Messaging 基础自动配置。 */
 @AutoConfiguration
 @EnableConfigurationProperties(SynapseMessagingProperties.class)
 @ConditionalOnProperty(prefix = "synapse.messaging", name = "enabled", matchIfMissing = true)
 public class SynapseMessagingAutoConfiguration {
-
     @Bean
     @ConditionalOnMissingBean
     OperationContextProvider synapseMessagingOperationContextProvider() {
@@ -33,7 +31,9 @@ public class SynapseMessagingAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    OperationContextMessageCodec synapseOperationContextMessageCodec() { return new OperationContextMessageCodec(); }
+    OperationContextMessageCodec synapseOperationContextMessageCodec() {
+        return new OperationContextMessageCodec();
+    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -53,14 +53,15 @@ public class SynapseMessagingAutoConfiguration {
     MessageDispatcher synapseMessageDispatcher(
             MessageHandlerRegistry registry,
             OperationContextMessagePropagator propagator,
-            ObjectProvider<MessageIdempotencyStore> idempotencyStore,
-            ObjectProvider<MessageFailureStore> failureStore,
-            ObjectProvider<MessageRetryPolicy> retryPolicy) {
-        return new MessageDispatcher(registry, propagator, idempotencyStore.getIfUnique(),
-                failureStore.getIfUnique(), retryPolicy.getIfUnique());
+            ObjectProvider<MessageIdempotencyStore> stores,
+            ObjectProvider<MessageFailureStore> failures,
+            ObjectProvider<MessageRetryPolicy> policies,
+            SynapseMessagingProperties properties) {
+        MessageIdempotencyStore store = stores.getIfUnique();
+        return new MessageDispatcher(registry, propagator, store, failures.getIfUnique(), policies.getIfUnique(),
+                properties.getConsumerId(), properties.getIdempotencyLease());
     }
 
-    /** 显式开启时要求唯一 OutboxStore；缺失或歧义都会使启动失败。 */
     @Bean
     @ConditionalOnProperty(prefix = "synapse.messaging.reliable", name = "enabled", havingValue = "true")
     @ConditionalOnMissingBean
