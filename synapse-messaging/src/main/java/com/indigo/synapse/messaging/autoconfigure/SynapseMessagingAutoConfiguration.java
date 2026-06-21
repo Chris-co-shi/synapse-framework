@@ -63,6 +63,7 @@ public class SynapseMessagingAutoConfiguration {
                 properties.getConsumerId(), properties.getIdempotencyLease());
     }
 
+    /** 显式开启时要求唯一 OutboxStore；缺失或歧义都会使启动失败。 */
     @Bean
     @ConditionalOnProperty(prefix = "synapse.messaging.reliable", name = "enabled", havingValue = "true")
     @ConditionalOnMissingBean
