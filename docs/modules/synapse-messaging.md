@@ -28,9 +28,10 @@ Spring Cloud Stream 可选适配、上下文传播及可靠性 SPI。它不是�
 - `MessageVersion`：负载结构版本。
 - `MessagePublishResult`：`SENT`、`STORED` 或 `FAILED`。
 - `MessageHandleResult`：`SUCCESS`、`DUPLICATE`、`RETRY` 或 `DISCARD`。
+- `MessageIdempotencyKey`：消费方、Handler、消息类型和事件身份组成的作用域键。
 
 `eventId` 表示同一领域事件的稳定身份，重投时应保持不变；`messageId` 表示消息实例。
-消费幂等键优先使用 `eventId`，缺失时回退到 `messageId`。
+幂等键中的消息身份优先使用 `eventId`，缺失时回退到 `messageId`。
 
 ## 4. 发布语义
 
@@ -47,16 +48,29 @@ Spring Cloud Stream 可选适配、上下文传播及可靠性 SPI。它不是�
 
 ## 5. 消费语义
 
-应用通过 `MessageHandler.messageType()` 声明路由类型。`MessageHandlerRegistry` 拒绝重复类型，
-`MessageDispatcher` 负责上下文恢复、Handler 查找、幂等检查、结果处理和失败决策。
+应用通过 `MessageHandler.messageType()` 声明路由类型，通过 `handlerId()` 声明稳定处理器标识。
+`handlerId` 默认复用 `messageType`，不得使用 Java 类名等会随重构变化的值。
+
+`MessageDispatcher` 在调用 Handler 前通过 `MessageIdempotencyStore.claim` 原子申请处理权：
+
+- 已完成：返回 `DUPLICATE`，不再次调用 Handler。
+- 其他消费者仍持有有效处理权：返回 `RETRY`，避免提前 ACK 后丢失消息。
+- 成功取得处理权：调用 Handler，并在成功或业务重复时调用 `complete`。
+- Handler 返回重试、丢弃、空结果或抛出异常时调用 `release`，使状态重新可申请。
+- `complete` 和 `release` 必须校验 claimId，拒绝过期消费者覆盖新处理状态。
+
+幂等状态建议使用 `PROCESSING`、`COMPLETED`、`RETRYABLE`。处理权必须具备租约，节点故障后允许接管。
+幂等键由 `consumerId + handlerId + messageType + eventId/messageId` 组成，不同消费方互不干扰。
 
 可选 SPI：
 
-- `MessageIdempotencyStore`：查询和标记 `messageId/eventId`。
+- `MessageIdempotencyStore`：原子 claim/complete/release 状态端口。
 - `MessageRetryPolicy`：按异常和尝试次数决定是否重试。
 - `MessageFailureStore`：记录最终失败摘要，不含 payload 和异常堆栈。
 
 Framework 不提供这些 SPI 的生产实现。若未提供 `MessageIdempotencyStore`，Dispatcher 不会伪装成已具备幂等保护。
+该机制只降低并发重复处理，不能消除“业务提交成功但 complete 前进程退出”的窗口；关键业务仍必须具备业务幂等，
+或将消费记录与业务修改放入同一数据库本地事务。
 
 ## 6. Spring Cloud Stream
 
@@ -69,11 +83,13 @@ Framework 不提供这些 SPI 的生产实现。若未提供 `MessageIdempotency
 | 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
 | `synapse.messaging.enabled` | `true` | 启用 Messaging 基础自动配置 |
+| `synapse.messaging.consumer-id` | 无 | 存在 `MessageIdempotencyStore` 时必填的稳定消费方标识 |
+| `synapse.messaging.idempotency-lease` | `5m` | 单次消息处理权有效时长，必须大于零 |
 | `synapse.messaging.stream.enabled` | `true` | 允许创建默认 StreamBridge 传输 |
 | `synapse.messaging.reliable.enabled` | `false` | 创建可靠发布器；开启后必须存在唯一 `OutboxStore` Bean |
 
-显式开启可靠发布但缺少 `OutboxStore` 时，应用启动快速失败。配置 metadata 由
-`spring-boot-configuration-processor` 自动生成。
+显式开启可靠发布但缺少 `OutboxStore` 时，应用启动快速失败。提供幂等存储但缺少 `consumer-id`，
+或者租约不是正数时，Dispatcher 创建失败。配置 metadata 由 `spring-boot-configuration-processor` 自动生成。
 
 ## 8. 边界
 
