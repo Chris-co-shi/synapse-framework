@@ -20,7 +20,16 @@ class SynapseMessagingIdempotencyAutoConfigurationTest {
     @Test
     void shouldFailFastWithoutConsumerId() {
         runner.run(context -> assertThat(context).hasFailed()
-                .getFailure().hasMessageContaining("consumerId"));
+                .getFailure().rootCause().hasMessageContaining("consumerId"));
+    }
+
+    @Test
+    void shouldFailFastWithNonPositiveLease() {
+        runner.withPropertyValues(
+                        "synapse.messaging.consumer-id=order-service",
+                        "synapse.messaging.idempotency-lease=0s")
+                .run(context -> assertThat(context).hasFailed()
+                        .getFailure().rootCause().hasMessageContaining("idempotencyLease"));
     }
 
     @Test
