@@ -12,8 +12,8 @@ public final class MessageHandlerRegistry {
     public MessageHandlerRegistry(List<MessageHandler> handlers) {
         Map<String, MessageHandler> indexed = new LinkedHashMap<>();
         for (MessageHandler handler : handlers == null ? List.<MessageHandler>of() : handlers) {
-            String type = handler.messageType();
-            if (type == null || type.isBlank()) throw new IllegalArgumentException("handler messageType must not be blank");
+            String type = requireText(handler.messageType(), "handler messageType");
+            requireText(handler.handlerId(), "handlerId");
             if (indexed.putIfAbsent(type, handler) != null) {
                 throw new IllegalStateException("Duplicate MessageHandler for messageType: " + type);
             }
@@ -23,5 +23,12 @@ public final class MessageHandlerRegistry {
 
     public Optional<MessageHandler> find(String messageType) {
         return Optional.ofNullable(handlers.get(messageType));
+    }
+
+    private static String requireText(String value, String name) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(name + " must not be blank");
+        }
+        return value.trim();
     }
 }
