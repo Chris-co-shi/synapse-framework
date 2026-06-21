@@ -1,6 +1,7 @@
 package com.indigo.synapse.audit.annotation;
 
 import com.indigo.synapse.audit.publish.AuditFailurePolicy;
+import com.indigo.synapse.audit.publish.AuditSuccessPolicy;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,12 +12,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Audited {
-    /** 稳定审计动作。 */
     String action();
-    /** 审计目标类型。 */
     String targetType();
-    /** 可选目标 ID；为空时使用方法名作为技术标识。 */
     String targetId() default "";
-    /** 审计发布失败策略。 */
-    AuditFailurePolicy failurePolicy() default AuditFailurePolicy.CONTINUE;
+    AuditSuccessPolicy successPolicy() default AuditSuccessPolicy.BEST_EFFORT;
+    AuditFailurePolicy failurePolicy() default AuditFailurePolicy.NONE;
 }
