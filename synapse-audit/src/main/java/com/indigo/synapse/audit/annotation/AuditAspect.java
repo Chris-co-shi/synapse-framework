@@ -13,7 +13,7 @@ import java.time.Clock;
 import java.util.Map;
 import java.util.Objects;
 
-/** 执行 {@link Audited} 方法并按成功或异常结果发布审计事件。 */
+/** 执行 Audited 方法并按成功或异常结果发布审计事件。 */
 public final class AuditAspect implements MethodInterceptor {
     private final AuditPublisher publisher;
     private final Clock clock;
@@ -29,19 +29,22 @@ public final class AuditAspect implements MethodInterceptor {
     public Object invoke(MethodInvocation invocation) throws Throwable {
         Audited audited = findAudited(invocation);
         if (audited == null) return invocation.proceed();
+
+        Object result;
         try {
-            Object result = invocation.proceed();
-            publisher.publish(event(invocation, audited, AuditOutcome.SUCCESS, null), audited.failurePolicy());
-            return result;
+            result = invocation.proceed();
         } catch (Throwable businessFailure) {
             try {
-                publisher.publish(event(invocation, audited, AuditOutcome.FAILURE,
-                        businessFailure.getClass().getSimpleName()), audited.failurePolicy());
+                publisher.publishFailure(event(invocation, audited, AuditOutcome.FAILURE,
+                        businessFailure.getClass().getSimpleName()), audited.failurePolicy(), businessFailure);
             } catch (RuntimeException auditFailure) {
                 businessFailure.addSuppressed(auditFailure);
             }
             throw businessFailure;
         }
+
+        publisher.publishSuccess(event(invocation, audited, AuditOutcome.SUCCESS, null), audited.successPolicy());
+        return result;
     }
 
     private Audited findAudited(MethodInvocation invocation) {
