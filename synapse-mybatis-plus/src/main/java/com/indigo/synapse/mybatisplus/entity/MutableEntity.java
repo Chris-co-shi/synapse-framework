@@ -7,17 +7,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serial;
 import java.time.Instant;
 
 /**
- * @author 史偕成
- * @date 2026/06/28 10:11
- **/
+ * 包含修改时间和修改人字段的 MyBatis-Plus 实体基类。
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class MutableEntity extends CreatedEntity {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Instant updatedAt;
