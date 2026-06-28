@@ -60,8 +60,8 @@ public final class DatasourceInventorySynchronizer {
             dataSources.forEach((name, dataSource) -> resolvedDescriptors.add(descriptorResolver.resolve(
                     name,
                     dataSource,
-                    inventory.getJdbcUrl(name),
-                    inventory.getPrimaryName()
+                    inventory.getJdbcUrl(name).orElse(null),
+                    inventory.getPrimaryName().orElse(null)
             )));
 
             Set<String> activeNames = dataSources.keySet();
@@ -78,7 +78,7 @@ public final class DatasourceInventorySynchronizer {
             return new DatasourceInventorySnapshot(
                     dataSources,
                     resolvedDescriptors,
-                    inventory.getPrimaryName(),
+                    inventory.getPrimaryName().orElse(null),
                     inventory.isStrict()
             );
         } finally {

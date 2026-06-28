@@ -1,7 +1,9 @@
 package com.indigo.synapse.oauth2.resource.webmvc.jwt;
 
 import com.indigo.synapse.oauth2.resource.core.SynapsePrincipalClaimMapper;
+import com.indigo.synapse.security.context.AuthenticatedClient;
 import com.indigo.synapse.security.context.AuthenticatedPrincipal;
+import com.indigo.synapse.security.context.AuthenticatedUser;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 /**

@@ -20,7 +20,7 @@ public final class DataFieldNames {
      *
      * @deprecated Framework 标准实体基类使用 {@link #REVISION}。
      */
-    @Deprecated(forRemoval = false, since = "0.1.0")
+    @Deprecated(since = "0.1.0")
     public static final String VERSION = "version";
 
     private DataFieldNames() {

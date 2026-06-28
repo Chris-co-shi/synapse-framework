@@ -51,16 +51,18 @@ public final class TieredCacheClient implements CacheClient {
         validateKeyAndType(key, valueType);
         String cacheKey = key.value();
         Optional<String> local = localCacheStore == null ? Optional.empty() : localCacheStore.get(cacheKey);
-        if (local.isPresent()) {
-            return Optional.of(cacheValueCodec.decode(local.get(), valueType));
-        }
-        Optional<String> remote = redisCacheStore.get(cacheKey);
-        remote.ifPresent(value -> {
-            if (localCacheStore != null) {
-                localCacheStore.put(cacheKey, value, backfillLocalTtl(cacheKey));
-            }
-        });
-        return remote.map(value -> cacheValueCodec.decode(value, valueType));
+        return local
+                .map(value -> Optional.of(cacheValueCodec.decode(value, valueType)))
+                .or(() -> {
+                    Optional<String> remote = redisCacheStore.get(cacheKey);
+                    remote.ifPresent(value -> {
+                        if (localCacheStore != null) {
+                            localCacheStore.put(cacheKey, value, backfillLocalTtl(cacheKey));
+                        }
+                    });
+                    return remote.map(value -> Optional.of(cacheValueCodec.decode(value, valueType)));
+                })
+                .orElse(Optional.empty());
     }
 
     @Override
@@ -97,15 +99,17 @@ public final class TieredCacheClient implements CacheClient {
         }
         CacheSpec effectiveSpec = cacheSpec == null ? defaultCacheSpec : cacheSpec;
         Optional<T> cached = get(key, valueType);
-        if (cached.isPresent()) {
-            return cached.get();
+        T cachedValue = cached.orElse(null);
+        if (cachedValue != null) {
+            return cachedValue;
         }
         Object lock = LOCAL_LOCKS.computeIfAbsent(key.value(), ignored -> new Object());
         synchronized (lock) {
             try {
                 cached = get(key, valueType);
-                if (cached.isPresent()) {
-                    return cached.get();
+                cachedValue = cached.orElse(null);
+                if (cachedValue != null) {
+                    return cachedValue;
                 }
                 T loaded = loader.get();
                 if (loaded == null) {

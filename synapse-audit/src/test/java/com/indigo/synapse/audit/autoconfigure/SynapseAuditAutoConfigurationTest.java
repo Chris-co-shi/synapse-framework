@@ -34,7 +34,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SynapseAuditAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(SynapseAuditAutoConfiguration.class));
+            .withConfiguration(AutoConfigurations.of(
+                    SynapseAuditAutoConfiguration.class,
+                    SynapseAuditLegacyAutoConfiguration.class
+            ));
 
     @Test
     void shouldRegisterNoopPortAndRecorderByDefault() {

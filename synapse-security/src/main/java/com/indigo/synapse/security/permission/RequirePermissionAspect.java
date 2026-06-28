@@ -42,7 +42,9 @@ public class RequirePermissionAspect extends StaticMethodMatcherPointcutAdvisor 
      */
     @Override
     public boolean matches(@NonNull Method method, @NonNull Class<?> targetClass) {
-        return findRequirePermission(method, targetClass).isPresent();
+        return findRequirePermission(method, targetClass)
+                .map(ignored -> true)
+                .orElse(false);
     }
 
     /**

@@ -1,7 +1,10 @@
 package com.indigo.synapse.resilience.autoconfigure;
 
 import com.indigo.synapse.observability.SynapseObservationOperations;
-import com.indigo.synapse.resilience.*;
+import com.indigo.synapse.resilience.DefaultResilienceExceptionClassifier;
+import com.indigo.synapse.resilience.DefaultResilienceOperations;
+import com.indigo.synapse.resilience.ResilienceExceptionClassifier;
+import com.indigo.synapse.resilience.ResilienceOperations;
 import io.github.resilience4j.retry.Retry;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

@@ -2,7 +2,11 @@ package com.indigo.synapse.oauth2.core.jwt;
 
 import com.indigo.synapse.oauth2.core.validation.JwtClaimAccessor;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * JWT claim 值读取工具。

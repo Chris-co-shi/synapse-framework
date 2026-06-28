@@ -34,8 +34,8 @@ public final class AuditEventContextEnricher {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
         }
-        Optional<AuditContextSnapshot> auditContext = AuditContext.current();
-        Optional<OperationContext> operationContext = operationContextProvider.current();
+        AuditContextSnapshot auditContext = AuditContext.current().orElse(null);
+        OperationContext operationContext = operationContextProvider.current().orElse(null);
 
         AuditSubject subject = resolveSubject(event, auditContext, operationContext);
         String traceId = resolveTraceId(event, auditContext, operationContext);
@@ -55,15 +55,16 @@ public final class AuditEventContextEnricher {
 
     private AuditSubject resolveSubject(
             AuditEvent event,
-            Optional<AuditContextSnapshot> auditContext,
-            Optional<OperationContext> operationContext
+            AuditContextSnapshot auditContext,
+            OperationContext operationContext
     ) {
         if (event.subject() != null) {
             return event.subject();
         }
-        return auditContext.map(AuditContextSnapshot::subject)
-                .or(() -> operationContext.flatMap(this::toSubject))
-                .orElse(null);
+        if (auditContext != null && auditContext.subject() != null) {
+            return auditContext.subject();
+        }
+        return operationContext == null ? null : toSubject(operationContext).orElse(null);
     }
 
     private Optional<AuditSubject> toSubject(OperationContext context) {
@@ -79,32 +80,36 @@ public final class AuditEventContextEnricher {
 
     private String resolveTraceId(
             AuditEvent event,
-            Optional<AuditContextSnapshot> auditContext,
-            Optional<OperationContext> operationContext
+            AuditContextSnapshot auditContext,
+            OperationContext operationContext
     ) {
         if (event.traceId() != null && !event.traceId().isBlank()) {
             return event.traceId();
         }
-        return auditContext.map(AuditContextSnapshot::traceId)
-                .or(() -> operationContext.map(OperationContext::traceId).filter(value -> !value.isBlank()))
-                .orElse(event.traceId());
+        if (auditContext != null && auditContext.traceId() != null) {
+            return auditContext.traceId();
+        }
+        if (operationContext != null && operationContext.traceId() != null && !operationContext.traceId().isBlank()) {
+            return operationContext.traceId();
+        }
+        return event.traceId();
     }
 
     private Map<String, String> enrichAttributes(
             Map<String, String> attributes,
-            Optional<OperationContext> operationContext
+            OperationContext operationContext
     ) {
         Map<String, String> enriched = new LinkedHashMap<>(attributes == null ? Map.of() : attributes);
         enriched.putIfAbsent("audit.eventId", UUID.randomUUID().toString());
-        operationContext.ifPresent(context -> {
-            putActor(enriched, "operation.actor", context.actor());
-            putActor(enriched, "operation.initiator", context.initiator());
-            putIfPresent(enriched, "operation.requestId", context.requestId());
-            putSource(enriched, context.source());
-            if (context.source() != null) {
-                putIfPresent(enriched, "audit.sourceService", context.source().name());
+        if (operationContext != null) {
+            putActor(enriched, "operation.actor", operationContext.actor());
+            putActor(enriched, "operation.initiator", operationContext.initiator());
+            putIfPresent(enriched, "operation.requestId", operationContext.requestId());
+            putSource(enriched, operationContext.source());
+            if (operationContext.source() != null) {
+                putIfPresent(enriched, "audit.sourceService", operationContext.source().name());
             }
-        });
+        }
         return enriched;
     }
 

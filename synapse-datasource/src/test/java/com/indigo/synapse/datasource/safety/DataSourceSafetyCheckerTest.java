@@ -50,7 +50,7 @@ class DataSourceSafetyCheckerTest {
         DataSourceDescriptorRegistry registry = new DataSourceDescriptorRegistry();
         registry.register(descriptor("master", DataSourceRole.MASTER, SynapseDbType.POSTGRESQL, true, false));
 
-        DataSourceSafetyReport report = checker.checkPrimaryDescriptor(Optional.of("master"), Map.of(), registry);
+        DataSourceSafetyReport report = checker.checkPrimaryDescriptor("master", Map.of(), registry);
 
         assertThat(code(report)).isEqualTo(DataSourceSafetyViolationCode.MASTER_DATASOURCE_MISSING.name());
     }
@@ -63,7 +63,7 @@ class DataSourceSafetyCheckerTest {
         registry.register(descriptor("master_2", DataSourceRole.MASTER, SynapseDbType.POSTGRESQL, true, false));
 
         DataSourceSafetyReport report = checker.checkPrimaryDescriptor(
-                Optional.of("master"),
+                "master",
                 Map.of("master", TestDataSources.healthy("PostgreSQL")),
                 registry
         );
@@ -78,7 +78,7 @@ class DataSourceSafetyCheckerTest {
         registry.register(descriptor("master", DataSourceRole.SLAVE, SynapseDbType.POSTGRESQL, true, true));
 
         DataSourceSafetyReport report = checker.checkPrimaryDescriptor(
-                Optional.of("master"),
+                "master",
                 Map.of("master", TestDataSources.healthy("PostgreSQL")),
                 registry
         );

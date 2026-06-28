@@ -5,7 +5,6 @@ import io.micrometer.observation.ObservationHandler;
 import org.slf4j.MDC;
 
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * 将消费方 tracing 适配器提供的 traceId/spanId 写入当前线程 MDC，并在停止后恢复旧值。
@@ -22,8 +21,8 @@ public final class SynapseObservationMdcHandler implements ObservationHandler<Sy
 
     @Override
     public void onStart(SynapseObservationContext context) {
-        context.put(PREVIOUS_TRACE, Optional.ofNullable(MDC.get("traceId")));
-        context.put(PREVIOUS_SPAN, Optional.ofNullable(MDC.get("spanId")));
+        context.put(PREVIOUS_TRACE, MDC.get("traceId"));
+        context.put(PREVIOUS_SPAN, MDC.get("spanId"));
         traceContextProvider.traceId().ifPresent(value -> MDC.put("traceId", value));
         traceContextProvider.spanId().ifPresent(value -> MDC.put("spanId", value));
     }
@@ -39,11 +38,11 @@ public final class SynapseObservationMdcHandler implements ObservationHandler<Sy
         return context instanceof SynapseObservationContext;
     }
 
-    private static void restore(String key, Optional<String> previous) {
-        if (previous == null || previous.isEmpty()) {
+    private static void restore(String key, String previous) {
+        if (previous == null) {
             MDC.remove(key);
         } else {
-            MDC.put(key, previous.orElseThrow());
+            MDC.put(key, previous);
         }
     }
 }

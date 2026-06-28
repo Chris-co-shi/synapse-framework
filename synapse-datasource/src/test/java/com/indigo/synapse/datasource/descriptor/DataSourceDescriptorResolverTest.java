@@ -8,8 +8,6 @@ import com.indigo.synapse.datasource.properties.SynapseDatasourceProperties;
 import com.indigo.synapse.datasource.testsupport.TestDataSources;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -23,8 +21,8 @@ class DataSourceDescriptorResolverTest {
         DataSourceDescriptor descriptor = resolver.resolve(
                 "slave_1",
                 TestDataSources.healthy("PostgreSQL"),
-                Optional.of("jdbc:postgresql://localhost/app"),
-                Optional.of("master")
+                "jdbc:postgresql://localhost/app",
+                "master"
         );
 
         assertThat(descriptor.role()).isEqualTo(DataSourceRole.SLAVE);
@@ -44,8 +42,8 @@ class DataSourceDescriptorResolverTest {
         DataSourceDescriptor descriptor = resolver.resolve(
                 "master",
                 TestDataSources.healthy("PostgreSQL"),
-                Optional.of("jdbc:postgresql://localhost/app"),
-                Optional.of("master")
+                "jdbc:postgresql://localhost/app",
+                "master"
         );
 
         assertThat(descriptor.dbType()).isEqualTo(SynapseDbType.ORACLE);
@@ -62,8 +60,8 @@ class DataSourceDescriptorResolverTest {
         assertThatThrownBy(() -> resolver.resolve(
                 "external_1",
                 TestDataSources.failing("Unknown"),
-                Optional.empty(),
-                Optional.of("master")
+                null,
+                "master"
         )).isInstanceOf(DatasourceDetectionException.class);
     }
 

@@ -28,13 +28,13 @@ public class CompositeDbTypeDetector implements DbTypeDetector {
 
     public SynapseDbType detectOrUnknown(String dataSourceName, DataSource dataSource, String jdbcUrl) {
         Optional<SynapseDbType> explicitType = explicitType(dataSourceName);
-        if (explicitType.isPresent() && (properties == null || properties.getDetection().isPreferExplicit())) {
-            return explicitType.get();
+        SynapseDbType explicit = explicitType.orElse(null);
+        if (explicit != null && (properties == null || properties.getDetection().isPreferExplicit())) {
+            return explicit;
         }
         return detectors.stream()
                 .map(detector -> detector.detect(dataSourceName, dataSource, jdbcUrl))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .findFirst()
                 .or(() -> explicitType)
                 .orElse(SynapseDbType.UNKNOWN);

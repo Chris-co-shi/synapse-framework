@@ -10,7 +10,7 @@ import com.indigo.synapse.audit.event.AuditEvent;
  *
  * @deprecated since 0.1.0，新代码使用 {@link com.indigo.synapse.audit.publish.AuditPublisher}。
  */
-@Deprecated(since = "0.1.0", forRemoval = false)
+@Deprecated(since = "0.1.0")
 public interface AuditLogPort {
 
     /**

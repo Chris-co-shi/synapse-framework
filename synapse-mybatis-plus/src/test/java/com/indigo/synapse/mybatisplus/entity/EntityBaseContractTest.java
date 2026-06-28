@@ -48,7 +48,7 @@ class EntityBaseContractTest {
 
         assertThat(field.getType()).isEqualTo(Integer.class);
         assertThat(field.getAnnotation(Version.class)).isNotNull();
-        assertThat(DataFieldNames.VERSION).isEqualTo("version");
+        assertThat(DataFieldNames.REVISION).isEqualTo("revision");
         assertThat(DataFieldNames.class.getDeclaredField("VERSION").getAnnotation(Deprecated.class)).isNotNull();
     }
 

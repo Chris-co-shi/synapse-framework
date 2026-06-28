@@ -78,21 +78,21 @@ public class DataSourceSafetyChecker {
     /**
      * 综合检查 primary 和 master 描述符。
      *
-     * @param primaryName runtime inventory 提供的 primary 名称
+     * @param primaryName runtime inventory 提供的 primary 名称；没有显式 primary 时为 null
      * @param dataSources runtime inventory 当前数据源快照
      * @param descriptorRegistry 描述符注册表
      * @return 安全检查报告
      */
     public DataSourceSafetyReport checkPrimaryDescriptor(
-            Optional<String> primaryName,
+            String primaryName,
             Map<String, DataSource> dataSources,
             DataSourceDescriptorRegistry descriptorRegistry
     ) {
-        DataSourceSafetyReport primaryReport = checkPrimary(primaryName.orElse(null));
+        DataSourceSafetyReport primaryReport = checkPrimary(primaryName);
         if (!primaryReport.safe()) {
             return primaryReport;
         }
-        String primary = primaryName.orElseThrow();
+        String primary = primaryName;
         if (dataSources == null || !dataSources.containsKey(primary)) {
             return DataSourceSafetyReport.violation(
                     primary,

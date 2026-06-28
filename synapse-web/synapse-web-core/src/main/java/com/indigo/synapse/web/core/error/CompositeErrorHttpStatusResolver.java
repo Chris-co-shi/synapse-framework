@@ -4,7 +4,6 @@ import com.indigo.synapse.core.error.ErrorCode;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.OptionalInt;
 
 /**
  * 组合式 HTTP 状态码解析器。
@@ -33,9 +32,9 @@ public final class CompositeErrorHttpStatusResolver {
      */
     public int resolve(ErrorCode errorCode) {
         for (ErrorHttpStatusResolver resolver : resolvers) {
-            OptionalInt status = resolver.resolve(errorCode);
-            if (status.isPresent()) {
-                return status.getAsInt();
+            int status = resolver.resolve(errorCode).orElse(-1);
+            if (status >= 100 && status <= 599) {
+                return status;
             }
         }
 

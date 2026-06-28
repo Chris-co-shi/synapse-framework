@@ -6,7 +6,6 @@ import com.indigo.synapse.datasource.properties.SynapseDatasourceProperties;
 
 import javax.sql.DataSource;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * 数据源描述符解析器。
@@ -32,21 +31,21 @@ public class DataSourceDescriptorResolver {
      *
      * @param name 数据源名称
      * @param dataSource 数据源对象；只用于数据库类型 metadata 检测，不会被关闭或持有
-     * @param jdbcUrl 可选 JDBC URL；只参与类型识别，不写入描述符属性
-     * @param primaryName dynamic-datasource 显式 primary 名称
+     * @param jdbcUrl 可选 JDBC URL；只参与类型识别，不写入描述符属性，没有可见 URL 时为 null
+     * @param primaryName dynamic-datasource 显式 primary 名称，没有显式 primary 时为 null
      * @return 数据源描述符
      */
     public DataSourceDescriptor resolve(
             String name,
             DataSource dataSource,
-            Optional<String> jdbcUrl,
-            Optional<String> primaryName
+            String jdbcUrl,
+            String primaryName
     ) {
-        boolean primary = primaryName.map(name::equals).orElse(false);
+        boolean primary = name.equals(primaryName);
         DataSourceRole role = resolveRole(name, primary);
         String group = resolveGroup(name, role);
         SynapseDbType dbType = properties.getDetection().isEnabled()
-                ? dbTypeDetector.detectOrUnknown(name, dataSource, jdbcUrl.orElse(null))
+                ? dbTypeDetector.detectOrUnknown(name, dataSource, jdbcUrl)
                 : SynapseDbType.UNKNOWN;
         if (dbType == SynapseDbType.UNKNOWN && properties.getDetection().isFailOnUnknown()) {
             throw new DatasourceDetectionException("Cannot detect database type for datasource " + name);

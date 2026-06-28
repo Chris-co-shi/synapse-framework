@@ -1,1 +1,2 @@
 com.indigo.synapse.audit.autoconfigure.SynapseAuditAutoConfiguration
+com.indigo.synapse.audit.autoconfigure.SynapseAuditLegacyAutoConfiguration

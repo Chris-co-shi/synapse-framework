@@ -13,7 +13,7 @@ import com.indigo.synapse.core.context.DefaultOperationContextProvider;
  *
  * @deprecated since 0.1.0，新代码使用 {@link com.indigo.synapse.audit.publish.AuditPublisher}。
  */
-@Deprecated(since = "0.1.0", forRemoval = false)
+@Deprecated(since = "0.1.0")
 public final class AuditRecorder {
 
     private final AuditLogPort auditLogPort;

@@ -2,7 +2,14 @@ package com.indigo.synapse.oauth2.resource.core;
 
 import com.indigo.synapse.oauth2.core.token.NoopTokenDenylistPort;
 import com.indigo.synapse.oauth2.core.token.TokenDenylistPort;
-import com.indigo.synapse.oauth2.core.validation.*;
+import com.indigo.synapse.oauth2.core.validation.AudienceValidator;
+import com.indigo.synapse.oauth2.core.validation.DenylistedTokenValidator;
+import com.indigo.synapse.oauth2.core.validation.PrincipalClaimsValidator;
+import com.indigo.synapse.oauth2.core.validation.PrincipalTypeClaimValidator;
+import com.indigo.synapse.oauth2.core.validation.RequiredClaimsValidator;
+import com.indigo.synapse.oauth2.core.validation.SynapseJwtValidator;
+import com.indigo.synapse.oauth2.core.validation.SynapseJwtValidatorFactory;
+import com.indigo.synapse.oauth2.core.validation.TokenTypeValidator;
 
 import java.util.ArrayList;
 import java.util.List;

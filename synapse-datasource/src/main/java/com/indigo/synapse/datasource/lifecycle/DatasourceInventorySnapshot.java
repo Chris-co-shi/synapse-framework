@@ -5,7 +5,6 @@ import com.indigo.synapse.datasource.descriptor.DataSourceDescriptor;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * 数据源 inventory 同步快照。
@@ -18,18 +17,17 @@ import java.util.Optional;
  *
  * @param dataSources 当前有效数据源快照
  * @param descriptors 当前有效描述符快照
- * @param primaryName runtime inventory 显式 primary 名称
+ * @param primaryName runtime inventory 显式 primary 名称；没有显式 primary 时为 null
  * @param strict runtime inventory strict 模式
  */
 public record DatasourceInventorySnapshot(
         Map<String, DataSource> dataSources,
         List<DataSourceDescriptor> descriptors,
-        Optional<String> primaryName,
+        String primaryName,
         boolean strict
 ) {
     public DatasourceInventorySnapshot {
         dataSources = dataSources == null ? Map.of() : Map.copyOf(dataSources);
         descriptors = descriptors == null ? List.of() : List.copyOf(descriptors);
-        primaryName = primaryName == null ? Optional.empty() : primaryName;
     }
 }

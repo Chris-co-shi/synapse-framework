@@ -1,6 +1,9 @@
 package com.indigo.synapse.observability.autoconfigure;
 
-import com.indigo.synapse.observability.*;
+import com.indigo.synapse.observability.DefaultSynapseObservationOperations;
+import com.indigo.synapse.observability.SynapseObservationMdcHandler;
+import com.indigo.synapse.observability.SynapseObservationOperations;
+import com.indigo.synapse.observability.TraceContextProvider;
 import io.micrometer.observation.ObservationRegistry;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

@@ -1,7 +1,10 @@
 package com.indigo.synapse.mybatisplus.entity;
 
 import com.baomidou.mybatisplus.annotation.TableLogic;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serial;
 
@@ -14,7 +17,6 @@ import java.io.Serial;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 public abstract class ManagedEntity extends VersionedEntity {
 
     @Serial

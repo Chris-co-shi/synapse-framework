@@ -3,13 +3,9 @@ package com.indigo.synapse.audit.autoconfigure;
 import com.indigo.synapse.audit.annotation.AuditAspect;
 import com.indigo.synapse.audit.annotation.AuditMethodAdvisor;
 import com.indigo.synapse.audit.event.AuditEventContextEnricher;
-import com.indigo.synapse.audit.port.AuditLogPort;
-import com.indigo.synapse.audit.port.CompositeAuditLogPort;
-import com.indigo.synapse.audit.port.NoopAuditLogPort;
 import com.indigo.synapse.audit.publish.AuditFailureSink;
 import com.indigo.synapse.audit.publish.AuditPublisher;
 import com.indigo.synapse.audit.publish.MessagingAuditPublisher;
-import com.indigo.synapse.audit.recorder.AuditRecorder;
 import com.indigo.synapse.audit.sanitize.AuditSanitizer;
 import com.indigo.synapse.audit.sanitize.DefaultAuditSanitizer;
 import com.indigo.synapse.core.context.DefaultOperationContextProvider;
@@ -31,8 +27,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.transaction.support.TransactionTemplate;
-
-import java.util.List;
 
 /** Audit 模块自动配置。 */
 @AutoConfiguration(after = TransactionAutoConfiguration.class)
@@ -94,29 +88,11 @@ public class SynapseAuditAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(AuditLogPort.class)
-    public AuditLogPort synapseNoopAuditLogPort() {
-        return new NoopAuditLogPort();
-    }
-
-    @Bean
     @ConditionalOnMissingBean
     public AuditEventContextEnricher synapseAuditEventContextEnricher(
             ObjectProvider<OperationContextProvider> operationContextProvider) {
         OperationContextProvider provider = operationContextProvider.getIfAvailable(DefaultOperationContextProvider::new);
         return new AuditEventContextEnricher(provider);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public AuditRecorder synapseAuditRecorder(
-            ObjectProvider<AuditLogPort> auditLogPorts,
-            AuditEventContextEnricher contextEnricher) {
-        List<AuditLogPort> delegates = auditLogPorts.stream().toList();
-        if (delegates.size() == 1) {
-            return new AuditRecorder(delegates.get(0), contextEnricher);
-        }
-        return new AuditRecorder(new CompositeAuditLogPort(delegates), contextEnricher);
     }
 
     private TransactionOperations requiresNewOperations(PlatformTransactionManager transactionManager) {
