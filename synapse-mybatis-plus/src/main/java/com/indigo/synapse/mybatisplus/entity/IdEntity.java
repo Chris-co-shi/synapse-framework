@@ -13,10 +13,10 @@ import java.io.Serializable;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public abstract class IdEntity<T> implements Serializable {
+public abstract class IdEntity implements Serializable {
 
     @TableId(type = IdType.ASSIGN_ID)
-    private T id;
+    private String id;
 
 
 

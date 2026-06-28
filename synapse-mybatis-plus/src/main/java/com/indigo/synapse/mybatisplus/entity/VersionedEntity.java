@@ -1,10 +1,7 @@
 package com.indigo.synapse.mybatisplus.entity;
 
 import com.baomidou.mybatisplus.annotation.Version;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * @author 史偕成
@@ -14,7 +11,8 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public abstract class VersionedEntity<T>  extends  MutableEntity<T>{
+@EqualsAndHashCode(callSuper = true)
+public abstract class VersionedEntity  extends  MutableEntity{
 
     @Version
     private Integer revision;

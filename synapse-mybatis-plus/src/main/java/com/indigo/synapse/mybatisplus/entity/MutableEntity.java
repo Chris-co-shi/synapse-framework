@@ -17,7 +17,7 @@ import java.time.Instant;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class MutableEntity<T> extends CreatedEntity<T> {
+public abstract class MutableEntity extends CreatedEntity {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Instant updatedAt;

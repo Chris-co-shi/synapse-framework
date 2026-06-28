@@ -18,7 +18,7 @@ import java.time.Instant;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public abstract class CreatedEntity<T> extends IdEntity<T> {
+public abstract class CreatedEntity extends IdEntity {
 
     @Serial
     private static final long serialVersionUID = 1L;
