@@ -11,9 +11,8 @@ import java.io.Serial;
 import java.time.Instant;
 
 /**
- * @author 史偕成
- * @date 2026/06/28 10:09
- **/
+ * 包含创建时间和创建人字段的 MyBatis-Plus 实体基类。
+ */
 @Getter
 @Setter
 @AllArgsConstructor
