@@ -4,24 +4,21 @@
 
 `synapse-mybatis-plus` 是 MyBatis-Plus 工程增强模块。
 
-它承接原 `synapse-data` 中所有 MyBatis-Plus 专属能力，`synapse-data` 不再依赖 MyBatis-Plus。
+它承接 MyBatis-Plus 专属能力；`synapse-data` 继续保持 ORM 无关。
 
-## 2. 当前事实
+## 2. 当前能力
 
 当前模块提供：
 
-- MyBatis-Plus 自动配置。
-- `MybatisPlusInterceptor` 默认插件链。
-- `OperationContext` 到数据审计人的默认适配。
-- 分页插件。
-- 安全排序字段白名单映射。
-- 乐观锁插件。
-- 防全表 update/delete 插件。
-- 非法 SQL 插件开关。
-- 审计字段自动填充。当前只填充 `createdAt`、`updatedAt`、`createdBy`、`updatedBy`。
-- `SynapseInnerInterceptorContributor` 插件链扩展点。
-- MyBatis-Plus ID 生成器适配。
-- `PageQuery` / `PageResult` 与 MyBatis-Plus `Page` 的转换。
+- MyBatis-Plus 自动配置；
+- 默认 `MybatisPlusInterceptor` 插件链；
+- 分页、乐观锁、防全表 update/delete 和非法 SQL 插件开关；
+- `OperationContext` 到 `DataAuditorProvider` 的审计适配；
+- 创建和修改审计字段自动填充；
+- 安全排序字段白名单；
+- ID 生成器适配；
+- `PageQuery` / `PageResult` 与 MyBatis-Plus `Page` 转换；
+- 可选择继承的持久化实体基类。
 
 ## 3. Maven 引入
 
@@ -52,44 +49,101 @@ synapse:
       enabled: true
 ```
 
-## 5. 实体注解要求
+## 5. 实体基类
 
-业务实体属于消费方。本模块只按字段名做 MyBatis-Plus 自动填充，业务实体字段需要配置 MyBatis-Plus 注解：
+模块提供以下继承链：
+
+```text
+IdEntity
+  └── CreatedEntity
+       └── MutableEntity
+            └── VersionedEntity
+                 └── ManagedEntity
+```
+
+| 类型 | 字段 | 能力 |
+| --- | --- | --- |
+| `IdEntity` | `String id` | `ASSIGN_ID` 字符串主键 |
+| `CreatedEntity` | `createdAt`, `createdBy` | 创建审计 |
+| `MutableEntity` | `updatedAt`, `updatedBy` | 修改审计 |
+| `VersionedEntity` | `revision` | MyBatis-Plus 乐观锁 |
+| `ManagedEntity` | `deleted` | 乐观锁和逻辑删除 |
+
+消费方应根据实体真实生命周期选择满足需求的最浅基类：
 
 ```java
-@TableField(fill = FieldFill.INSERT)
-private Instant createdAt;
+@TableName("user_account")
+public class UserEntity extends VersionedEntity {
+    private String username;
+    private String status;
+}
+```
 
-@TableField(fill = FieldFill.INSERT_UPDATE)
-private Instant updatedAt;
+约束：
 
-@TableField(fill = FieldFill.INSERT)
-private String createdBy;
+- 这些类型只用于 MyBatis-Plus 持久化 Entity；
+- Domain Model、DTO、Command、Query 和 Event 不得继承；
+- 不要求所有 Entity 继承 `ManagedEntity`；
+- 关系表、日志、Outbox、会话和执行记录可以不继承基类；
+- `revision` 只表示技术乐观锁版本，不表示业务修订版；
+- 基类不统一实现 `equals/hashCode`，具体实体按业务身份语义自行决定。
 
-@TableField(fill = FieldFill.INSERT_UPDATE)
-private String updatedBy;
+## 6. 字段规则
 
+### 6.1 ID
+
+`IdEntity` 使用：
+
+```java
+@TableId(type = IdType.ASSIGN_ID)
+private String id;
+```
+
+数据库字段长度由消费方数据库规范决定。Platform 当前推荐 PostgreSQL `varchar(19)`。
+
+### 6.2 审计字段
+
+- `createdAt`、`createdBy`：`FieldFill.INSERT`；
+- `updatedAt`、`updatedBy`：`FieldFill.INSERT_UPDATE`；
+- 时间字段类型为 `Instant`；
+- 插入时只填充空字段；
+- 更新时刷新 `updatedAt` 和可用的 `updatedBy`。
+
+### 6.3 乐观锁
+
+`VersionedEntity` 使用：
+
+```java
 @Version
-private Integer version;
+private Integer revision;
+```
 
-@TableLogic
+模块不主动初始化 `revision`，数据库应提供明确默认值，消费方应测试并发更新冲突。
+
+### 6.4 逻辑删除
+
+`ManagedEntity` 使用：
+
+```java
+@TableLogic(value = "0", delval = "1")
 private Integer deleted;
 ```
 
-说明：
+模块不主动初始化 `deleted`，数据库应提供明确默认值。逻辑删除是显式选择的实体能力，不是全局业务规则。
 
-- 插入时只填充空字段。
-- 更新时刷新 `updatedAt`。
-- 本模块不初始化 `deleted` 和 `version`，避免不同业务实体字段类型不一致时出现填充值类型冲突。
-- 乐观锁字段需要 `@Version`。
-- 逻辑删除字段需要 `@TableLogic` 或 MyBatis-Plus 全局逻辑删除配置。
-- 当前阶段不填充 `tenantId`。
+## 7. OperationContext 审计适配
 
-## 6. 安全排序
+默认自动配置注册 `OperationContextDataAuditorProvider`，从当前 `OperationContext` 读取 actor id，用于填充 `createdBy` 和 `updatedBy`。
 
-默认 `MybatisPlusPageConverter.toPage(PageQuery)` 不转换任何排序字段。
+- 没有上下文时不填充审计人；
+- `UNKNOWN` actor 不写入；
+- `SYSTEM` 只有入口方显式创建上下文时才写入；
+- 不填充 `tenantId`；
+- 消费方可以覆盖 `DataAuditorProvider`。
 
-业务系统需要排序时，应显式提供白名单：
+## 8. 安全排序
+
+默认分页转换不接受任意外部排序字段。消费方必须配置白名单：
 
 ```java
 Page<UserEntity> page = MybatisPlusPageConverter.toPage(
@@ -98,29 +152,19 @@ Page<UserEntity> page = MybatisPlusPageConverter.toPage(
 );
 ```
 
-未进入白名单的外部字段会被忽略，避免把请求字段直接拼入数据库列名。
+未进入白名单的字段会被忽略。
 
-## 7. 插件链扩展
+## 9. 插件扩展
 
-业务系统或上层技术模块可以提供 `SynapseInnerInterceptorContributor` Bean 扩展 MyBatis-Plus `InnerInterceptor`。
+消费方可以提供 `SynapseInnerInterceptorContributor` Bean，在默认插件之后追加自定义 `InnerInterceptor`。
 
-Contributor 实现 `Ordered`，自动配置会在默认插件之后按 order 追加贡献的插件。
+## 10. 边界
 
-## 8. OperationContext 审计适配
+本模块不提供：
 
-默认自动配置会注册 `OperationContextDataAuditorProvider`，从 `OperationContextProvider.current()` 读取当前 `OperationActor`，用于填充 `createdBy` / `updatedBy`。
-
-规则：
-
-- 当前上下文不存在时不填充审计人。
-- `OperationActorType.UNKNOWN` 不会写入审计字段。
-- 显式 `OperationActorType.SYSTEM` 可以写入审计字段，因为 core 约定 framework 不会自动伪造 system，只有入口方显式创建时才成立。
-- 不读取 `tenantId`，不实现租户字段填充。
-
-如果业务系统需要从其他上下文读取审计人，可以提供自己的 `DataAuditorProvider` Bean 覆盖默认实现。
-
-## 9. 边界说明
-
-本模块不提供业务 Entity、Mapper、Repository、Service、数据库 migration 或 DataSource 配置。
-
-数据源治理能力属于 `synapse-datasource`。SQL 自动读写路由不在当前模块中实现。
+- 具体业务 Entity、Mapper、Repository 或 Service；
+- 业务表和 migration；
+- DataSource 治理；
+- SQL 自动读写路由；
+- 租户 SQL 和数据权限；
+- 业务领域的删除、版本与相等性规则。
