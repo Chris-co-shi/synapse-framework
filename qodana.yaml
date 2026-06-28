@@ -2,5 +2,4 @@ version: "1.0"
 linter: qodana-jvm-community
 profile:
   name: qodana.recommended
-jdk:
-  version: "21"
+projectJDK: 21
