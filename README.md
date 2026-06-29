@@ -1,53 +1,25 @@
 # Synapse Framework
 
-面向 Java 企业级业务系统的通用技术基座。
+面向 Java 21 / Spring Boot 企业应用的通用技术基座。
 
-Synapse Framework 不做业务系统、不做后台管理端、不做平台服务，而是沉淀可复用的框架契约、自动配置、上下文传播、安全基础、数据访问支撑、缓存、消息和审计技术能力。
+Framework 只提供可复用的技术模块、抽象、SPI、自动配置和上下文传播，不提供可启动平台服务、业务系统、管理后台或第三方厂商适配平台。
 
-## 快速了解
+## Security V1
 
-- **定位**：Java 企业应用技术支持框架。
-- **阶段**：整体架构重构进行中，模块聚合结构与 BOM 边界已经对齐。
-- **JDK**：Java 21。
-- **主栈**：Spring Boot 3.x / Maven 多模块。
-- **Web 边界**：`synapse-webmvc` 支撑 Servlet MVC；`synapse-webflux` 支撑 WebFlux，不是 Gateway 服务。
-- **核心原则**：framework 只做技术能力，业务语义由消费方或 Synapse Platform 拥有。
-- **交付约定**：不提供 starter 聚合包，不提供 demo / example / sample application。
+- 标准 OAuth2 / JWT Resource Server；
+- WebMVC 与 WebFlux 技术适配；
+- RS256、`typ=at+jwt`、Issuer、Audience 和时间 Claim 验证；
+- USER / CLIENT 主体；
+- Scope Authority；
+- PermissionChecker SPI；
+- OAuth2 Client Credentials；
+- Gateway Authentication Only；
+- GatewayProof 取消并进入代码清理；
+- JWT 不默认携带或映射 roles、permissions、菜单、数据范围和租户。
 
-## 边界声明
-
-Synapse Framework 下所有 module 都必须是技术支持框架，不能是可启动服务，不能包含业务代码。
-
-Framework 最多只能提供：
-
-- 技术约束。
-- 通用抽象。
-- 通用模型。
-- SPI / Port。
-- 默认轻量实现。
-- 自动装配。
-- 上下文传播。
-- 编码规范。
-- 工具能力。
-- 测试与文档沉淀。
-- Skill 最佳实践。
-
-Framework 禁止提供：
-
-- `@SpringBootApplication` 生产启动类。
-- 业务 Controller。
-- 业务 Service / Entity / Mapper / Repository。
-- 业务数据库 migration。
-- starter 聚合包。
-- demo / example / sample application。
-- 用户、角色、菜单、组织、配置中心、文件中心、消息中心等平台业务实现。
-- Gateway / IAM / Message / File / Config 等可启动服务。
-
-可启动平台服务统一属于 Synapse Platform，例如 `synapse-gateway`、`synapse-iam`、`synapse-message-service`、`synapse-file-service`、`synapse-config-service`。
+Framework 是 Java/Spring 官方适配器，不是第三方接入 Synapse 的前置条件。
 
 ## 当前模块
-
-当前已进入 root `pom.xml` reactor 的模块如下：
 
 ```text
 synapse-framework
@@ -79,210 +51,37 @@ synapse-framework
 └── synapse-resilience
 ```
 
-| 模块 | 定位 | 手册 |
-| --- | --- | --- |
-| `synapse-bom` | 统一依赖版本管理 | [查看](docs/modules/synapse-bom.md) |
-| `synapse-core` | 错误码、异常、ID、OperationContext 等核心契约 | [查看](docs/modules/synapse-core.md) |
-| `synapse-web-core` | 统一响应、错误映射、traceId 与 Jackson 定制 | [查看](docs/modules/synapse-web-core.md) |
-| `synapse-webmvc` | Servlet MVC 响应、异常处理、Filter 异常桥接 | [查看](docs/modules/synapse-webmvc.md) |
-| `synapse-webflux` | WebFlux Trace、异常响应和不可信请求技术上下文 | [查看](docs/modules/synapse-webflux.md) |
-| `synapse-time` | 时间和时区技术支撑，提供 UTC 查询范围转换 | [查看](docs/modules/synapse-time.md) |
-| `synapse-config` | 配置抽象、运行时读取和类型解析，不是配置中心 | [查看](docs/modules/synapse-config.md) |
-| `synapse-i18n` | 国际化消息解析抽象，不是资源中心 | [查看](docs/modules/synapse-i18n.md) |
-| `synapse-data` | ORM 无关的数据语义抽象 | [查看](docs/modules/synapse-data.md) |
-| `synapse-mybatis-plus` | MyBatis-Plus 工程增强 | [查看](docs/modules/synapse-mybatis-plus.md) |
-| `synapse-datasource` | 数据源治理、多数据源基础接入和路由治理抽象 | [查看](docs/modules/synapse-datasource.md) |
-| `synapse-cache` | 缓存、锁、限流、幂等基础设施 | [查看](docs/modules/synapse-cache.md) |
-| `synapse-security` | Web 无关安全主体、PermissionChecker、权限注解适配、GatewayProof 协议基础 | [查看](docs/modules/synapse-security.md) |
-| `synapse-oauth2-core` | JWT claim、token、validator、denylist 和 BearerTokenProvider 契约 | [查看](docs/modules/synapse-oauth2-core.md) |
-| `synapse-oauth2-authorization-server-support` | JWT 签发、RSAKey、JWKSource、JwtEncoder 技术支持 | [查看](docs/modules/synapse-oauth2-authorization-server-support.md) |
-| `synapse-oauth2-client` | Token Relay、Client Credentials 和 Token 生命周期契约 | [查看](docs/modules/synapse-oauth2-client.md) |
-| `synapse-oauth2-resource-server-core` | Resource Server 共享验证、主体与 authority 映射语义 | [查看](docs/modules/synapse-oauth2-resource-server-core.md) |
-| `synapse-oauth2-resource-server-webmvc` | Servlet OAuth2 Resource Server 技术适配 | [查看](docs/modules/synapse-oauth2-resource-server-webmvc.md) |
-| `synapse-oauth2-resource-server-webflux` | Reactive OAuth2 Resource Server 技术适配 | [查看](docs/modules/synapse-oauth2-resource-server-webflux.md) |
-| `synapse-audit` | 审计模型、上下文、脱敏、失败策略与 Messaging 发布适配 | [查看](docs/modules/synapse-audit.md) |
-| `synapse-messaging` | Broker 中立消息模型、发布/消费编排、Stream 适配与可靠性 SPI | [查看](docs/modules/synapse-messaging.md) |
-| `synapse-observability` | Micrometer Observation 命名、低基数标签、MDC 与健康扩展约定 | [查看](docs/modules/synapse-observability.md) |
-| `synapse-resilience` | 基于 Resilience4j 的超时、重试、熔断、隔离和观测 | [查看](docs/modules/synapse-resilience.md) |
+## Start Here
 
-模块手册索引：[docs/modules/README.md](docs/modules/README.md)
+1. [V1 Security Baseline](docs/architecture/v1-security-baseline.md)
+2. [Repository Gap Analysis](docs/architecture/repository-gap-analysis.md)
+3. [Framework Boundary](docs/phase-2/00-framework-boundary.md)
+4. [Module Index](docs/modules/README.md)
+5. [Security Module](docs/modules/synapse-security.md)
+6. [Resource Server Core](docs/modules/synapse-oauth2-resource-server-core.md)
 
-模块 Skill 索引：[skills/README.md](skills/README.md)
+## 边界
 
-## 学习入口
+Framework 禁止包含：
 
-如果需要重新接管代码、按设计理解模块或开始手写练习，请从以下文档开始：
+- `@SpringBootApplication` 生产启动类；
+- 业务 Controller、Service、Entity、Mapper、Repository；
+- 用户、角色、菜单、组织等平台模型；
+- Gateway、IAM、File、Message 等可启动服务；
+- starter 聚合包；
+- demo / example / sample application；
+- SAP、MES、WMS 等厂商专用业务协议。
 
-| 文档 | 内容 |
-| --- | --- |
-| [学习路径索引](docs/learning/README.md) | 推荐阅读顺序、学习方法和掌握标准 |
-| [Framework 架构阅读指南](docs/learning/01-framework-architecture-reading-guide.md) | 三层边界、模块地图、依赖方向和源码阅读方式 |
-| [Security 与 OAuth2 请求链路](docs/learning/02-security-oauth2-request-flow.md) | Bearer Token 到 CurrentPrincipalContext、OperationContext 和权限检查的完整链路 |
-
-## 二阶段规划入口
-
-二阶段规划文档位于 `docs/phase-2`：
-
-| 文档 | 内容 |
-| --- | --- |
-| [00-Framework Boundary](docs/phase-2/00-framework-boundary.md) | Framework / Platform / Business Application 三层边界 |
-| [01-Module Boundary](docs/phase-2/01-module-boundary.md) | 当前模块事实、二阶段目标模块形态、模块允许/禁止内容 |
-| [02-Phase 2 Roadmap](docs/phase-2/02-phase-2-roadmap.md) | TASK-201 到 TASK-207 的任务拆分 |
-| [03-Boundary Checklist](docs/phase-2/03-boundary-checklist.md) | 每个 TASK 执行前后的边界检查清单 |
-| [04-Cloud Context Propagation](docs/phase-2/04-cloud-context-propagation.md) | 已删除 cloud 模块的历史设计记录 |
-
-注意：
-
-- 当前实现事实以根 `pom.xml` 和本页模块树为准；`synapse-cloud`、`synapse-file` 已删除。
-- 本项目不规划、不创建 `synapse-starter-*`。
-- 本项目不规划、不创建 demo / example / sample application。
-- 未进入 root `pom.xml` reactor 前，不能把规划模块描述成已实现能力。
-- `synapse-config` 在 Framework 中只能做配置抽象、配置客户端、运行时配置读取、解析、缓存、刷新扩展点；可启动配置服务属于 Platform。
-
-## 快速开始
-
-### 环境要求
+## 构建
 
 ```text
 Java 21
-Maven 3.8.6
+Maven 3.8.6+
 ```
-
-### 构建与测试
 
 ```bash
 mvn clean test
 mvn validate
 ```
 
-当前工作站 Maven 路径示例：
-
-```bash
-/Users/sxc/Documents/tool/apache-maven-3.8.6/bin/mvn -q clean test
-/Users/sxc/Documents/tool/apache-maven-3.8.6/bin/mvn -q validate
-```
-
-### Configuration Metadata
-
-所有公开 `@ConfigurationProperties` 都必须生成 Spring Boot Configuration Metadata。发布前需要确认对应 jar 中包含：
-
-```text
-META-INF/spring-configuration-metadata.json
-```
-
-该 metadata 用于消费方在 IntelliJ IDEA 等 IDE 中获得 `synapse.*` 配置前缀、属性名、类型、默认值、说明和候选值补全。新增配置项时必须同步补充字段 Javadoc，并验证 metadata 进入最终 jar。
-
-### 业务项目引入方式
-
-业务项目应按需直接引入具体 module，而不是通过 starter 或 demo 应用间接引入。
-
-```xml
-<dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>com.indigo.synapse</groupId>
-            <artifactId>synapse-bom</artifactId>
-            <version>${synapse.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-    </dependencies>
-</dependencyManagement>
-```
-
-Servlet MVC 服务引入：
-
-```xml
-<dependency>
-    <groupId>com.indigo.synapse</groupId>
-    <artifactId>synapse-webmvc</artifactId>
-</dependency>
-```
-
-WebFlux 服务引入：
-
-```xml
-<dependency>
-    <groupId>com.indigo.synapse</groupId>
-    <artifactId>synapse-webflux</artifactId>
-</dependency>
-```
-
-说明：Gateway 可启动服务属于 Synapse Platform。Platform Gateway 可以引用 `synapse-webflux` 的技术支撑能力，但 Gateway 路由、鉴权业务和启动服务不进入 Framework。
-
-OpenFeign 由应用直接使用 Spring Cloud OpenFeign；Framework 不再提供额外包装模块。
-
-## 文档导航
-
-| 文档 | 内容 |
-| --- | --- |
-| [学习路径](docs/learning/README.md) | 面向代码接管和手写练习的阅读顺序 |
-| [01-项目定位与边界](docs/01-项目定位与边界.md) | 项目定位、当前边界、成功标准 |
-| [02-总体架构设计](docs/02-总体架构设计.md) | 模块职责、依赖方向、设计原则 |
-| [03-核心链路设计](docs/03-核心链路设计.md) | OperationContext、Web、Security、Data、MQ 等核心链路 |
-| [04-技术复杂点](docs/04-技术复杂点.md) | 模块边界、异常链路、上下文传播、并发控制等风险点 |
-| [二阶段规划](docs/phase-2/02-phase-2-roadmap.md) | 二阶段任务拆分与执行顺序 |
-| [模块使用手册](docs/modules/README.md) | 各模块接入方式、扩展点和边界说明 |
-
-## 不做什么
-
-Framework 明确不做：
-
-- 不做业务 Controller。
-- 不做业务 Entity / Mapper / migration。
-- 不做生产启动应用。
-- 不做 starter 聚合包。
-- 不做 demo / example / sample application。
-- 不做后台管理端。
-- 不做前端页面。
-- 不做完整 IAM / RBAC / ABAC 平台。
-- 不做 Gateway / WebFlux 可启动服务。
-- 不做文件中心、消息中心、配置中心、审计中心、集成中心。
-
-## 边界原则
-
-```text
-Business Application
-  -> depends on Synapse Framework or Synapse Platform SDK / Client
-  -> owns business model
-  -> owns API
-  -> owns database schema
-  -> owns permission codes
-
-Synapse Platform
-  -> depends on Synapse Framework
-  -> owns platform services
-  -> owns gateway / iam / message / file / config runtime
-
-Synapse Framework
-  -> provides reusable technical foundation
-  -> provides contracts and auto-configuration
-  -> never depends on business application
-  -> never becomes a runnable platform service
-  -> never provides starter/demo/example/sample application
-```
-
-## 当前状态
-
-- `synapse-web` 和 `synapse-oauth2` 只做 Maven 聚合，不供应用直接依赖。
-- `synapse-oauth2-client` 提供协议中立的出站 token 编排契约，不包装 OpenFeign 或具体 HTTP 客户端。
-- `synapse-oauth2-resource-server-core` 统一 MVC/WebFlux 的验证策略、主体映射和 authority 规则。
-- `synapse-webmvc` 承接 Servlet MVC Web 能力；`synapse-webflux` 提供 Reactive 技术支撑，不包含 Gateway 服务。
-- `synapse-security` 是 Web 无关安全基础模块；认证主体由 OAuth2 Resource Server 适配模块从经过验证的 Bearer Token 建立；GatewayProof 只证明可信入口。
-- OAuth2 当前通过聚合层组织 core、authorization support、client 和 resource server 子模块。
-- Web 当前通过聚合层组织 web-core、MVC 和 WebFlux 子模块。
-- `synapse-security` 不依赖 Spring Security Web / Config。
-- 普通 HTTP Header 只能建立 traceId、requestId 等不可信技术上下文；actor、tenant 和 initiator 只能由验证 Token 的认证适配器建立。
-- `synapse-messaging` 不包含真实 MQ / Redis 幂等 / DB / Outbox / 外部渠道 SDK 实现。
-- `synapse-cache` 不包含业务缓存 key 或业务规则。
-- `synapse-data` 只提供 ORM 无关的数据语义抽象，不包含 MyBatis-Plus、DataSource、Flyway 或自动配置。
-- `synapse-mybatis-plus` 只提供 MyBatis-Plus 工程增强，不包含业务 Entity / Mapper。
-- `synapse-datasource` 只提供数据源治理能力，不提供 `@DS` 封装、Seata、MyBatis SQL 自动路由或应用层主库晋升。
-- 文件能力已移出 Framework，归 Synapse Platform 的可启动文件服务。
-- `synapse-observability` 不创建 APM/exporter；消费方可提供 ObservationRegistry 与 TraceContextProvider。
-- `synapse-resilience` 默认不重试非幂等操作，也不提供假成功 fallback。
-- Framework 不提供 starter，也不提供 demo / example / sample application。
-
-## 许可证
-
-当前未声明开源许可证。正式发布前需要补充 LICENSE。
+现有 GatewayProof、JWT roles/permissions 映射和 tenant 主体字段属于待迁移代码事实，不代表目标架构。新增任务必须先读取 Gap Analysis。
